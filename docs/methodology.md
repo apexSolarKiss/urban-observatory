@@ -1,0 +1,109 @@
+# Methodology
+
+This document describes the proposed method `urban-observatory` is being developed to test, and what its method does *not* do.
+
+The methodology is method-first and public-data-only. It is designed to produce written interpretations with explicit uncertainty, traceable provenance, and modest claims. No analytical artifacts have yet been produced; this document describes the method as a working hypothesis to be tested by concrete prototype work.
+
+## Public-data only
+
+The method uses only publicly available data — plans, environmental reviews, agendas, permit records, progress reports, capital plans, funding records, policy documents, and other artifacts that any researcher or member of the public can access. The method does not require proprietary data, scraped private sources, or vendor partnerships.
+
+This is a deliberate architectural choice, not a starting compromise. Most of the signals relevant to interpreting urban implementation already exist publicly — they are fragmented, inconsistently updated, and difficult to synthesize, but they exist. The method's value comes from connecting and interpreting them, not from acquiring novel data.
+
+The implication: claims the method makes can be inspected and challenged against their source. The method cites what it draws on.
+
+## Continuous interpretation, not retrieval
+
+The method does not retrieve documents in response to queries. It does not present dashboards of metrics. It produces *interpretations* — written analyses that synthesize across documents and time, framed with confidence levels and explicit limits.
+
+An interpretation might say:
+
+> Pipeline momentum on the [corridor / subarea / site set] has weakened over the [time window]. Two contributing signals: [signal A from source X], [signal B from source Y]. Adopted assumption [assumption text, from document Z] is becoming less plausible as a result. Confidence: moderate. This does not yet constitute a determination of infeasibility; it indicates rising implementation risk that warrants attention.
+
+The form is **memo-like, not chart-like**. Charts and maps may support interpretation but do not substitute for it.
+
+## Synthesis of fragmented documents
+
+The method's value sits in reading across documents that no single workflow currently connects. Examples of documents whose signals are typically siloed in practice:
+
+- planning documents (general plans, area plans, element documents)
+- environmental review materials
+- approval and entitlement records
+- permit activity records (issued, inactive, withdrawn)
+- progress and production reports
+- capital improvement programs
+- transit and infrastructure plans
+- funding award records
+- policy and program documents (rezonings, ordinances, incentive programs)
+- meeting agendas and decision records
+
+The method synthesizes signals from these sources into interpretations about specific implementation questions — for example, whether adopted opportunity-site assumptions remain plausible, whether pipeline projects are showing momentum or drift, whether infrastructure sequencing is keeping pace with housing assumptions, where financing conditions are constraining what current plans assume.
+
+## Uncertainty representation
+
+The method represents uncertainty as a first-class property of every interpretation. The initial posture is approximately **70% qualitative interpretation, 30% lightweight scoring**, with strong preference for:
+
+- categorical risk tiers (e.g., low / elevated / high implementation risk)
+- directional change (e.g., weakening pipeline momentum, deteriorating feasibility, stable redevelopment probability)
+- confidence ranges (low / moderate / high), with the basis of confidence named
+- signal clustering (where multiple independent signals point in the same direction)
+
+The method avoids:
+
+- false numerical precision
+- deterministic feasibility scores
+- overconfident probability claims
+- single-number "feasibility scores" or "risk scores" that hide the underlying signals
+
+Quantitative scoring, where used, is **assistive, not authoritative**. A score never substitutes for the interpretive explanation that produces it.
+
+## Source provenance discipline
+
+Every claim the method produces should be inspectable to its source. The method treats provenance as a first-class property:
+
+- the source document or dataset
+- the retrieval date
+- the relevant location within the source
+- the confidence in the interpretation derived from it
+- any limits or caveats the source carries
+
+Interpretations that combine signals from multiple sources should make the combination logic visible — *which signal contributed what to which conclusion* — so that a reader or reviewer can disagree with specific components without rejecting the whole.
+
+Outputs without provenance are not the same artifact class as outputs with provenance. The method distinguishes them.
+
+## Why this is not deterministic
+
+Urban implementation systems are probabilistic. Data quality is uneven. Causality is partially observable. False precision is dangerous. Politically sensitive findings require interpretive restraint. Over-scoring reduces credibility. Premature numerical certainty freezes ontology and analysis prematurely.
+
+The method's epistemic stance is: interpret what is currently knowable, frame it carefully, name what is uncertain, and do not pretend to know more than the evidence supports.
+
+## What method validation would look like
+
+A first prototype analysis, when it exists, would succeed if:
+
+- a senior planning consultant or implementation-oriented city planner can read it and find it operationally credible — recognizing the signals, agreeing with the interpretive logic, identifying where the analysis is over- or under-reading;
+- the analysis cites its sources cleanly enough that a reviewer can check any specific claim;
+- the analysis represents uncertainty in a form that survives scrutiny rather than collapsing under it;
+- the interpretation is useful enough to affect a real decision or workflow, not merely interesting.
+
+A first prototype analysis would *not* succeed by:
+
+- being comprehensive
+- making confident predictions
+- producing impressive visualizations
+- claiming to grade or rank cities or sites
+- automating planning judgment
+
+## Limitations
+
+The method has known limits that should be stated, not hidden:
+
+- Public data is partial. Some signals are not publicly available; the method works only with what is.
+- Interpretation depends on the documents the method has read. Documents not in the corpus do not contribute, and the method's outputs reflect the corpus's coverage.
+- Document synthesis at scale is hard. The method does not claim to do it perfectly; it claims to do it more usefully than not doing it at all.
+- The method does not establish legal status, regulatory compliance, environmental review conclusions, or final feasibility. Those judgments require professional and institutional processes the method does not substitute for.
+- Interpretations are dated. Conditions change. An interpretation produced at time T may no longer hold at time T+N; that is the point of the *continuous* posture, but it also means any single interpretation has a useful lifespan.
+
+## Where this method is being developed
+
+The methodology has not yet been tested on a concrete analytical example. A first prototype — a small, scoped analysis of selected sites and pipeline signals — is a candidate later phase that depends on scoping decisions (specific implementation surface, geography, dataset, interpretations) that have not been made. Until that scope is decided and that prototype work is done, this document describes the method as a working hypothesis to be pressure-tested by concrete analytical work, not a method already proven.
