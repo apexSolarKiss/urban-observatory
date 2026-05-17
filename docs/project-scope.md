@@ -74,14 +74,6 @@ The following are intentionally deferred until subsequent scoping decisions are 
 - **AI extraction / ingestion pipelines** beyond what's needed for a first prototype analysis.
 - **Any commitment to a specific load-bearing ontology primitive** (`intervention`, `implementation`, `site`, `constraint`, `outcome` — all remain credible candidates).
 
-## Long-term values, sequenced later
-
-Fairness, public accountability, environmental justice, and resident legibility are durable values for this project's eventual public-facing layers. They are **not** the framing of the first prototype.
-
-The project's sequencing logic: first establish that continuous implementation interpretation is *technically and analytically credible* on a narrow operational surface. Once that credibility exists, public-accountability and resident-legibility layers become possible without overclaiming.
-
-This sequencing is not a deprioritization of those values. It is a sequencing choice — public-accountability framings without credible underlying interpretation tend to become advocacy or dashboards, not implementation intelligence.
-
 ## Where this comes from
 
 External context (intent, audience, philosophy, foundational premises, unresolved questions, voice discipline) lives in the project's grounding note, which is operator-side and not in this repo. The repo itself is the operative source of truth for what the project actually is and does. See [`docs/architecture.md`](architecture.md) for repo-local boundaries and [`AGENTS.md`](../AGENTS.md) for workflow rules.
