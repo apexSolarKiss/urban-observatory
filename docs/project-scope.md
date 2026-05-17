@@ -57,11 +57,13 @@ The first operational domain is **housing implementation**, specifically the pos
 
 ### Current v0 direction (scoped recommendation, not doctrine)
 
-The current scoped v0 direction for this first domain is **APR augmentation + opportunity-site implementation stress testing** — interpreting whether adopted Housing Element opportunity sites and pipeline assumptions remain plausible as conditions change, framed as an augmentation of the existing Annual Progress Reporting workflow rather than a replacement of it, a compliance check, or a grading system.
+The current scoped v0 direction is a **bounded whole-city San Francisco Housing Element implementation-intelligence prototype**, structured as an APR-augmentation companion. v0 is bounded by analytical depth, automation level, confidence representation, interpreted outputs, signal coverage, and review posture — not by shrinking geography below whole-city San Francisco.
 
-This is the **current best-scoped direction**, not immutable doctrine. The exact implementation surface — which specific sites, which corridor or subarea, which datasets, which interpretations — remains an open decision that subsequent scoped work will refine.
+For the v0 scope statement, the hybrid implementation surface, and what v0 is and is not, see [`v0-scope.md`](v0-scope.md). For the interpretive chain the prototype reasons over, see [`object-model.md`](object-model.md). For the public-data source posture, see [`source-strategy.md`](source-strategy.md). For the structure of the first artifact, see [`report-outline.md`](report-outline.md).
 
 APR augmentation here means *adding implementation interpretation* to an existing reporting workflow — making the question of whether adopted assumptions still hold visible in a form planners and consultants can act on. It does not mean producing the APR itself, replacing it, or determining its compliance status.
+
+This is the current scoped direction, not immutable doctrine. As prototype work tests the method, the direction may be refined.
 
 ## Deferred / out of scope for now
 
@@ -80,10 +82,9 @@ External context (intent, audience, philosophy, foundational premises, unresolve
 
 ## What is still open
 
-- Which specific implementation surface (which sites, which corridor, which subarea) a first prototype interprets.
-- Which specific public-data sources are included in the first corpus.
-- Which specific interpretations a first prototype produces (site viability drift / pipeline fragility / entitlement-to-delivery risk / assumption stress test / constraint exposure / intervention candidates).
-- Which load-bearing ontology primitive(s) the prototype demonstrates as most useful.
-- The final public name and framing.
+- Specific datasets within the Tier A / B / C source categories (see [`source-strategy.md`](source-strategy.md)).
+- Field-level schema, controlled vocabularies, and the exact mechanism by which assumptions reference supporting objects (see [`object-model.md`](object-model.md) for what stays conceptual in v0).
+- Whether the validated `Assumption`-centered interpretive chain survives prototype pressure-testing as the load-bearing model.
+- The final public-facing concept name and framing.
 
 These will be resolved in subsequent scoped work. Until they are, the repo holds method documentation, not analyses.
