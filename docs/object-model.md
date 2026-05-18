@@ -20,13 +20,42 @@ A claim or premise embedded in a public plan, policy, inventory, program, APR, c
 
 The project's core move is testing whether assumptions embedded in plans still hold under changing real-world conditions. `Assumption` is the load-bearing interpretive primitive in v0 planning.
 
+An `Assumption` is not necessarily tied to a single site or project. Manual chain extraction has pressure-tested the per-site framing and surfaced that some assumptions operate at scales other than the site. Assumptions may attach to:
+
+- a specific site (e.g., an opportunity-site capacity assumption);
+- a specific project (e.g., a project's delivery expectation);
+- a typology or corridor (e.g., expected redevelopment across a class of sites);
+- a program or policy (e.g., expected outcomes from a rezoning ordinance);
+- an aggregate strategy (e.g., total ADU / small-infill production assumed across many parcels at once).
+
+The ontology should not force per-site framing on aggregate strategies. A residential parcel's individual capacity assumption may be effectively zero or fractional while the aggregate strategy that includes it carries meaningful weight. The chain should be able to test assumptions at the scale they were stated.
+
 ### ImplementationSignal
 
 A public-data observation that bears on whether one or more assumptions remain supported, weakened, contradicted, or uncertain. A signal is source-anchored (cites a public document or dataset), assumption-anchored (only counts as evidence about a specific assumption), directional, and typed. A row in a permit database is not a signal; the interpretation that the row's content weakens or supports a specific assumption is the signal.
 
+**Signal aggregation.** Multiple similar raw records may be summarized as one `ImplementationSignal` where they support the same interpretation about the same assumption — for example, a series of related permit records that collectively bear on a single assumption can be summarized as one signal rather than recorded as many separate signals. Source and provenance remain inspectable: the summary signal cites the underlying records. The choice between per-record signals and summary signals is operational and depends on whether the underlying records carry distinct interpretive force. The chain does not require one signal per raw row.
+
+**Candidate signal subtypes.** Signal subtypes are operationally useful for categorizing signals but are not final schema doctrine in v0. Candidate subtypes — surfaced by grounding-note context and by manual chain extraction — include:
+
+- `AdministrativeSignal` — pipeline / planning / case-management activity.
+- `PermitSignal` — building-permit activity.
+- `PipelineSignal` — project-status changes.
+- `MarketSignal` — market-level indicators.
+- `InfrastructureSignal` — capital plan or infrastructure-capacity signals.
+- `EnvironmentalSignal` — environmental review or constraint signals.
+- `ParticipatorySignal` — public-input signals (per grounding-note v7; reserved by default in v0).
+- `EnforcementPromptedSignal` — permits or activity prompted by enforcement actions rather than voluntary market activity.
+- `CurrentUseSignal` — signals about the current operating use of a property (e.g., active commercial tenancy at a site flagged for residential redevelopment).
+- `ProgrammaticTemporalSignal` — signals about the implementation environment rather than the site (e.g., long approval cycles, citywide entitlement-stage stalls).
+
+These subtypes are candidates, not final schema. They may consolidate, split, or be renamed as further prototype work accumulates.
+
 ### ImplementationFinding
 
 The interpretive synthesis produced by comparing one or more assumptions against implementation signals. A finding carries direction, confidence, possible intervention candidates, and source provenance. Findings are the project's primary interpretive artifact; the Housing Element Implementation Risk Brief is a curated presentation of findings (see [`report-outline.md`](report-outline.md)).
+
+**Composite direction.** Findings carry a direction. The working direction vocabulary is `supports` / `weakens` / `contradicted` / `uncertain`. Manual chain extraction has surfaced cases where a single direction value does not capture the implementation condition cleanly — for example, an entitled-but-not-advancing case is partially supported and partially uncertain at the same time. The object model allows composite or hybrid interpretation to be captured in the finding's interpretation prose rather than forcing a coarse single-value vocabulary. The direction field's final controlled vocabulary remains deferred to later prototype work.
 
 ### InterventionCandidate
 
@@ -46,7 +75,14 @@ The following remain essential supporting primitives but are not the conceptual 
 - `Source` — a public document or dataset cited as provenance. First-class.
 - `Confidence` — a reusable confidence value attached to signals, findings, and signal cards.
 
-`OpportunitySite` and `HousingProject` are separate but linkable. The relationship between them can be `direct_match`, `nearby_or_related`, or `citywide_context`. This split protects against three failure modes: ignoring citywide pipeline reality, forcing false project-to-site matches, and collapsing the method into parcel feasibility.
+`OpportunitySite` and `HousingProject` are separate but linkable. The relationship between them can be:
+
+- `direct_match` — a `HousingProject` is clearly on a Housing Element opportunity site (same parcel).
+- `nearby_or_related` — a project is near or within the planning area of an opportunity site, but not at the same parcel.
+- `citywide_context` — a project is not tied to an opportunity site but helps interpret broader pipeline / delivery conditions.
+- `inventory_only` — a Housing Element opportunity site is present in the inventory but has no matched `HousingProject`. The site exists as an assumption surface; no project signal has yet materialized.
+
+The four-status split protects against several failure modes: ignoring citywide pipeline reality, forcing false project-to-site matches, collapsing the method into parcel feasibility, and treating an unmatched inventory site as either silently absent or as having an implicit project relationship it does not have.
 
 ## Output classifications and direction labels (not objects in v0)
 
