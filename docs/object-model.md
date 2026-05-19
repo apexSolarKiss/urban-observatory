@@ -122,4 +122,6 @@ If prototype work surfaces substantial revisions to several of these, the right 
 
 ## Posture
 
-This object model is a working hypothesis. Repo-local schema files, data dictionaries, and runnable schema artifacts are deferred to later phases. The chain and the supporting primitives are named here because they are method-bearing; schema-shape decisions are deferred because they are data-shape decisions.
+This object model is a working hypothesis. Repo-local schema files and runnable schema artifacts are deferred to later phases. The chain and the supporting primitives are named here because they are method-bearing; schema-shape decisions are deferred because they are data-shape decisions.
+
+For per-concept field-level treatment (candidate fields, source / provenance requirements, and the relationship between objects, signal subtypes, classifications, and reporting surfaces), see [`data-dictionary.md`](data-dictionary.md).
