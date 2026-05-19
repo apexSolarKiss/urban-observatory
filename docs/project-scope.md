@@ -69,12 +69,11 @@ This is the current scoped direction, not immutable doctrine. As prototype work 
 
 The following are intentionally deferred until subsequent scoping decisions are made and validated:
 
-- **Specific case-study selection.** No city, corridor, subarea, or site is currently canonical.
+- **Later case studies, second-pilot themes, and public-facing examples.** Beyond the current v0 San Francisco Housing Element implementation-intelligence prototype, additional case studies and pilot themes remain deferred.
 - **Specific dataset selection.** Candidate first-corpus categories appear in the methodology document; specific source choices await initial scoping work.
 - **Schema files, sample data, analysis notebooks, and report artifacts.** These are **candidate later phases, not guaranteed deliverables.** They depend on resolving a set of preceding scoping decisions (specific implementation surface, geography, dataset, and computed interpretations) that have not been made and that the prototype work itself will inform.
 - **Application UI, maps, dashboards, public query interfaces.**
 - **AI extraction / ingestion pipelines** beyond what's needed for a first prototype analysis.
-- **Any commitment to a specific load-bearing ontology primitive** (`intervention`, `implementation`, `site`, `constraint`, `outcome` — all remain credible candidates).
 
 ## Where this comes from
 

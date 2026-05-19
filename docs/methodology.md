@@ -106,4 +106,4 @@ The method has known limits that should be stated, not hidden:
 
 ## Where this method is being developed
 
-The methodology has not yet been tested on a concrete analytical example. A first prototype — a small, scoped analysis of selected sites and pipeline signals — is a candidate later phase that depends on scoping decisions (specific implementation surface, geography, dataset, interpretations) that have not been made. Until that scope is decided and that prototype work is done, this document describes the method as a working hypothesis to be pressure-tested by concrete analytical work, not a method already proven.
+The methodology has not yet been tested through a completed analytical artifact. The current v0 test surface is the bounded whole-city San Francisco Housing Element implementation-intelligence prototype described in [`v0-scope.md`](v0-scope.md). Until prototype work produces signal cards, findings, or a first brief, this document describes the method as a working hypothesis to be pressure-tested by concrete public-data interpretation work, not a method already proven.

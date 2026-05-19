@@ -46,26 +46,13 @@ The workflow rules apply regardless of which agent does the executing. Rules liv
 
 ## Architecture-Specific Anchors
 
-The project's load-bearing primitive is not yet decided. Credible candidates that remain open include `intervention`, `implementation`, `site`, `risk`, `constraint`, and `outcome`. Each names a plausible organizing unit for the method. None is canonical at this stage, and the first concrete prototype work is what will reveal which carries the most weight.
+At current v0 planning depth, the repo is organized around the interpretive chain `Assumption → ImplementationSignal → ImplementationFinding → InterventionCandidate`. `Assumption` is the v0 load-bearing interpretive primitive: the method tests whether assumptions embedded in public plans, reports, inventories, programs, and related documents remain plausible under changing implementation conditions. This is a working ontology direction, not final schema doctrine.
 
-One illustrative candidate sketch, organized around `intervention`:
-
-```text
-intervention
-  has constraints
-  depends on evidence items
-  affects outcomes
-  creates tradeoffs
-  has sequencing dependencies
-  carries uncertainty
-  may shift burdens / benefits across groups or geographies
-```
-
-This sketch is held as one working hypothesis among several, not a fixed schema or a foreclosed choice. Alternative primitives (`implementation`, `site`, `risk`, `constraint`, `outcome`) would yield different but equally plausible relational sketches. Do not foreclose between them before prototype work has tested them.
+Supporting primitives such as `OpportunitySite`, `HousingProject`, `PolicyProgram`, `InfrastructureDependency`, `Constraint`, `Outcome`, `Source`, and `Confidence` remain essential but are not the conceptual center; their schema-shape decisions remain open at v0 depth. See [`object-model.md`](object-model.md) for the chain, supporting primitives, candidate signal subtypes, and what stays conceptual in v0, and [`data-dictionary.md`](data-dictionary.md) for the per-concept Markdown-first treatment.
 
 Evidence quality, provenance, and uncertainty are first-class properties of any structured output. Outputs without provenance are not the same artifact class as outputs with provenance; the architecture should preserve the distinction.
 
 ## Ownership Notes
 
-- local source of truth: repo-local files — this doc, `AGENTS.md`, `README.md`, [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md).
+- local source of truth: repo-local files — this doc, `AGENTS.md`, `README.md`, [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/report-outline.md`](report-outline.md), [`docs/data-dictionary.md`](data-dictionary.md).
 - external dependencies or governing artifacts: external grounding note for source-of-intent context; public-data sources to be enumerated as the data model takes shape.
