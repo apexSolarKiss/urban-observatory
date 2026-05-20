@@ -30,6 +30,8 @@ An `Assumption` is not necessarily tied to a single site or project. Manual chai
 
 The ontology should not force per-site framing on aggregate strategies. A residential parcel's individual capacity assumption may be effectively zero or fractional while the aggregate strategy that includes it carries meaningful weight. The chain should be able to test assumptions at the scale they were stated.
 
+Prototype source contact has confirmed that a single interpretive case can carry per-site, per-project, and aggregate-level assumptions simultaneously; the per-scale hierarchy is operational, and collapsing to a single scale loses interpretive coherence.
+
 ### ImplementationSignal
 
 A public-data observation that bears on whether one or more assumptions remain supported, weakened, contradicted, or uncertain. A signal is source-anchored (cites a public document or dataset), assumption-anchored (only counts as evidence about a specific assumption), directional, and typed. A row in a permit database is not a signal; the interpretation that the row's content weakens or supports a specific assumption is the signal.
@@ -49,13 +51,13 @@ A public-data observation that bears on whether one or more assumptions remain s
 - `CurrentUseSignal` — signals about the current operating use of a property (e.g., active commercial tenancy at a site flagged for residential redevelopment).
 - `ProgrammaticTemporalSignal` — signals about the implementation environment rather than the site (e.g., long approval cycles, citywide entitlement-stage stalls).
 
-These subtypes are candidates, not final schema. They may consolidate, split, or be renamed as further prototype work accumulates.
+These subtypes are candidates, not final schema. Prototype source contact in v0 has operated against `CurrentUseSignal` and `ProgrammaticTemporalSignal` as load-bearing subtypes; both are retained. The list as a whole remains candidate-level and may consolidate, split, or be renamed as further prototype work accumulates.
 
 ### ImplementationFinding
 
 The interpretive synthesis produced by comparing one or more assumptions against implementation signals. A finding carries direction, confidence, possible intervention candidates, and source provenance. Findings are the project's primary interpretive artifact; the Housing Element Implementation Risk Brief is a curated presentation of findings (see [`report-outline.md`](report-outline.md)).
 
-**Composite direction.** Findings carry a direction. The working direction vocabulary is `supports` / `weakens` / `contradicted` / `uncertain`. Manual chain extraction has surfaced cases where a single direction value does not capture the implementation condition cleanly — for example, an entitled-but-not-advancing case is partially supported and partially uncertain at the same time. The object model allows composite or hybrid interpretation to be captured in the finding's interpretation prose rather than forcing a coarse single-value vocabulary. The direction field's final controlled vocabulary remains deferred to later prototype work.
+**Composite direction.** Findings carry a direction. The working direction vocabulary is `supports` / `weakens` / `contradicted` / `uncertain`. Prototype source contact has confirmed cases where a single direction value does not capture the implementation condition cleanly — partial support and partial weakening can coexist within one finding. The object model allows composite or hybrid interpretation to be captured in the finding's interpretation prose rather than forcing a coarse single-value vocabulary. The direction field's final controlled vocabulary remains deferred to later prototype work.
 
 ### InterventionCandidate
 
