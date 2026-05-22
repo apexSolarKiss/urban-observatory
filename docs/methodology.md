@@ -49,6 +49,27 @@ Findings should preserve surface-specific evidence and avoid forcing a single di
 
 Schema treatment of these surfaces, source-by-source operativeness ranking, and controlled vocabulary for surface-specific labels remain conceptual at v0.
 
+## Living Implementation Consistency matrix
+
+The method's basic visible extraction form is a four-column matrix, applied per surface-relevant assumption within a single case:
+
+| Column | Content |
+|---|---|
+| Document claim | The claim or commitment being tested, with source citation |
+| Supporting evidence | Current evidence consistent with the claim |
+| Weakening evidence | Current evidence that lowers confidence in the claim or introduces contradiction |
+| Assessment | Row-level reading of the claim against the evidence |
+
+Row-level assessment uses a working vocabulary: `confirmed / weakened / contradicted / unresolved / not yet testable`. The vocabulary is candidate-strength, not final controlled-enum doctrine.
+
+A single case typically requires multiple rows — one per surface-relevant assumption — because the chain's surfaces (inventory snapshot, entitlement event, rolling advancement, completion; see §Surface-specific interpretation) can carry distinct assumptions whose readings diverge.
+
+When row assessments diverge within a single case, the finding-level reading is composite. The composite is explained in prose rather than forced into a single value; this method does not commit to a controlled-enum vocabulary for finding-level composite treatment. See [`object-model.md`](object-model.md) and [`data-dictionary.md`](data-dictionary.md) for the explicit distinction between signal direction, matrix row-level assessment, and finding-level composite treatment.
+
+Sustained absence of a record can also operate as signal evidence within the matrix when the source searched, the search scope, the time horizon, and the expected downstream record are bounded. The form is bounded absence rather than absence in the abstract; an unbounded absence is not interpretable. Provenance discipline still applies: the bounding parameters are cited along with the source.
+
+This extraction form has been used in operator-side scratch examples and is held as a working hypothesis at the method level. It is not yet an expert-reviewed or public artifact, and prototype work may refine its shape.
+
 ## Uncertainty representation
 
 The method represents uncertainty as a first-class property of every interpretation. The initial posture is approximately **70% qualitative interpretation, 30% lightweight scoring**, with strong preference for:

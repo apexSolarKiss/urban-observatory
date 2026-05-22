@@ -120,6 +120,8 @@ The ontology should not force per-site framing on aggregate strategies. A reside
 
 **A row in a database is not a signal.** The interpretation that the row's content weakens or supports a specific assumption is the signal. The interpretive step is real and load-bearing.
 
+**Bounded absence of a record can also count as signal evidence**, when the source searched, the search scope, the time horizon, and the expected downstream record are explicitly defined. For example, a sustained absence of any DBI permit activity on a parcel over a defined horizon — anchored to a Pipeline approval date and to a specific downstream-record expectation such as a building permit application — is an interpretable signal about whether an approved entitlement is advancing. The signal is bounded absence, not absence in the abstract; an unbounded absence is not interpretable. Provenance discipline still applies: the bounding parameters must be cited along with the source.
+
 **Source / provenance requirement:** every signal cites a retrievable public source with retrieval date. Outputs without provenance are not the same artifact class as outputs with provenance (see [`methodology.md`](methodology.md)).
 
 **Relationship notes:** anchored to one or more `Assumption` records. Synthesized into `ImplementationFinding` records. May reference supporting objects via the same `relevant_objects` mechanism used by `Assumption`.
@@ -145,7 +147,13 @@ Possible intervention candidates:
 Sources:
 ```
 
-**Composite direction:** findings carry a direction. The working direction vocabulary is `supports` / `weakens` / `contradicted` / `uncertain`. Manual chain extraction has surfaced cases where a single direction value does not capture the implementation condition cleanly — for example, an entitled-but-not-advancing case is partially supported and partially uncertain at the same time. The model allows composite or hybrid interpretation to be captured in the finding's interpretation prose rather than forcing a coarse single-value vocabulary. The direction field's final controlled vocabulary remains deferred.
+**Three-layer assessment treatment:** the method operates with three distinct assessment layers; they are deliberately not collapsed:
+
+- *Signal-level direction.* The direction of an `ImplementationSignal` relative to the assumption it anchors to (the signal-level field listed in §ImplementationSignal candidate fields above). Working vocabulary: `supports` / `weakens` / `contradicts` / `uncertain`.
+- *Matrix row-level assessment.* The reading of one document-claim row against its supporting and weakening evidence within the Living Implementation Consistency matrix (see [`methodology.md`](methodology.md)). Working vocabulary: `confirmed` / `weakened` / `contradicted` / `unresolved` / `not yet testable`.
+- *Finding-level composite treatment.* When the row assessments within a finding diverge, the finding-level reading is composite. The composite is explained in the finding's interpretation prose rather than forced into a single controlled value. No controlled enum is committed for finding-level composite treatment.
+
+Manual chain extraction has surfaced cases where a single direction value does not capture the implementation condition cleanly — for example, an entitled-but-not-advancing case where row assessments diverge across the surface-specific readings of inventory snapshot, entitlement event, rolling advancement, and completion. The row-level vocabulary has held across operator-side scratch extractions but is not yet expert-reviewed. Final controlled vocabularies remain deferred to later prototype work.
 
 **Cross-cutting findings:** some findings are not about a single assumption but about a pattern across many (e.g., a typology-level drift pattern). These are aggregate findings that reference multiple constituent findings; the mechanism (cross-cutting object class vs attribute on `ImplementationFinding` vs narrative-only) remains operator-pending.
 
@@ -393,7 +401,7 @@ APR / pipeline / production reporting defines counts, categories, statuses, and 
 
 **Purpose:** a reporting-side concept (e.g., "Authorized Units," "Pipeline Units," "HE opportunity-site capacity," "Major Multiphase Projects"). A reported category is a surface from which assumptions can be extracted or inferred. Treating it as an attribute on `Assumption` (i.e., "this assumption is associated with reported category X") is the lightweight pattern.
 
-**Why not its own object in v0:** the placement decision is deferred. Promoting `ReportedCategory` to a top-level object would require schema commitments about its fields, vocabulary, and relationships that v0 has not pressure-tested. The lightweight attribute pattern is sufficient.
+**Why not its own object in v0:** the lightweight attribute pattern has been pressure-tested in operator-side scratch examples and is held as the v0 working pattern. Promoting `ReportedCategory` to a top-level object would require schema commitments about its fields, vocabulary, and relationships that the lightweight pattern does not yet need. The placement decision can be revisited if future cases break the lightweight pattern; v0 retains it as the working approach.
 
 **What stays conceptual:** the final placement (object class / attribute / surface concept), the controlled vocabulary for category names, and the mechanism by which `Assumption` references `ReportedCategory`.
 
