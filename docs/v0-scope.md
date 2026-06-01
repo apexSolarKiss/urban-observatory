@@ -32,10 +32,10 @@ v0 is bounded by **analytical depth, automation level, confidence representation
 
 In practice this means a two-tier pass:
 
-- **Tier 1.** Every Housing Element opportunity site receives a shallow baseline signal card.
+- **Tier 1.** Whole-city baseline coverage through scale-matched treatment: aggregate-strategy treatment for ADU / small-infill capacity, shallow per-site treatment for high-capacity opportunity sites where per-site framing is meaningful, and explicit boundary treatment for major project surfaces recorded outside the Appendix B.4 inventory.
 - **Tier 2.** Deeper interpretation is reserved for flagged sites, selected typologies, and non-obvious implementation-risk cases.
 
-The typology grouping itself is not finalized; see [`object-model.md`](object-model.md) for why this stays conceptual until prototype work has reviewed the inventory.
+The typology grouping itself is not finalized; see [`object-model.md`](object-model.md) for the aggregate-vs-per-site scale distinction this treatment rests on. Prototype work has confirmed that Tier-1 treatment must be stratified by the scale at which the underlying assumption is stated, rather than applied as one uniform per-site card.
 
 Quantitative outputs are assistive, not authoritative (see [`methodology.md`](methodology.md)). Public phrasing is evidence-supported implementation sensitivity, not failure or enforcement language. First reviewer is an implementation-oriented San Francisco or city planner, or a senior planning consultant. Public site-level analysis is deferred until after expert review and is not a v0 deliverable.
 
