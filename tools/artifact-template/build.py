@@ -57,24 +57,24 @@ MD_CSS = """
 .uo-md { max-width: 80ch; margin: 0 auto; font-size: var(--fs-small); font-weight: var(--fw-extralight); line-height: 1.6; color: var(--fg-1); }
 .uo-md > :first-child { margin-top: 0; }
 .uo-md h1 { font-size: var(--fs-h2); font-weight: var(--fw-regular); line-height: var(--lh-heading); letter-spacing: var(--tracking-tight); margin: var(--space-6) 0 var(--space-4); color: var(--fg-1); }
-.uo-md h2 { font-size: var(--fs-h3); font-weight: var(--fw-regular); line-height: var(--lh-heading); letter-spacing: var(--tracking-tight); margin: var(--space-8) 0 var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--line-1); color: var(--fg-1); }
+.uo-md h2 { font-size: var(--fs-h3); font-weight: var(--fw-regular); line-height: var(--lh-heading); letter-spacing: var(--tracking-tight); margin: var(--space-8) 0 var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--artifact-line); color: var(--fg-1); }
 .uo-md h3 { font-size: var(--fs-body); font-weight: var(--fw-light); line-height: var(--lh-tight); margin: var(--space-6) 0 var(--space-3); color: var(--fg-1); }
 .uo-md p { font-size: var(--fs-small); font-weight: var(--fw-extralight); line-height: 1.6; margin: 0 0 var(--space-4); color: var(--fg-1); text-wrap: pretty; }
 .uo-md ul, .uo-md ol { margin: 0 0 var(--space-4); padding-left: var(--space-5); }
 .uo-md li { margin: 0 0 var(--space-2); }
 .uo-md strong { font-weight: var(--fw-medium); color: var(--fg-1); }
 .uo-md em { font-style: italic; color: var(--fg-2); }
-.uo-md a { color: inherit; border-bottom: 1px solid var(--line-1); }
-.uo-md hr { border: 0; border-top: 1px solid var(--line-2); margin: var(--space-7) 0; }
+.uo-md a { color: inherit; border-bottom: 1px solid var(--artifact-line); }
+.uo-md hr { border: 0; border-top: 1px solid var(--artifact-line-soft); margin: var(--space-7) 0; }
 .uo-md blockquote { margin: 0 0 var(--space-4); padding: var(--space-1) 0 var(--space-1) var(--space-5); border-left: 3px solid var(--ask-emphasis-violet); color: var(--fg-2); }
 .uo-md blockquote p { color: var(--fg-2); margin-bottom: var(--space-2); }
 .uo-md code { font-family: var(--font-mono); font-size: 0.86em; font-weight: var(--fw-light); background: var(--uo-code-bg); padding: 0.08em 0.34em; border-radius: var(--radius-xs); }
-.uo-md pre { background: var(--uo-soft-bg); padding: var(--space-4); border-radius: var(--radius-sm); overflow-x: auto; border: 1px solid var(--line-2); margin: 0 0 var(--space-4); }
+.uo-md pre { background: var(--uo-soft-bg); padding: var(--space-4); border-radius: var(--radius-sm); overflow-x: auto; border: 1px solid var(--artifact-line-soft); margin: 0 0 var(--space-4); }
 .uo-md pre code { background: none; padding: 0; font-size: var(--fs-caption); line-height: 1.55; }
 .uo-md table { width: 100%; border-collapse: collapse; margin: 0 0 var(--space-5); font-family: var(--font-mono); font-size: var(--fs-caption); }
-.uo-md th, .uo-md td { border: 1px solid var(--line-1); padding: var(--space-2) var(--space-3); text-align: left; vertical-align: top; }
-.uo-md thead th { font-weight: var(--fw-medium); border-bottom: 2px solid var(--line-1); }
-.uo-md .uo-foot { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--line-1); font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--fg-2); }
+.uo-md th, .uo-md td { border: 1px solid var(--artifact-line); padding: var(--space-2) var(--space-3); text-align: left; vertical-align: top; }
+.uo-md thead th { font-weight: var(--fw-medium); border-bottom: 2px solid var(--artifact-line); }
+.uo-md .uo-foot { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--artifact-line); font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--fg-2); }
 .uo-md .uo-foot p { font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--fg-2); margin: 0 0 var(--space-2); }
 """
 

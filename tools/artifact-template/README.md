@@ -74,41 +74,49 @@ vendored so artifact builds are **reproducible without a sibling checkout** of
 `design-system-ASK` remains the upstream source of truth for the tokens. This repo
 holds a frozen copy for reproducible rendering.
 
-## Light / dark contract
+## Light / dark contract (Class B v2)
 
-The foundational `--fg-*` foreground ramp resolves to **white** — correct on the
-dark gradient, but **invisible** on the light lavender gradient. The artifact
-template fixes this with a **local `--fg` / `--line` rebind in
-`artifact.template.html`** (the `:root` light block), mirroring the design-system
-diagram-tree light palette. The foundational `colors_and_type.css` is left
-untouched.
+This template follows the design-system-ASK **Class B `output-artifact` v2**
+contract (`040e7ca`). **Foreground is inherited, not rebound.** Since the
+foundation light-mode foreground ramp landed (design-system PR #18 / `f9eed18`),
+`colors_and_type.css` resolves `--fg-1/-2/-3` to **dark ink in light**
+(`#6A637F` / `#827399` / `rgba(130,115,153,.62)`) and lavender in dark — so
+base-element prose (`p` / `h1` / `h2`) inherits the correct color directly. The
+template adds **no local `--fg` rebind**, and `colors_and_type.css` is consumed
+verbatim.
 
-| Role | Token | Light | Dark (unchanged) |
+The **one sanctioned artifact-layer override is line intensity.** The foundation
+hairlines (`--line-*`, white `.45` / `.22`) read too faint for report rules,
+borders, table lines, and dividers on the light field. So the template defines a
+**scoped `--artifact-line` / `--artifact-line-soft`** (stronger white in light;
+the foundation lavender lines in dark) and points its own structural elements at
+it — applied by class, never to base elements, so it cannot affect inherited
+prose color. The foundation `--line-*` tokens are left untouched.
+
+| Role | Token | Light | Dark |
 |---|---|---|---|
-| Primary text | `--fg-1` | `#6A637F` | lavender (`--ask-lavender-dark`) |
-| Secondary text | `--fg-2` | `#827399` | `rgba(212,198,225,.72)` |
-| Tertiary / separators | `--fg-3` | `rgba(130,115,153,.62)` | `rgba(212,198,225,.48)` |
-| Box borders · edges · rules | `--line-1` | white `rgba(255,255,255,.90)` | lavender |
-| Held / softer strokes | `--line-2` | white `rgba(255,255,255,.55)` | lavender |
+| Foreground (text) | `--fg-1/-2/-3` | **inherited** dark ink (`#6A637F` / `#827399` / `rgba(130,115,153,.62)`) | inherited lavender |
+| Structural lines | `--artifact-line` | white `rgba(255,255,255,.90)` | `var(--line-1)` (foundation lavender) |
+| Softer dividers | `--artifact-line-soft` | white `rgba(255,255,255,.55)` | `var(--line-2)` (foundation lavender) |
 
-Design principles (carried from the design-system handoff):
+Design principles:
 
-- **Small text needs dark ink in light mode** — white is unreadable at body /
-  caption sizes on the lavender field. Light text uses the diagram inks above.
-- **Structural lines read fine in white** in light mode — they're large enough,
-  and white lines preserve the light-mode character. Keep them white.
-- **Dark mode is left exactly as-is** — only the light values are overridden; the
-  dark `@media (prefers-color-scheme: dark)` / `[data-theme="dark"]` blocks keep
-  the prior lavender ramp and lines.
+- **Foreground is the foundation's job.** The foundation light ramp is dark ink;
+  the artifact does not re-declare `--fg-*`. (Re-declaring it is a v2 hard-fail.)
+- **Line intensity is the one artifact override** — scoped to structural lines
+  (by class), white at higher alpha in light, foundation lavender in dark. White
+  is in-palette; the override never touches foreground.
+- **Dark mode is the foundation's** — the dark `@media` / `[data-theme="dark"]`
+  blocks resolve `--fg-*` and `--line-*` to lavender; `--artifact-line` inherits
+  the foundation lines in dark.
 
-**Why a local `--fg` rebind and not scoped tokens:** the design-system handoff
-suggested mirroring with scoped tokens (e.g. `--diagram-*`). For this artifact
-class that is insufficient — the foundation's **base element rules**
-(`p`, `h1`, `h2` style `color: var(--fg-1)` directly) win over any scoped
-*container* color, leaving base-rule body text white. Rebinding `--fg-*` itself at
-the artifact-template layer fixes **every** text path (base-element and class),
-while still leaving the foundational stylesheet untouched. This is an
-artifact-template-layer override, not a design-system change.
+**History (resolved):** an earlier version of this template carried a local
+`--fg` rebind, because the foundation light ramp was still white and base-element
+rules (`p`/`h1`/`h2 { color: var(--fg-1) }`) win over scoped container color. The
+foundation fix (`f9eed18`) made that rebind redundant; the 2026-06-04 re-sync to
+`040e7ca` dropped it and adopted the scoped `--artifact-line` line-intensity
+overlay, aligning to the matured Class B v2 contract. The template is now a clean
+consumer of the shared pattern rather than the sole owner of the matured behavior.
 
 ## What stays operator-side (not in this repo)
 
