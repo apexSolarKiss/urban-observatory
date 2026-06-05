@@ -28,24 +28,33 @@ body { margin: 0; min-height: 100vh; }
 :root {
   --uo-code-bg: rgba(255, 255, 255, 0.18);
   --uo-soft-bg: rgba(255, 255, 255, 0.12);
-  /* ── Light-mode foreground readability fix — artifact-template-LOCAL --fg / --line
-     rebind. Mirrors the design-system-ASK diagram-tree light palette EXACTLY
-     (handoff §3 / PR #15; values locked by ASK 2026-06-04). The foundational
-     --fg-* ramp resolves to WHITE in light mode (correct on the dark gradient,
-     invisible on the light lavender gradient). We OVERRIDE the foreground ramp +
-     light structural-line alpha here, at the ARTIFACT-TEMPLATE :root layer — NOT
-     by editing the sealed foundation colors_and_type.css (untouched; no fork; the
-     possible design-system generalization remains the owner's call). Local --fg
-     rebinding (not scoped --uo-* tokens) is required because the foundation's BASE
-     element rules (p / h1 / h2 { color: var(--fg-1) }) target elements directly and
-     win over any scoped container color — every text path must resolve through
-     --fg-*. Dark mode is unchanged: the dark @media / [data-theme="dark"] blocks
-     below keep the lavender ramp + lavender lines as before; only LIGHT is set here. */
-  --fg-1: #6A637F;                     /* primary text — light: --diagram-ink */
-  --fg-2: #827399;                     /* secondary text — light: --diagram-muted */
-  --fg-3: rgba(130, 115, 153, 0.62);   /* tertiary / separators — light: --diagram-faint */
-  --line-1: rgba(255, 255, 255, 0.90); /* box borders · edges · rules — white (light) */
-  --line-2: rgba(255, 255, 255, 0.55); /* held / softer strokes — soft white (light) */
+  /* ── Class B output-artifact line-intensity overlay (design-system-ASK v2
+     contract, `040e7ca`). FOREGROUND IS INHERITED — this template adds NO local
+     --fg rebind. Since the foundation light-mode ramp landed (design-system PR
+     #18 / `f9eed18`), the foundation --fg-1/-2/-3 already resolve to dark ink in
+     light (`#6A637F` / `#827399` / `rgba(130,115,153,.62)`) and lavender in dark,
+     so base-element prose (p / h1 / h2) inherits the correct color directly —
+     the prior local --fg rebind is now redundant and has been dropped.
+     The ONE sanctioned Class B override is LINE INTENSITY: report rules / borders
+     / table lines / dividers read too faint at the foundation hairline (white
+     .45 / .22) on the light field, so the scoped --artifact-line /
+     --artifact-line-soft carry stronger white lines in light and inherit the
+     foundation lavender lines in dark. These are applied only to the artifact's
+     OWN structural elements (by class), never to base elements, so they cannot
+     affect inherited prose color. The foundation tokens (--fg-*, --line-*) are
+     left untouched. */
+  --artifact-line:      rgba(255, 255, 255, 0.90); /* rules · borders · table lines (light) */
+  --artifact-line-soft: rgba(255, 255, 255, 0.55); /* fainter dividers (light) */
+}
+:root[data-theme="dark"] {
+  --artifact-line:      var(--line-1);             /* dark: foundation lavender lines read fine */
+  --artifact-line-soft: var(--line-2);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --artifact-line:      var(--line-1);
+    --artifact-line-soft: var(--line-2);
+  }
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -131,12 +140,12 @@ body { margin: 0; min-height: 100vh; }
   gap: var(--space-3) var(--space-5);
   align-items: center;
   padding: var(--space-3) 0;
-  border-top: 1px solid var(--line-1);
-  border-bottom: 1px solid var(--line-1);
+  border-top: 1px solid var(--artifact-line);
+  border-bottom: 1px solid var(--artifact-line);
   margin-bottom: var(--space-7);
 }
 .uo-status-rail__primary { color: var(--fg-1); font-weight: var(--fw-medium); }
-.uo-status-rail__sep { display: inline-block; width: 1px; height: 0.9em; background: var(--line-2); }
+.uo-status-rail__sep { display: inline-block; width: 1px; height: 0.9em; background: var(--artifact-line-soft); }
 
 .uo-head { margin: 0 0 var(--space-7); }
 .uo-head__eyebrow {
@@ -296,7 +305,7 @@ body { margin: 0; min-height: 100vh; }
   line-height: 1.5;
   color: var(--fg-1);
   padding: var(--space-2) var(--space-4);
-  border: 1px dashed var(--line-1);
+  border: 1px dashed var(--artifact-line);
   border-radius: var(--radius-sm);
   background: var(--uo-soft-bg);
 }
@@ -396,7 +405,7 @@ body { margin: 0; min-height: 100vh; }
   text-align: left;
   padding: var(--space-2) var(--space-4) var(--space-2) 0;
   vertical-align: top;
-  border-bottom: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--artifact-line-soft);
 }
 .uo-data-table td.num, .uo-data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .uo-data-table th {
@@ -417,7 +426,7 @@ body { margin: 0; min-height: 100vh; }
   background: var(--surface-glass);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--line-1);
+  border: 1px solid var(--artifact-line);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   box-shadow: var(--shadow-lg);
@@ -427,7 +436,7 @@ body { margin: 0; min-height: 100vh; }
 .uo-absence {
   margin: var(--space-4) 0;
   padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--line-1);
+  border: 1px solid var(--artifact-line);
   border-left: 2px solid var(--ask-ui-accent-2);
   background: var(--uo-soft-bg);
   border-radius: var(--radius-sm);
@@ -456,7 +465,7 @@ body { margin: 0; min-height: 100vh; }
   color: var(--fg-2);
   margin: var(--space-6) 0 var(--space-3);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--artifact-line-soft);
 }
 .uo-cand-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
 .uo-cand-card { padding: var(--space-5) var(--space-6); }
@@ -503,7 +512,7 @@ body { margin: 0; min-height: 100vh; }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 3px 9px;
-  border: 1px solid var(--line-1);
+  border: 1px solid var(--artifact-line);
   border-radius: var(--radius-xs);
   color: var(--fg-1);
 }
@@ -520,7 +529,7 @@ body { margin: 0; min-height: 100vh; }
   line-height: 1.6;
   color: var(--fg-2);
   background: var(--uo-soft-bg);
-  border: 1px solid var(--line-2);
+  border: 1px solid var(--artifact-line-soft);
   border-radius: var(--radius-sm);
   padding: var(--space-4) var(--space-5);
   margin: 0 0 var(--space-4);
@@ -541,7 +550,7 @@ body { margin: 0; min-height: 100vh; }
 .uo-gap {
   margin: 0 0 var(--space-7);
   padding: var(--space-4) var(--space-5);
-  border: 1px dashed var(--line-1);
+  border: 1px dashed var(--artifact-line);
   border-radius: var(--radius-md);
   background: transparent;
   display: flex;
@@ -596,7 +605,7 @@ body { margin: 0; min-height: 100vh; }
   text-align: left;
   padding: var(--space-2) var(--space-4) var(--space-2) 0;
   vertical-align: top;
-  border-bottom: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--artifact-line-soft);
 }
 .uo-provenance__table th {
   color: var(--fg-3);
@@ -654,7 +663,7 @@ details.uo-details > .uo-details__body code { font-family: var(--font-mono); fon
 /* ── Disposition block ──────────────────────────────────────────────── */
 .uo-disposition {
   padding: var(--space-6) var(--space-7);
-  border: 1px solid var(--line-1);
+  border: 1px solid var(--artifact-line);
   border-left: 2px solid var(--ask-ui-accent-2);
   background: var(--surface-glass);
   -webkit-backdrop-filter: blur(20px);
@@ -668,7 +677,7 @@ details.uo-details > .uo-details__body code { font-family: var(--font-mono); fon
 .uo-footer {
   margin-top: var(--space-9);
   padding-top: var(--space-5);
-  border-top: 1px solid var(--line-2);
+  border-top: 1px solid var(--artifact-line-soft);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: var(--fw-light);
