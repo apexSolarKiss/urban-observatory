@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>urban-observatory — Information architecture — state</title>
+<meta name="description" content="Interactive information-architecture state surface for urban-observatory: surfaces, seams, and open questions colored by state (Spectral State v1.1). Color encodes state only. Repo prose is source truth.">
+<meta name="generator" content="conforms to apexSolarKiss/design-system-ASK Tier 1 + Tier 2 by reference; consumes Spectral State by reference (pin 20fc5d6)">
+<!-- design-system-ASK foundations — local pinned mirror (no CDN), one level up in ../_dsa-tokens/.
+     Load order: core tokens → Spectral State (opt-in state colors) → the pattern styling. -->
+<link rel="stylesheet" href="../_dsa-tokens/colors_and_type.css">
+<link rel="stylesheet" href="../_dsa-tokens/spectral-state.css">
+<link rel="stylesheet" href="diagrams-interactive-spine.css">
+</head>
+<body>
+
+<div class="shell">
+  <div class="bar">
+    <div class="mark">apexSolarKiss<span class="sep">/</span>urban-observatory</div>
+    <div class="title-block">
+      <div class="t">Information architecture — state</div>
+      <div class="s">operational state surface · earned / structural / partial / held / proposed / external, and where · color encodes state only</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stamp">
+      <div><span class="k">source-v1</span> // <span class="k">render-v1</span></div>
+      <div>2026-06-05</div>
+    </div>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="stage" id="stage">
+      <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="corner-tick tl"></div>
+    <div class="corner-tick tr"></div>
+    <div class="corner-tick bl"></div>
+    <div class="corner-tick br"></div>
+
+    <div class="inspector glass" id="inspector"></div>
+
+    <div class="legend glass">
+      <div class="h"><span>State</span></div>
+      <div id="legendRows"></div>
+    </div>
+
+    <div class="hud glass">
+      <button id="zoomOut" title="Zoom out">−</button>
+      <div class="pct" id="zoomPct">100%</div>
+      <button id="zoomIn" title="Zoom in">+</button>
+      <button id="zoomFit" title="Fit">⤢</button>
+    </div>
+
+    <div class="caption glass">
+      <b>illustrative</b> · repo prose is source truth · color encodes state only
+    </div>
+  </div>
+</div>
+
+<script src="urban-observatory_ia-state-spine.data.js"></script>
+<script src="diagrams-interactive-spine-engine.js"></script>
+<script>
+window.IA_SPINE.render(window.IA_STATE_SPINE);
+</script>
+<script src="export-png.js"></script>
+
+</body>
+</html>
