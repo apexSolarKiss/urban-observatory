@@ -21,7 +21,7 @@ axis) and *structure or state*.
 |---|---|---|---|---|
 | **Architecture tree** | whole repo (the atlas) | structure | `diagram-static-H` | built |
 | **Ontology** | one axis — *kinds* of concepts (Axis A) | structure | `diagram-static-H` | built |
-| **Interactive IA spine** | the operational whole | **state** (Spectral State v1.1) | `diagram-interactive-spine` | planned |
+| **Interactive IA spine** | the operational whole | **state** (Spectral State v1.1) | `diagram-interactive-spine` | built |
 
 - The **structure** diagrams keep **one axis each** (axis purity) and assert no
   maturity. The **state** diagram is the one place the mixed operational whole is
@@ -41,28 +41,39 @@ docs/diagrams/
 ├── _dsa-tokens/                                   VENDORED, PINNED design-system-ASK mirror
 │   ├── MANIFEST.md                                upstream commit + per-file sha256
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
+│   ├── spectral-state.css                         Spectral State v1.1 (verbatim) — interactive spine only
 │   └── fonts/                                      Inter + JetBrains Mono (+ OFL licenses)
 ├── diagrams-static-H-engine.js                    upstream engine — consumed verbatim, DO NOT EDIT
 ├── diagrams.css                                   upstream style layer — consumed verbatim, DO NOT EDIT
-├── export-png.js                                  upstream PNG export — consumed verbatim, DO NOT EDIT
+├── export-png.js                                  upstream PNG export (static) — consumed verbatim, DO NOT EDIT
 ├── urban-observatory_architecture-tree.html       UO chrome (title · subtitle · stamp · legend)
 ├── urban-observatory_architecture-tree.source.js  UO data (window.TREE_ARCHITECTURE)
 ├── urban-observatory_ontology.html                UO chrome (legend repurposed as an Axis-A reading note)
-└── urban-observatory_ontology.source.js           UO data (window.TREE_ONTOLOGY)
+├── urban-observatory_ontology.source.js           UO data (window.TREE_ONTOLOGY)
+└── interactive/                                    Class A INTERACTIVE (diagram-interactive-spine)
+    ├── diagrams-interactive-spine-engine.js        upstream engine — consumed verbatim, DO NOT EDIT
+    ├── diagrams-interactive-spine.css              upstream style layer — consumed verbatim, DO NOT EDIT
+    ├── export-png.js                               upstream PNG export (interactive) — verbatim, DO NOT EDIT
+    ├── urban-observatory_ia-state-spine.html       UO chrome (loads ../_dsa-tokens/)
+    └── urban-observatory_ia-state-spine.data.js    UO data (window.IA_STATE_SPINE)
 ```
 
-The architecture tree and the ontology share this static scaffold (same engine,
-CSS, export, and pinned mirror). The interactive IA spine will add its own
-`*.html` + `*.data.js` and additionally vendor `spectral-state.css` into
-`_dsa-tokens/` (at the same pin) plus the interactive engine/CSS/export.
+All three diagrams share one pinned `_dsa-tokens/` mirror. The two **static**
+diagrams (architecture tree, ontology) sit at top level and load
+`colors_and_type.css` + `diagrams.css`. The **interactive** IA spine sits in
+`interactive/` and additionally loads `spectral-state.css` (load order:
+`colors_and_type.css → spectral-state.css → diagrams-interactive-spine.css`); it
+references the shared mirror one level up at `../_dsa-tokens/`. The interactive
+surface is the only one that consumes Spectral State; **color encodes state only**.
 
 ## Consumption discipline
 
 - **Consume by reference; no fork.** The engine, `diagrams.css`, and
   `export-png.js` are copied **verbatim** from the upstream pattern and are
   **never edited** here — modifying them breaks inheritance. UO authors **only**
-  source data (`window.TREE_*`) and HTML chrome (`.mark`, title, subtitle,
-  `.stamp`, legend, `<title>`, `<meta>`, file names).
+  source data (`window.TREE_*` for the static diagrams, `window.IA_STATE_SPINE`
+  for the interactive one) and HTML chrome (`.mark`, title, subtitle, `.stamp`,
+  legend, `<title>`, `<meta>`, file names).
 - **Pinned, offline, no CDN.** `_dsa-tokens/` is a pinned snapshot
   (`MANIFEST.md` records the commit SHA + per-file sha256). The diagrams inherit
   at generation time and **freeze for audit** — no runtime fetch, no font CDN.

@@ -26,6 +26,7 @@ _dsa-tokens/
 ├── MANIFEST.md                     this file
 ├── colors_and_type.css             Tier 1 + Tier 2 tokens + @font-face
 │                                   (light default · [data-theme="dark"] · prefers-color-scheme auto-bridge)
+├── spectral-state.css              Spectral State v1.1 — 8 --state-* roles (interactive spine only)
 └── fonts/
     ├── InterVariable.woff2         Inter (interface + display), OFL
     ├── InterVariable-Italic.woff2
@@ -38,18 +39,23 @@ _dsa-tokens/
 | file | sha256 |
 | --- | --- |
 | `colors_and_type.css` | `1aeed0fda84cef41a60789613e2a5195b0cae3c208cb047d592f27959bca973c` |
+| `spectral-state.css` | `36bbd48347944e746375caa791074bf9c04dd67d6b7bce1c46fe41ee03e9d432` |
 | `fonts/InterVariable.woff2` | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | `fonts/InterVariable-Italic.woff2` | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | `fonts/JetBrainsMono.woff2` | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | `fonts/JetBrainsMono-Italic.woff2` | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 
-## Scope note — static diagrams only (so far)
+## Scope note — static vs interactive load
 
-This mirror carries `colors_and_type.css` + fonts, which is everything the
-**static** Class A diagrams need (`diagram-static-H`). The **interactive** IA
-spine additionally requires `spectral-state.css`; that file is **not** vendored
-here yet and will be added (at the same pin) when the interactive spine is built.
-Static scaffolds do **not** load `spectral-state.css`.
+This mirror carries `colors_and_type.css` + fonts (everything the **static**
+Class A diagrams need, `diagram-static-H`) **and** `spectral-state.css` (Spectral
+State v1.1), required by the **interactive** IA spine (`diagram-interactive-spine`,
+in `../interactive/`). All vendored at the same pin `20fc5d6`.
+
+**Static scaffolds do NOT load `spectral-state.css`** — only the interactive
+spine does, in load order `colors_and_type.css → spectral-state.css →
+diagrams-interactive-spine.css`. Color on the interactive surface encodes
+**state only**.
 
 ## Binding
 
