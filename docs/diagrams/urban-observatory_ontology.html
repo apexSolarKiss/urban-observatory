@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>urban-observatory — ontology</title>
+<meta name="description" content="Illustrative ontology (Axis A) for urban-observatory: the kinds of concepts the method reasons over. Structural classification, no maturity state. Repo prose is source truth.">
+<meta name="generator" content="conforms to apexSolarKiss/design-system-ASK Tier 1 + Tier 2 by reference at generation time (pin 20fc5d6)">
+<!-- design-system-ASK foundations — local pinned mirror (no CDN). -->
+<link rel="stylesheet" href="./_dsa-tokens/colors_and_type.css">
+<link rel="stylesheet" href="diagrams.css">
+</head>
+<body>
+
+<div class="shell">
+  <div class="bar">
+    <div class="mark">apexSolarKiss<span class="sep">/</span>urban-observatory</div>
+    <div class="title-block">
+      <div class="t">Ontology</div>
+      <div class="s">Axis A · what kinds of concepts the method reasons over · interpretive chain · signal subtypes · supporting primitives · assessment vocabulary · output classifications — structural, no state</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stamp">
+      <div><span class="k">source-v1</span> // <span class="k">render-v1</span></div>
+      <div>2026-06-05</div>
+    </div>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="stage" id="stage">
+      <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="corner-tick tl"></div>
+    <div class="corner-tick tr"></div>
+    <div class="corner-tick bl"></div>
+    <div class="corner-tick br"></div>
+
+    <!-- Structural ontology (Axis A), not a maturity-state diagram: no earned/held/legacy
+         is asserted, and no Spectral State is loaded. Legend repurposed as a reading note. -->
+    <div class="legend glass">
+      <div class="h"><span>Reading</span><span class="fig">Axis A</span></div>
+      <div class="row">
+        <div><span class="lbl">concept kind</span><span class="sub">structural map · no maturity state asserted</span></div>
+      </div>
+    </div>
+
+    <div class="hud glass">
+      <button id="zoomOut" title="Zoom out">−</button>
+      <div class="pct" id="zoomPct">100%</div>
+      <button id="zoomIn" title="Zoom in">+</button>
+      <button id="zoomFit" title="Fit">⤢</button>
+    </div>
+
+    <div class="caption glass">
+      <b>illustrative</b><br>
+      repo prose is source truth. diagram may lag the repo;<br>
+      refresh or trust the prose.
+    </div>
+  </div>
+</div>
+
+<script src="urban-observatory_ontology.source.js"></script>
+<script src="diagrams-static-H-engine.js"></script>
+<script src="export-png.js"></script>
+<script>
+window.DIAGRAMS.render(window.TREE_ONTOLOGY);
+</script>
+
+</body>
+</html>

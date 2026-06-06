@@ -20,7 +20,7 @@ axis) and *structure or state*.
 | Diagram | Slice | Structure / state | Pattern | Status |
 |---|---|---|---|---|
 | **Architecture tree** | whole repo (the atlas) | structure | `diagram-static-H` | built |
-| **Ontology** | one axis — *kinds* of concepts (Axis A) | structure | `diagram-static-H` | planned |
+| **Ontology** | one axis — *kinds* of concepts (Axis A) | structure | `diagram-static-H` | built |
 | **Interactive IA spine** | the operational whole | **state** (Spectral State v1.1) | `diagram-interactive-spine` | planned |
 
 - The **structure** diagrams keep **one axis each** (axis purity) and assert no
@@ -46,13 +46,15 @@ docs/diagrams/
 ├── diagrams.css                                   upstream style layer — consumed verbatim, DO NOT EDIT
 ├── export-png.js                                  upstream PNG export — consumed verbatim, DO NOT EDIT
 ├── urban-observatory_architecture-tree.html       UO chrome (title · subtitle · stamp · legend)
-└── urban-observatory_architecture-tree.source.js  UO data (window.TREE_ARCHITECTURE)
+├── urban-observatory_architecture-tree.source.js  UO data (window.TREE_ARCHITECTURE)
+├── urban-observatory_ontology.html                UO chrome (legend repurposed as an Axis-A reading note)
+└── urban-observatory_ontology.source.js           UO data (window.TREE_ONTOLOGY)
 ```
 
-The ontology and interactive IA spine will add their own `*.html` + `*.source.js`
-/ `*.data.js`; the ontology reuses this same static scaffold, and the interactive
-spine additionally vendors `spectral-state.css` into `_dsa-tokens/` (at the same
-pin) and copies the interactive engine/CSS/export.
+The architecture tree and the ontology share this static scaffold (same engine,
+CSS, export, and pinned mirror). The interactive IA spine will add its own
+`*.html` + `*.data.js` and additionally vendor `spectral-state.css` into
+`_dsa-tokens/` (at the same pin) plus the interactive engine/CSS/export.
 
 ## Consumption discipline
 
