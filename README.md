@@ -1,5 +1,7 @@
 # urban-observatory
 
+![urban-observatory banner](urban-observatory-banner.jpg)
+
 An open-source prototype for **implementation intelligence**: continuously interpreting whether urban plans become real outcomes.
 
 `urban-observatory` explores implementation intelligence: a public-data method for continuously interpreting whether public plans, policies, and commitments are actually translating into urban outcomes — and what would most effectively close the gap when they are not. The project is being structured around methods for synthesizing fragmented public documents and datasets, surfacing contradictions and assumption drift, and producing memo-form analyses with explicit uncertainty. **Housing implementation is the first institutional domain, not the whole project.**
