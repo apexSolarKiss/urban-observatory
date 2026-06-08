@@ -25,9 +25,9 @@ The workflow rules apply regardless of which agent does the executing. Rules liv
 ## Artifact Model
 
 - repo-local execution files: `AGENTS.md`, `CLAUDE.md`, `LICENSE`
-- repo docs: `README.md`, `docs/architecture.md` (this file), [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/report-outline.md`](report-outline.md)
+- repo docs: `README.md`, `docs/architecture.md` (this file), [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/source-inventory.md`](source-inventory.md), [`docs/data-dictionary.md`](data-dictionary.md), [`docs/report-outline.md`](report-outline.md), [`docs/method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)
 - external context: grounding note at `urban-observatory-EXTERNAL/sources of intent/urban-observatory_grounding-note.md` (operator-side)
-- further artifact classes (schemas, sample datasets, analysis notebooks, report artifacts, examples) do not yet exist. They are candidate later phases that depend on schema, dataset, and prototype-execution decisions that have not been made.
+- a site-abstracted worked-pattern method appendix ([`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)) now exists, demonstrating the interpretive chain on one real case (the named instance is held operator-side). Further artifact classes (schemas, sample datasets, analysis notebooks, report artifacts, named-site examples) do not yet exist; they are candidate later phases that depend on decisions that have not been made.
 
 ## How The Pieces Relate
 
@@ -39,6 +39,7 @@ The workflow rules apply regardless of which agent does the executing. Rules liv
 - [`object-model.md`](object-model.md) names the interpretive chain (`Assumption → ImplementationSignal → ImplementationFinding → InterventionCandidate`) and supporting primitives as a working hypothesis.
 - [`source-strategy.md`](source-strategy.md) describes the public-data source posture (Tier A / B / C categories), prioritized but open-ended.
 - [`report-outline.md`](report-outline.md) describes the structure of the first artifact (Housing Element Implementation Risk Brief) at heading level only.
+- [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md) is a site-abstracted worked-pattern appendix demonstrating the interpretive chain on one real case; the named instance is held operator-side.
 - This file holds repo-local structural framing and source-of-truth boundaries; it does not duplicate scope or method content.
 - `AGENTS.md` holds workflow rules, agent-agnostic.
 - The external grounding note carries source-of-intent context (audience, voice discipline, market/opportunity framing) and does not override repo-local truth once files exist.
@@ -54,5 +55,5 @@ Evidence quality, provenance, and uncertainty are first-class properties of any 
 
 ## Ownership Notes
 
-- local source of truth: repo-local files — this doc, `AGENTS.md`, `README.md`, [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/report-outline.md`](report-outline.md), [`docs/data-dictionary.md`](data-dictionary.md).
+- local source of truth: repo-local files — this doc, `AGENTS.md`, `README.md`, [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/source-inventory.md`](source-inventory.md), [`docs/data-dictionary.md`](data-dictionary.md), [`docs/report-outline.md`](report-outline.md), [`docs/method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md).
 - external dependencies or governing artifacts: external grounding note for source-of-intent context; public-data sources to be enumerated as the data model takes shape.

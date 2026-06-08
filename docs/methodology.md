@@ -2,7 +2,7 @@
 
 This document describes the proposed method `urban-observatory` is being developed to test, and what its method does *not* do.
 
-The methodology is method-first and public-data-only. It is designed to produce written interpretations with explicit uncertainty, traceable provenance, and modest claims. No analytical artifacts have yet been produced; this document describes the method as a working hypothesis to be tested by concrete prototype work.
+The methodology is method-first and public-data-only. It is designed to produce written interpretations with explicit uncertainty, traceable provenance, and modest claims. A first site-abstracted worked pattern now demonstrates the method on one real case (see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)); beyond it, no datasets, notebooks, or named-site analyses have been produced, and this document describes the method as a working hypothesis still being tested by concrete prototype work.
 
 ## Public-data only
 
@@ -137,4 +137,4 @@ The method has known limits that should be stated, not hidden:
 
 ## Where this method is being developed
 
-The methodology has not yet been tested through a completed analytical artifact. The current v0 test surface is the bounded whole-city San Francisco Housing Element implementation-intelligence prototype described in [`v0-scope.md`](v0-scope.md). Until prototype work produces signal cards, findings, or a first brief, this document describes the method as a working hypothesis to be pressure-tested by concrete public-data interpretation work, not a method already proven.
+A first site-abstracted worked pattern now demonstrates the method on one real case (see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)). The current v0 test surface is the bounded whole-city San Francisco Housing Element implementation-intelligence prototype described in [`v0-scope.md`](v0-scope.md). Until prototype work produces signal cards, findings, or a first brief more broadly, this document describes the method as a working hypothesis still being pressure-tested by concrete public-data interpretation work — one worked pattern is a demonstration, not a method already proven.

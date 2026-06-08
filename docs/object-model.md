@@ -132,4 +132,4 @@ If prototype work surfaces substantial revisions to several of these, the right 
 
 This object model is a working hypothesis. Repo-local schema files and runnable schema artifacts are deferred to later phases. The chain and the supporting primitives are named here because they are method-bearing; schema-shape decisions are deferred because they are data-shape decisions.
 
-For per-concept field-level treatment (candidate fields, source / provenance requirements, and the relationship between objects, signal subtypes, classifications, and reporting surfaces), see [`data-dictionary.md`](data-dictionary.md).
+For per-concept field-level treatment (candidate fields, source / provenance requirements, and the relationship between objects, signal subtypes, classifications, and reporting surfaces), see [`data-dictionary.md`](data-dictionary.md). For the chain exercised once, end to end, on a single site-abstracted case, see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md).
