@@ -8,6 +8,8 @@ This document defines what v0 is, how it is bounded, and what it intentionally i
 
 v0 tests whether the implementation-intelligence method — centered on the interpretive chain described in [`object-model.md`](object-model.md) — can produce credible memo-form interpretations of whether the assumptions embedded in San Francisco's adopted Housing Element, Annual Progress Report, and related public planning documents remain plausible as conditions change.
 
+v0 demonstrates **time-separated assumption stress testing** — an adopted assumption read against current public signals (adoption-to-current) — not a live continuous monitoring loop. The continuous-interpretation ambition described in [`implementation-intelligence.md`](implementation-intelligence.md) remains the north star; v0 tests the interpretive logic across time-separated surfaces, but does not yet implement automated re-evaluation as conditions change.
+
 ## Implementation surface
 
 v0 uses a hybrid implementation surface:
