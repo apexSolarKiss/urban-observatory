@@ -480,3 +480,5 @@ This data dictionary is a working hypothesis. It is Markdown-first by design —
 Per-concept fields are described in prose, not in a code-shaped contract. Candidate vocabularies are named as candidates. The discipline is to make the conceptual model legible to contributors and reviewers, not to bind tooling to it.
 
 Field-level commitments, controlled-vocabulary finalizations, and machine-validatable schemas all wait until prototype work justifies the commitment.
+
+For this apparatus exercised on a single site-abstracted case — the chain, the matrix, the bounded-absence signal, and the three-layer assessment in one worked pattern — see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md).
