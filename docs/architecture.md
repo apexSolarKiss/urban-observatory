@@ -55,5 +55,5 @@ Evidence quality, provenance, and uncertainty are first-class properties of any 
 
 ## Ownership Notes
 
-- local source of truth: repo-local files — this doc, `AGENTS.md`, `README.md`, [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/report-outline.md`](report-outline.md), [`docs/data-dictionary.md`](data-dictionary.md).
+- local source of truth: repo-local files — this doc, `AGENTS.md`, `README.md`, [`docs/project-scope.md`](project-scope.md), [`docs/implementation-intelligence.md`](implementation-intelligence.md), [`docs/methodology.md`](methodology.md), [`docs/v0-scope.md`](v0-scope.md), [`docs/object-model.md`](object-model.md), [`docs/source-strategy.md`](source-strategy.md), [`docs/source-inventory.md`](source-inventory.md), [`docs/data-dictionary.md`](data-dictionary.md), [`docs/report-outline.md`](report-outline.md), [`docs/method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md).
 - external dependencies or governing artifacts: external grounding note for source-of-intent context; public-data sources to be enumerated as the data model takes shape.
