@@ -81,7 +81,7 @@ External context (intent, audience, philosophy, foundational premises, unresolve
 
 ## What is still open
 
-- Specific datasets within the Tier A / B / C source categories (see [`source-strategy.md`](source-strategy.md)).
+- Specific datasets within the Tier-A / Tier-B source ladder (see [`source-strategy.md`](source-strategy.md)).
 - Field-level schema, controlled vocabularies, and the exact mechanism by which assumptions reference supporting objects (see [`object-model.md`](object-model.md) for what stays conceptual in v0).
 - Whether the validated `Assumption`-centered interpretive chain survives prototype pressure-testing as the load-bearing model.
 - The final public-facing concept name and framing.
