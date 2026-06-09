@@ -61,7 +61,7 @@ candidate               pinned at catalog level; intended classification pending
 
 ## Tier A — canonical sources
 
-Each entry below maps to one of the seven canonical Tier A categories in [`source-strategy.md`](source-strategy.md). Specific dataset choices are working candidates, not v0-canonical doctrine.
+Each entry below belongs to the housing / planning subset of the Tier-A **signal-visibility** posture described in [`source-strategy.md`](source-strategy.md). These seven pinned source categories are the sources exercised in v0; they do not exhaust the cross-system Tier-A posture. Specific dataset choices are working candidates, not v0-canonical doctrine. (A full re-tag of every source's `tier` field onto the revised visibility / interpretation ladder is a separate follow-on; the pinned content here is unchanged.)
 
 ### A.1 — SF Housing Element site inventory / opportunity sites
 
@@ -387,9 +387,9 @@ These are navigation / interpretive entry points, not raw Tier A evidence. They 
 
 Common fields: `source_classification: meta-source / discovery`; `chain_relevance: aggregated reporting / navigation only`; `v0_status: pinned (as meta-source)`. Raw MOHCD evidence routes through the Tier B B.3 candidate datasets below.
 
-## Tier B — candidate implementation-condition sources
+## Tier B — candidate dependency-interpretation sources
 
-Tier B sources illuminate the conditions under which implementation occurs. They are selective and not exhaustively retrieved in v0's Tier-1 shallow pass.
+Tier B is the **dependency-interpretation** layer (causal / delivery-risk / cross-system) — gated and not exercised in v0 by default (see [`source-strategy.md`](source-strategy.md)). The candidate sources below illuminate the conditions under which implementation occurs; reading them as dependency interpretation is Tier-B work, triggered by a specific finding, claim, reviewer need, or demo concept.
 
 ### B.1 — Capital plan and infrastructure investment references
 
