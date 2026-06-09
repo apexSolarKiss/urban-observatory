@@ -37,7 +37,7 @@ The workflow rules apply regardless of which agent does the executing. Rules liv
 - [`methodology.md`](methodology.md) describes how interpretation works — public-data-only, memo-like, uncertainty- and provenance-first, modest in claims.
 - [`v0-scope.md`](v0-scope.md) defines the current v0 working scope: bounded whole-city San Francisco Housing Element implementation-intelligence prototype, bounded by depth rather than geography.
 - [`object-model.md`](object-model.md) names the interpretive chain (`Assumption → ImplementationSignal → ImplementationFinding → InterventionCandidate`) and supporting primitives as a working hypothesis.
-- [`source-strategy.md`](source-strategy.md) describes the public-data source posture (Tier A / B / C categories), prioritized but open-ended.
+- [`source-strategy.md`](source-strategy.md) describes the public-data source posture (the Tier-A / Tier-B source ladder and supporting-source taxonomy), prioritized but open-ended.
 - [`report-outline.md`](report-outline.md) describes the structure of the first artifact (Housing Element Implementation Risk Brief) at heading level only.
 - [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md) is a site-abstracted worked-pattern appendix demonstrating the interpretive chain on one real case; the named instance is held operator-side.
 - This file holds repo-local structural framing and source-of-truth boundaries; it does not duplicate scope or method content.

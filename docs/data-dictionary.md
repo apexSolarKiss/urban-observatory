@@ -462,7 +462,7 @@ The following remain conceptual in v0; the dictionary names them as candidate bu
 2. The exact mechanism by which assumptions reference supporting objects (polymorphic list vs typed relations).
 3. Controlled vocabularies (direction labels, risk tiers, confidence levels, signal types, finding directions, candidate actor types).
 4. Typology list for opportunity sites (categories not hard-coded before reviewing the actual inventory).
-5. Specific datasets within Tier A / B / C source categories (see [`source-strategy.md`](source-strategy.md)).
+5. Specific datasets within the Tier-A / Tier-B source ladder (see [`source-strategy.md`](source-strategy.md)).
 6. Cross-cutting finding and intervention-candidate mechanisms.
 7. Pattern summary representation (as object class vs as brief section).
 8. Confidence basis taxonomy.

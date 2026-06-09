@@ -2,7 +2,7 @@
 
 This document is the working source inventory for `urban-observatory`'s v0 prototype. It documents the public-data sources `urban-observatory` may draw on, the access posture for each, and the role each source plays in the interpretive chain. Specific dataset choices remain candidate; the inventory is not a manifest and not a claim of source sufficiency.
 
-For the source-strategy posture (Tier A / B / C categories at the category level), see [`source-strategy.md`](source-strategy.md). For the interpretive chain the inventory supports, see [`object-model.md`](object-model.md). For provenance discipline, see [`methodology.md`](methodology.md). For repo-local architecture context, see [`architecture.md`](architecture.md).
+For the source-strategy posture (the Tier-A / Tier-B source ladder at the category level), see [`source-strategy.md`](source-strategy.md). For the interpretive chain the inventory supports, see [`object-model.md`](object-model.md). For provenance discipline, see [`methodology.md`](methodology.md). For repo-local architecture context, see [`architecture.md`](architecture.md).
 
 ## Source inventory boundary
 
