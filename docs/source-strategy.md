@@ -22,33 +22,30 @@ Every claim the method produces should be inspectable to its source. Each source
 
 Outputs without provenance are not the same artifact class as outputs with provenance; see [`methodology.md`](methodology.md).
 
-## Tier A — core v0 source categories
+## Two tier axes — keep them distinct
 
-Tier A sources are the categories v0 attempts first. The Housing Element inventory and APR are the natural starting points; pipeline, planning applications, and DBI permits follow. Tier A categories include:
+This document's **source ladder** (Tier A / Tier B) is a different axis from the **analytical-depth pass** (Tier 1 / Tier 2) used in v0 scoping (see [`v0-scope.md`](v0-scope.md)). The source ladder describes *what kind of reading a source supports* — signal visibility (Tier A) versus dependency interpretation (Tier B). The depth pass describes *how far v0 interprets* — a shallow citywide baseline (Tier 1) versus deeper interpretation of flagged cases (Tier 2). A Tier-A source can be read at Tier-1 or Tier-2 depth; the two axes are independent.
 
-- San Francisco Housing Element site inventory and opportunity-site data
-- San Francisco APR / Housing Element annual progress reporting data
-- SF Planning development pipeline data
-- SF Planning applications and entitlement records
-- DBI building permit records
-- Planning Code and zoning GIS layers
-- Parcel, assessor, and land-use GIS layers
+## Tier A — cross-system signal visibility
 
-Specific datasets within each category are not named here as v0-canonical. Dataset selection within these categories is part of the prototype's own work and depends on what is available, current, and reliable.
+Tier A is the **signal-visibility** layer: shallow, source-linked public-record signals across the systems that bear on implementation, not housing records alone. Tier A states what the record shows — *signal present / absent / unclear · source found / not found · status changed · dependency flagged · public-record silence · procedural gate visible · public-record wall* — and **implies no causation**.
 
-## Tier B — implementation-condition source categories
+Tier A is a **visibility posture, not a source-collection mandate.** It can surface signals across the bearing systems where those signals are shallowly visible in authorized public sources or already-pinned records:
 
-Tier B sources illuminate the conditions under which implementation occurs. They are selective: not every Tier B category is required for v0, but several are likely needed for Tier-2 deeper interpretation of flagged sites.
+- **Housing / planning** — Housing Element site inventory, APR, development pipeline, planning applications, DBI building permits, completions, zoning and parcel GIS *(the sources pinned and exercised in v0)*
+- **Infrastructure** — capital plan and infrastructure-investment references
+- **Transportation** — transportation plans and transit-access layers
+- **Capital / funding** — affordable-housing and public funding / subsidy signals
+- **Environmental / resilience** — environmental-constraint and resilience layers
+- **Public / institutional** — public and institutional records
 
-Tier B categories include:
+v0 operates on the housing / planning sources already pinned (see [`source-inventory.md`](source-inventory.md)); the non-housing systems are named here as the Tier-A visibility posture — surfaced where public records make them shallowly visible — not as a present collection requirement. Specific datasets within each system are not named here as v0-canonical; dataset selection is part of the prototype's own work.
 
-- capital plan and infrastructure investment references
-- transportation plans and transit access layers
-- affordable housing project and funding signals
-- public subsidy and financing award signals
-- environmental constraint layers
-- construction cost, interest rate, and vacancy indicators
-- policy and program documents related to Housing Element implementation
+## Tier B — cross-system dependency interpretation
+
+Tier B is the **interpretation** layer, triggered when the project must read *how systems interact* or whether a dependency *materially affects* implementation: explanation, causality, delivery-risk claims, intervention priority, cross-system dependency interpretation, and higher-confidence, expert-review-facing, or public-facing claims. Tier B is **gated** — Tier-A visibility never implies a Tier-B interpretation on its own.
+
+Tier B is a *function*, not a separate source list. It interprets deeper reads of the same public records (and, where a specific finding, claim, reviewer need, or demo concept requires it, additional sources such as capital / infrastructure references, transportation plans, funding / subsidy records, environmental-constraint layers, construction-cost / interest-rate / vacancy indicators, or policy / program documents). It is not exercised in v0 by default.
 
 ## Tier C — selective supporting source categories
 
@@ -65,8 +62,10 @@ Tier C categories include:
 - utility-capacity documents
 - neighborhood-specific and area plans
 
+Tier C predates the Tier-A / Tier-B visibility-versus-interpretation reframe; its placement on the revised ladder is reserved for a separate source-taxonomy review and is left unchanged here.
+
 ## Posture
 
-The source strategy is a posture, not a manifest. New sources may emerge during prototype work, and some named categories may turn out to be less useful than expected. The category-level naming is durable; specific dataset choices remain candidate.
+The source strategy is a posture, not a manifest. New sources may emerge during prototype work, and some named categories may turn out to be less useful than expected. The category-level naming is durable; specific dataset choices remain candidate. Tier A names a visibility posture across systems, not a commitment to collect every system's data: v0 exercises the housing / planning sources, and other systems' signals enter only where public records make them shallowly visible.
 
 No data is fetched as part of this document; retrieval is a separate, later phase.

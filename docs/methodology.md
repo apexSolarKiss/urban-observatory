@@ -43,7 +43,7 @@ The method synthesizes signals from these sources into interpretations about spe
 
 Implementation assumptions may need to be interpreted across temporally distinct surfaces. Prototype source contact against San Francisco Housing Element, APR, and pipeline material has surfaced at least four such surfaces for a single project: an **inventory snapshot** dated at Housing Element adoption; an **entitlement event** anchored to a Planning approval; a **rolling advancement** signal in building-permit activity; and a **completion or production signal** in certificate-of-occupancy and permit-closeout records.
 
-Each surface has its own temporal grammar — snapshot, event, rolling, milestone — and a single project may produce diverging readings across them. Tier A summary sources may collapse these surfaces, obscuring substructure within the advancement signal or rendering inventory coverage rules indistinguishable from project condition.
+Each surface has its own temporal grammar — snapshot, event, rolling, milestone — and a single project may produce diverging readings across them. Summary / aggregate sources may collapse these surfaces, obscuring substructure within the advancement signal or rendering inventory coverage rules indistinguishable from project condition.
 
 Findings should preserve surface-specific evidence and avoid forcing a single direction label where surfaces diverge.
 
