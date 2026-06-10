@@ -79,6 +79,8 @@ The following are intentionally deferred until subsequent scoping decisions are 
 
 External context (intent, audience, philosophy, foundational premises, unresolved questions, voice discipline) lives in the project's grounding note, which is operator-side and not in this repo. The repo itself is the operative source of truth for what the project actually is and does. See [`docs/architecture.md`](architecture.md) for repo-local boundaries and [`AGENTS.md`](../AGENTS.md) for workflow rules.
 
+The project also holds **operator-side evidence** that is not in this repo: named-site, fully-sourced case material the method has been **internally exercised** against, retained operator-side pending review, abstraction, and publication gates. The repo publishes the method and one **site-abstracted public pattern** ([`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)); named-site evidence and full site-level citations are held back deliberately — to preserve abstraction discipline and because named-site publication has not been authorized. What the repo shows is the method and its abstracted demonstration, not the underlying **held case material**.
+
 ## What is still open
 
 - Specific datasets within the Tier-A / Tier-B source ladder (see [`source-strategy.md`](source-strategy.md)).
