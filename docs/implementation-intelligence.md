@@ -51,7 +51,7 @@ The method preserves the chain between assumptions, documents, updates, implemen
 
 ## Interdependency awareness
 
-A core principle of the method: a parcel is never just a parcel. Sites exist inside infrastructure systems, financing systems, transportation systems, regulatory systems, market systems, and implementation-timing systems. A practical scope is acceptable only if it preserves this relational logic. The method resists collapsing into transaction-level analysis that treats individual sites or projects in isolation from the systems they depend on.
+A core principle of the method: a parcel is never just a parcel. Sites exist inside infrastructure systems, financing systems, transportation systems, regulatory systems, market systems, and implementation-timing systems. A practical scope is acceptable only if it preserves this relational logic. The method resists collapsing into transaction-level analysis that treats individual sites or projects in isolation from the systems they depend on. It follows that housing implementation cannot be read from housing records alone: the housing record shows that a site is adopted, entitled, or permitted, but whether that capacity becomes real also depends on conditions recorded in other systems — infrastructure, transportation, capital and funding, environmental, institutional. Surfacing those cross-system conditions where the public record makes them visible is a **signal-visibility posture** (see [`source-strategy.md`](source-strategy.md), Tier A); whether a given condition *materially affects* a site's outcome is a deeper, gated interpretation (Tier B), not asserted by visibility alone.
 
 ## Why housing is the first operational domain
 
