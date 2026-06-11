@@ -19,6 +19,13 @@ The project is method-first, public-data based, and modest in its claims. It doe
 
 `urban-observatory` is in early prototype-planning. The repo carries workflow rules (`AGENTS.md`), an architecture sketch (`docs/architecture.md`), the public scope, concept, methodology, v0-scope, object-model, source-strategy, source-inventory, data-dictionary, and report-outline documents in `docs/`, and one site-abstracted **worked-pattern method appendix** ([`docs/method-appendix-worked-pattern.md`](docs/method-appendix-worked-pattern.md)) demonstrating the interpretive chain on one abstracted case. The method has also been **internally exercised** operator-side against additional named public-record cases and contrast conditions; that **held case material** remains operator-side pending review, abstraction, and publication gates, and is not in this repo (see [`docs/project-scope.md`](docs/project-scope.md)). **No datasets, notebooks, repo-resident named-site analyses, or report artifacts exist in the repo yet** — those are candidate later phases that depend on decisions that have not been made.
 
+## Background Articles
+
+Background articles, in chronological order (Substack is the source of truth):
+
+- [*From Conversation to Control Surface*](https://atomicspacekitten.substack.com/p/from-conversation-to-control-surface) — the project's inception story: messy AI-mediated exploration recovered into intent, validated constraint, and a load-bearing repo (cross-listed from the workflow/method series).
+- [*A Parcel Is Never Just a Parcel*](https://atomicspacekitten.substack.com/p/a-parcel-is-never-just-a-parcel) — the first domain-facing public argument: housing implementation cannot be read from housing records alone; reading the cross-system dependency field with explicit uncertainty.
+
 ## License
 
 Copyright 2026 Andrew S Klug // ASK
