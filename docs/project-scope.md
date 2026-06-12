@@ -1,6 +1,6 @@
 # Project Scope
 
-`urban-observatory` is an open-source prototype exploring **implementation intelligence**: methods for continuously interpreting whether public plans, policies, infrastructure commitments, and capital investments are actually translating into urban outcomes — and what would most effectively close the gap when they aren't.
+`urban-observatory` is an open-source prototype exploring **implementation intelligence**: a public-data method for reconstructing how public intent is carried into practice across plans, resources, approvals, investments, delivery systems, and changing conditions — identifying relationships that separate reports do not show: shared dependencies, conflicting assumptions, sequencing gaps, misaligned investment, and implementation drift over time. Observed outcomes enter as evidence within that interpretation, not as a scorecard.
 
 This document defines what the project is, what it is not, and how its scope is sequenced.
 
