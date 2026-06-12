@@ -2,7 +2,7 @@
 
 ## Repo Purpose
 
-- repo purpose: open-source prototype for **implementation intelligence** — a public-data method for continuously interpreting whether public plans, policies, infrastructure commitments, and capital investments are translating into actual urban outcomes, and what would most effectively close the gap when they aren't. Outputs are memo-form interpretations with explicit uncertainty and provenance.
+- repo purpose: open-source prototype for **implementation intelligence** — a public-data method for reconstructing how public intent is carried into practice across plans, resources, approvals, investments, delivery systems, and changing conditions, identifying relationships that separate reports do not show: shared dependencies, conflicting assumptions, sequencing gaps, misaligned investment, and implementation drift over time. Observed outcomes enter as evidence within the interpretation, not as a scorecard. Outputs are memo-form interpretations with explicit uncertainty and provenance.
 - first operational domain: housing implementation. Housing is the first domain, not the whole project. See [`project-scope.md`](project-scope.md) for what is in and out of scope and [`implementation-intelligence.md`](implementation-intelligence.md) for the core concept.
 - non-goals: the canonical anti-goal list lives in [`project-scope.md`](project-scope.md). Briefly: not a GIS replacement, not a planning-department replacement, not an enforcement tool, not a deterministic feasibility engine, not a dashboard-first product, not a predictive authority, not a developer underwriting platform, not a smart-city platform. Does not replace planners, policy experts, community processes, legal review, or environmental review. Does not claim complete or neutral data.
 
@@ -38,7 +38,7 @@ The workflow rules apply regardless of which agent does the executing. Rules liv
 - [`v0-scope.md`](v0-scope.md) defines the current v0 working scope: bounded whole-city San Francisco Housing Element implementation-intelligence prototype, bounded by depth rather than geography.
 - [`object-model.md`](object-model.md) names the interpretive chain (`Assumption → ImplementationSignal → ImplementationFinding → InterventionCandidate`) and supporting primitives as a working hypothesis.
 - [`source-strategy.md`](source-strategy.md) describes the public-data source posture (the Tier-A / Tier-B source ladder and supporting-source taxonomy), prioritized but open-ended.
-- [`report-outline.md`](report-outline.md) describes the structure of the first artifact (Housing Element Implementation Risk Brief) at heading level only.
+- [`report-outline.md`](report-outline.md) describes the structure of the first artifact (Housing Element Implementation Risk Brief — working title) at heading level only.
 - [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md) is a site-abstracted worked-pattern appendix demonstrating the interpretive chain on one real case; the named instance is held operator-side.
 - This file holds repo-local structural framing and source-of-truth boundaries; it does not duplicate scope or method content.
 - `AGENTS.md` holds workflow rules, agent-agnostic.

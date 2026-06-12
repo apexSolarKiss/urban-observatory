@@ -2,7 +2,7 @@
 
 ## What this means
 
-**Implementation intelligence** is a method for continuously interpreting whether public plans, policies, and commitments are translating into actual urban outcomes — and what is preventing them when they aren't.
+**Implementation intelligence** is a method for continuously reconstructing how public intent is carried into practice across plans, resources, approvals, investments, delivery systems, and changing conditions — identifying relationships that separate reports do not show: shared dependencies, conflicting assumptions, sequencing gaps, misaligned investment, and implementation drift over time. Implementability is the central concern; observed outcomes enter as evidence within the interpretation, not as a scorecard.
 
 It is not an AI planning tool, a dashboard, a GIS replacement, or a smart-city platform. It is a *layer of interpretation* over fragmented public documents and data that already exist but are rarely synthesized.
 
@@ -17,14 +17,14 @@ Current planning workflows tend to be:
 - weakly interpretive (which assumptions still hold, and which are breaking?)
 - structurally siloed (housing, transportation, infrastructure, finance, environmental — each in its own system)
 
-Implementation intelligence is the function that pays continuous attention to the gap *across* these silos and over time, surfacing where assumptions are drifting from reality and what interventions would most likely change outcomes.
+Implementation intelligence is the function that pays continuous attention to the gap *across* these silos and over time, surfacing where assumptions are drifting from reality and where plans, resources, and delivery systems are aligned, in conflict, or out of sequence. Identifying intervention candidates is a downstream function built on that interpretation, not its defining purpose.
 
 ## What it is not
 
 Implementation intelligence is explicitly *not*:
 
 - **Prediction.** The method does not claim to know what will happen. It interprets what is currently knowable, and represents uncertainty explicitly.
-- **Optimization.** The method does not propose a "best" solution. It interprets implementation conditions and identifies leverage points where targeted interventions would most likely change outcomes.
+- **Optimization.** The method does not propose a "best" solution. It interprets implementation conditions; surfacing intervention candidates is a downstream, non-prescriptive function, not an optimization claim.
 - **Authoritative judgment.** The method does not determine feasibility, compliance, or legal status. Outputs are advisory and are framed in interpretive language (implementation sensitivity, emerging risk indicators, feasibility uncertainty), not deterministic claims.
 - **Document retrieval.** The method does not return relevant documents in response to queries. It synthesizes across documents to produce coherent interpretations that no single document contains.
 - **A replacement for planners or planning departments.** The method supports professional judgment by reducing the cost of continuous synthesis. It does not replace it.
