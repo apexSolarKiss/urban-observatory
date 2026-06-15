@@ -102,6 +102,18 @@ Interpretations that combine signals from multiple sources should make the combi
 
 Outputs without provenance are not the same artifact class as outputs with provenance. The method distinguishes them.
 
+## Finding discipline: completeness, screening, and reliance
+
+The method holds findings to a discipline that separates what the evidence supports from what it does not, and separates private validation from public reliance.
+
+**Completeness before findings.** A finding requires source coverage sufficient for the specific claim it makes. Before a site- or entity-level finding is issued, the current state — active applications, project identity, the relevant process records — is reconciled across the surfaces where it could appear, rather than inferred from a single query. A *bounded absence* is recorded precisely: "not found in this source, under this query, on this date." A bounded absence supports only that statement; it is not evidence that something does not exist. Promoting "not found" to "does not exist" requires reconciling the surfaces where the thing would appear if it did.
+
+**Screening versus findings.** Population-scale classification and site-level findings are different artifact classes. A classifier run across many sites produces *provisional screening signals* — useful for prioritizing attention and for testing whether a pattern exists, but not themselves findings. A named finding requires per-site or per-entity reconciliation first. A population aggregate is not converted into a claim about an individual site without that reconciliation.
+
+**Reliance gate.** Private method validation — an analysis checked internally, or confirmed by a domain reviewer — is not the same as public or repo-local reliance. A worked example that is published, or relied on within this repository, requires the readily available evidence for its subject to be reconciled first, not only the subset convenient to the original analysis.
+
+**Negative and null results.** A disciplined method declines claims the evidence does not support, including dramatic ones. When a population-scale test is run and no defensible pattern emerges, that negative result is a valid contribution: it prevents over-narration — turning a few vivid cases into a trend the data does not establish — and it is reported as plainly as a positive result would be.
+
 ## Why this is not deterministic
 
 Urban implementation systems are probabilistic. Data quality is uneven. Causality is partially observable. False precision is dangerous. Politically sensitive findings require interpretive restraint. Over-scoring reduces credibility. Premature numerical certainty freezes ontology and analysis prematurely.
