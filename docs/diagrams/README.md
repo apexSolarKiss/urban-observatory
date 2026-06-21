@@ -82,6 +82,28 @@ surface is the only one that consumes Spectral State; **color encodes state only
 - **Light + dark both work** (verified for the architecture tree, both themes).
 - **Pin:** design-system-ASK `main` **`20fc5d6`**.
 
+## Theme by embedding surface
+
+Adopted from the design-system-ASK convention ***Theme by embedding surface***, pinned at
+design-system-ASK `main` **`7921b79`** (PR #49, merged 2026-06-21). This is a visual-consumption
+convention, not an engine/CSS/token change — it only settles which existing theme variant a surface
+embeds. Both `-light` and `-dark` exports are always generated and retained; the surface selects the
+default, and a stated local exception may override per figure.
+
+**UO default:**
+
+- **Repository documentation embeds dark** — these in-repo diagrams (the `diagram-static-H`
+  architecture tree and ontology; the `diagram-interactive-spine` static export) are repository
+  documentation and default to **dark**.
+- **Editorial / Substack embeds light** — if a UO diagram is ever published in a Substack or other
+  long-form editorial piece, that figure defaults to **light**.
+- **Both exports retained; a stated local exception may override** a specific figure.
+
+UO currently commits **no rasters** — the diagrams are live `.html` that export a poster PNG on
+demand (the `PNG` button), so there is nothing to re-select today. The default governs which export
+is embedded when a raster is committed or published going forward. (Convention owner:
+design-system-ASK; UO owns its adoption record and which render each UO surface embeds.)
+
 ## Viewing
 
 Open any diagram `.html` directly in a browser (it loads its CSS/JS/fonts from
