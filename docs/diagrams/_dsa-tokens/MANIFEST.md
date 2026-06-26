@@ -11,11 +11,11 @@ This mirror is a **build input, not a fork** and not a second source of truth.
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `20fc5d6505da16a848dda529545b144f3c7a90ac` |
-| short | `20fc5d6` |
-| commit date | `2026-06-05 20:04:25 -0700` |
-| commit subject | `feat(diagram-interactive-spine): graduate the interactive IA state spine (Class A interactive) (#28)` |
-| synced at | `2026-06-05` |
+| commit | `b5d158e6b2a74faf7dae92e3d15a6ee0a3baba59` |
+| short | `b5d158e` |
+| commit date | `2026-06-26 10:08:46 -0700` |
+| commit subject | `patterns + README: alias diagram foreground, conform output-artifact docs + root README to the canonical model (#53)` |
+| synced at | `2026-06-26` |
 | consuming surface | `urban-observatory/docs/diagrams/` |
 | scope | Tier 1 + Tier 2 only (no Tier 3) |
 
@@ -38,12 +38,14 @@ _dsa-tokens/
 
 | file | sha256 |
 | --- | --- |
-| `colors_and_type.css` | `1aeed0fda84cef41a60789613e2a5195b0cae3c208cb047d592f27959bca973c` |
+| `colors_and_type.css` | `d3a94ac725e76ac8fdd290797ac1288799cf6f5c02e51f269c3cb666be4cb4fa` |
 | `spectral-state.css` | `36bbd48347944e746375caa791074bf9c04dd67d6b7bce1c46fe41ee03e9d432` |
 | `fonts/InterVariable.woff2` | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | `fonts/InterVariable-Italic.woff2` | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | `fonts/JetBrainsMono.woff2` | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | `fonts/JetBrainsMono-Italic.woff2` | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
+
+**Re-sync 2026-06-26 (`20fc5d6` → `b5d158e`):** picks up design-system PR **#52** (light-mode foreground conformance in `colors_and_type.css` — white = wordmark pairing only; `#6A637F` = canonical default light foreground / the approved dark purple; `#201D26` = reserved opt-in high-contrast) and **#53** (`diagrams.css` aliases its `--diagram-ink/-muted/-faint` roles to the foundation `--fg-1/-2/-3` ramp). **Render-neutral:** light `--fg-1` still resolves to `#6A637F`, dark unchanged, and the diagram roles inherit the foundation foreground in both themes — no UO diagram render change, no raster to re-export (UO commits no diagram rasters; live `.html` exports on demand). Two files changed: `diagrams.css` (`d19d71d6` → `c2d1e493`) and `colors_and_type.css` (new sha256 above); `spectral-state.css` + the four fonts are byte-identical to the `20fc5d6` snapshot. See the handoff `sources of intent/2026-06-26_design-system-ASK_to_urban-observatory_foreground-conformance-resync.md` and the absorption record in `scratch/`.
 
 ## Scope note — static vs interactive load
 
