@@ -52,7 +52,8 @@ _dsa-tokens/
 This mirror carries `colors_and_type.css` + fonts (everything the **static**
 Class A diagrams need, `diagram-static-H`) **and** `spectral-state.css` (Spectral
 State v1.1), required by the **interactive** IA spine (`diagram-interactive-spine`,
-in `../interactive/`). All vendored at the same pin `20fc5d6`.
+in `../interactive/`). All vendored at the same pin (current pin `b5d158e`; prior
+pin `20fc5d6` — see the table above and the re-sync note).
 
 **Static scaffolds do NOT load `spectral-state.css`** — only the interactive
 spine does, in load order `colors_and_type.css → spectral-state.css →
@@ -62,7 +63,7 @@ diagrams-interactive-spine.css`. Color on the interactive surface encodes
 ## Binding
 
 This manifest binds the rendered diagram files in `docs/diagrams/` to a known
-upstream `design-system-ASK` state (`20fc5d6`). The diagram `<head>` records the
+upstream `design-system-ASK` state (current pin `b5d158e`; prior `20fc5d6`). The diagram `<head>` records the
 `source-vN` / `render-vN` stamp; this manifest records the upstream pin. If the
 two diverge, the diagram is reading tokens that have drifted from its audit point.
 
