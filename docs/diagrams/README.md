@@ -80,7 +80,8 @@ surface is the only one that consumes Spectral State; **color encodes state only
 - **Tier 1 + Tier 2 only.** No ASK **Tier 3** (`logo-ASK`, "ASK Design System"
   chrome) leaks into UO surfaces. UO owns its own content and its own Tier 3.
 - **Light + dark both work** (verified for the architecture tree, both themes).
-- **Pin:** design-system-ASK `main` **`20fc5d6`**.
+- **Pin:** see [`_dsa-tokens/MANIFEST.md`](_dsa-tokens/MANIFEST.md) for the current
+  upstream pin (single source of truth — this README does not duplicate fast-aging pin state).
 
 ## Theme by embedding surface
 

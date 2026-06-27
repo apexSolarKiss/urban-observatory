@@ -62,6 +62,19 @@ The method's basic visible extraction form is a four-column matrix, applied per 
 
 Row-level assessment uses a working vocabulary: `confirmed / weakened / contradicted / unresolved / not yet testable`. The vocabulary is candidate-strength, not final controlled-enum doctrine.
 
+**Evidence State alignment (by reference).** This row-level assessment vocabulary aligns to the **design-system-ASK Evidence State profile by reference** — UO does not vendor `evidence-state.css`. The ownership boundary: **design-system-ASK owns** the reusable Evidence State role/profile vocabulary, its value mapping, and its presentation contract; **UO owns** assignment, evidence-depth qualifiers, source pointers, layout, and artifact presentation. (Distinct surface: the interactive IA-state spine consumes *Spectral State* directly — a different profile — and UO does not relabel either profile's roles by the other's names.) The UO labels are **not** the DS profile labels verbatim, so the mapping is stated explicitly rather than assumed:
+
+| UO assessment label | design-system-ASK Evidence State role | Note |
+| --- | --- | --- |
+| `confirmed` | `supported` | mapped, not a verbatim label match |
+| `weakened` | `weakened` | reused role — kept under its evidence label, not relabeled by any Spectral name |
+| `unresolved` | `unresolved` | reused role |
+| `not yet testable` | `not-yet-testable` | same role; formatting differs |
+| `contradicted` | *(none)* | **consumer-local — outside the current DS Evidence State profile**; UO-local until/unless DS adds it |
+| *(no single UO label)* | `partially-supported` | UO expresses partial readings through evidence-depth qualifiers / composite prose, not a dedicated row label |
+
+See also [`object-model.md`](object-model.md) §Three-layer assessment treatment.
+
 A single case typically requires multiple rows — one per surface-relevant assumption — because the chain's surfaces (inventory snapshot, entitlement event, rolling advancement, completion; see §Surface-specific interpretation) can carry distinct assumptions whose readings diverge.
 
 When row assessments diverge within a single case, the finding-level reading is composite. The composite is explained in prose rather than forced into a single value; this method does not commit to a controlled-enum vocabulary for finding-level composite treatment. See [`object-model.md`](object-model.md) and [`data-dictionary.md`](data-dictionary.md) for the explicit distinction between signal direction, matrix row-level assessment, and finding-level composite treatment.
