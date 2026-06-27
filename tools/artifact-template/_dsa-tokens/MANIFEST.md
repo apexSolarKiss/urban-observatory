@@ -7,20 +7,22 @@ review-packet rendering workflow (see
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `040e7caa7e3a2fefe045f0be2b247fdd1706636d` |
-| short | `040e7ca` |
-| commit date | `2026-06-04 17:09:22 -0700` |
-| commit subject | `feat(output-artifact): mature Class B scaffold to v2 (#19) (#21)` |
-| synced at | `2026-06-04` |
+| commit | `1231d03040c74eb4eedf7be2e3214da9766e63f7` |
+| short | `1231d03` |
+| commit date | `2026-06-26 20:26:43 -0700` |
+| commit subject | `tokens: comment-only conformance — retire "Core 5"/"five-color" + "each neon" (no value change) (#56)` |
+| synced at | `2026-06-26` |
 | consuming project | `urban-observatory` |
 | files copied | `colors_and_type.css`, `fonts/InterVariable.woff2`, `fonts/InterVariable-Italic.woff2`, `fonts/JetBrainsMono.woff2`, `fonts/JetBrainsMono-Italic.woff2` |
-| colors_and_type.css sha256 | `1aeed0fda84cef41a60789613e2a5195b0cae3c208cb047d592f27959bca973c` |
+| colors_and_type.css sha256 | `bcd11e0efeae2851c8653a425f94a76cb6423c770e23cb18b3a0315519a7375f` |
 | fonts/InterVariable.woff2 sha256 | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | fonts/InterVariable-Italic.woff2 sha256 | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | fonts/JetBrainsMono.woff2 sha256 | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | fonts/JetBrainsMono-Italic.woff2 sha256 | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 
-**Re-sync 2026-06-04 (`3395833` → `040e7ca`):** picks up the foundation light-mode foreground ramp (design-system PR #18 / `f9eed18`) — light `--fg-1/-2/-3` now resolve to dark ink (`#6A637F` / `#827399` / `rgba(130,115,153,.62)`) instead of white — and aligns to the matured Class B v2 `output-artifact` contract. Only `colors_and_type.css` changed (new sha256 above); the four font files are byte-identical to the `3395833` snapshot (same hashes). Consequence in the artifact template: the local `--fg-*` rebind was dropped (now redundant — foreground inherited from the foundation), and the local `--line-*` light rebind was replaced by the Class B-scoped `--artifact-line` / `--artifact-line-soft` overlay. See the handoff `sources of intent/2026-06-04_design-system-ASK_to_urban-observatory_token-resync-class-b-v2-handoff.md` and the absorption record in `scratch/`.
+**Re-sync 2026-06-26 (`040e7ca` → `1231d03`):** token catch-up bringing this mirror current with the foundation (it had been deferred at the pre-#52 `040e7ca` snapshot). Crosses design-system **#52** (light-mode foreground conformance: `--ask-white` relabel, `--ask-fg-light` / `--fg-high-contrast` added, `--fg-on-card` / `.bg-ask-light` rebind), **#53**, and **#56** (comment-only conformance). **Render-neutral for this Class B artifact-template:** the template binds prose to the foundation `--fg-*` and forbids a local `--fg` rebind, so it uses none of the rebind-affected roles (`--fg-on-card` / `.bg-ask-light`) and `--fg-1` still resolves to `#6A637F` (verified before/after). Only `colors_and_type.css` changed (`602578ee` → `c7618b2d`; new sha256 above); the four font files are byte-identical to the `040e7ca` snapshot (same hashes). **No frozen/sealed artifact regenerated** — future renders pick up the current tokens. See the handoff `sources of intent/2026-06-26_design-system-ASK_to_urban-observatory_vendored-css-comment-resync.md` and the absorption record in `scratch/`.
+
+**Prior re-sync 2026-06-04 (`3395833` → `040e7ca`):** foundation light-mode foreground ramp (design-system PR #18 / `f9eed18`) + Class B v2 `output-artifact` contract; the local `--fg-*` rebind was dropped (foreground inherited from the foundation) and the local `--line-*` light rebind replaced by the Class B-scoped `--artifact-line` / `--artifact-line-soft` overlay. Handoff `…token-resync-class-b-v2-handoff.md`.
 
 ## Binding
 
