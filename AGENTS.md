@@ -37,7 +37,7 @@ Before any meaningful repo work, read:
 - `README.md`
 - `AGENTS.md` (this file)
 - `docs/architecture.md`
-- `[repo-specific entry-point doc]`
+- `docs/project-scope.md` and `docs/v0-scope.md` (scope + current phase), then the task-relevant `docs/` files (`object-model.md` · `source-strategy.md` · `methodology.md` · … — see `docs/architecture.md` for the full set)
 
 Then read the latest milestone or finding artifact relevant to the task.
 
@@ -180,13 +180,7 @@ The plan-before-execute step preserves the explicit reasoning surface that promp
 
 ## Project-Specific Defaults
 
-Fill in local expectations here:
-
-- `[testing or verification commands]`
-- `[protected paths or high-risk areas]`
-- `[external systems with their own mutation discipline, e.g. a live database, a CMS, a workflow tool]`
-- `[terminology to preserve]`
-- `[domain-specific creative or governance acts that should be modeled as first-class — see Architecture-Specific Rules below]`
+UO has not yet defined project-specific verification/terminology defaults beyond standard repo discipline. Until it does, apply: clean tree · scoped diff · one branch per change · honor `docs/architecture.md` for domain structure and the **Architecture-Specific Rules** below for any load-bearing creative/governance act. Replace this section with concrete UO defaults (verification commands, protected paths, terminology-to-preserve, domain governance acts) once they earn a place.
 
 ---
 
