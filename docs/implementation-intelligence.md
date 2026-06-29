@@ -67,4 +67,4 @@ The method is intended to extend to other domains — capital improvement progra
 
 ## What this concept is not yet
 
-This concept is established at the framing level. It has not yet been demonstrated on a concrete analytical example. Subsequent scoped work will test the framing through a small operational example; until then, the framing remains a **working hypothesis to be pressure-tested by concrete prototype work**, not a settled claim.
+This concept is established at the framing level. It has been demonstrated on one site-abstracted worked pattern (see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)), which traces the interpretive chain on a single case rather than surveying or generalizing it. Beyond that one pattern the framing remains a **working hypothesis to be pressure-tested by further concrete prototype work**, not a settled claim.

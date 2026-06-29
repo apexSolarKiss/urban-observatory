@@ -51,7 +51,7 @@ It interprets implementation conditions with explicit uncertainty. Its outputs a
 
 ## First operational domain
 
-The first operational domain is **housing implementation**, specifically the post-adoption interpretation question California's 7th-cycle Housing Element environment puts on cities: are adopted assumptions about opportunity sites, production pipelines, infrastructure dependencies, and funding still plausible as conditions change?
+The first operational domain is **housing implementation**, specifically the post-adoption interpretation question California's 2023–2031 RHNA-cycle Housing Element environment puts on cities: are adopted assumptions about opportunity sites, production pipelines, infrastructure dependencies, and funding still plausible as conditions change?
 
 **Housing is a first domain, not the project's identity.** Other domains — capital improvement programs, transportation–housing coordination, climate-adaptation implementation, infrastructure sequencing — may follow once the method is credible in housing.
 

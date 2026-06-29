@@ -53,4 +53,4 @@ v0 is not complete citywide intelligence, an HCD enforcement tool, a city-gradin
 
 ## Posture
 
-v0 is the working scope; it is not immutable doctrine. As prototype work tests the method against real public-data conditions, the scope may be refined. Subsequent scoped work — schema implementation, source inventory, first report skeleton — is deferred to later phases that depend on what v0 reveals.
+v0 is the working scope; it is not immutable doctrine. As prototype work tests the method against real public-data conditions, the scope may be refined. Subsequent scoped work — schema implementation, first report skeleton — is deferred to later phases that depend on what v0 reveals.
