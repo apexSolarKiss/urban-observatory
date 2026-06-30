@@ -79,7 +79,7 @@ Each entry below belongs to the housing / planning subset of the Tier-A **signal
 | `access_type` | direct download |
 | `format` | XLSX (HCD-standard multi-sheet template) |
 | `update_frequency` | per Housing Element submission cycle |
-| `coverage_period` | 2023–2031 (6th-cycle Housing Element; Dec-2022 submission) |
+| `coverage_period` | 2023–2031 RHNA-cycle period (Dec-2022 submission) |
 | `geographic_scope` | whole SF (~121,053 SF rows in Table A; 121,055 total) |
 | `primary_keys` | BLKLOT (hyphenated, e.g., `3704-045`); Site Address; ZIP |
 | `relevant_objects` | `OpportunitySite` (anchor); `Assumption` (per-site capacity); `Source` |
