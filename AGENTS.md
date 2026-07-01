@@ -22,7 +22,6 @@ This file owns workflow rules. It does not track project state, current directio
 - **`AGENTS.md`** (this file) = workflow rules for repo execution.
 - **Grounding note** (external) = repo-external context: intent, audience, philosophy, foundational premises, durable loose threads.
 - **Per-conversation memory** (operator-side: Claude Code's MEMORY.md, ChatGPT thread history, task lists) = ephemeral session state that does NOT belong in the grounding note.
-- `[project-specific live truth surfaces, e.g. public datasets, document sources, schema registries]`
 
 ### Aging-Rate Principle
 
