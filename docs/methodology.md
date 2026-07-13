@@ -1,6 +1,6 @@
 # Methodology
 
-This document describes the proposed method `urban-observatory` is being developed to test, and what its method does *not* do.
+This document describes the proposed method [`urban-observatory`](../README.md) is being developed to test, and what its method does *not* do.
 
 The methodology is method-first and public-data-only. It is designed to produce written interpretations with explicit uncertainty, traceable provenance, and modest claims. A first site-abstracted worked pattern now demonstrates the method on one real case (see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)); beyond it, no datasets, notebooks, or named-site analyses have been produced, and this document describes the method as a working hypothesis still being tested by concrete prototype work.
 
@@ -62,7 +62,7 @@ The method's basic visible extraction form is a four-column matrix, applied per 
 
 Row-level assessment uses a working vocabulary: `confirmed / weakened / contradicted / unresolved / not yet testable`. The vocabulary is candidate-strength, not final controlled-enum doctrine.
 
-**Evidence State alignment (by reference).** This row-level assessment vocabulary aligns to the **design-system-ASK Evidence State profile by reference** — UO does not vendor `evidence-state.css`. The ownership boundary: **design-system-ASK owns** the reusable Evidence State role/profile vocabulary, its value mapping, and its presentation contract; **UO owns** assignment, evidence-depth qualifiers, source pointers, layout, and artifact presentation. (Distinct surface: the interactive IA-state spine consumes *Spectral State* directly — a different profile — and UO does not relabel either profile's roles by the other's names.) The UO labels are **not** the DS profile labels verbatim, so the mapping is stated explicitly rather than assumed:
+**Evidence State alignment (by reference).** This row-level assessment vocabulary aligns to the **[design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) Evidence State profile by reference** — UO does not vendor `evidence-state.css`. The ownership boundary: **design-system-ASK owns** the reusable Evidence State role/profile vocabulary, its value mapping, and its presentation contract; **UO owns** assignment, evidence-depth qualifiers, source pointers, layout, and artifact presentation. (Distinct surface: the interactive IA-state spine consumes *Spectral State* directly — a different profile — and UO does not relabel either profile's roles by the other's names.) The UO labels are **not** the DS profile labels verbatim, so the mapping is stated explicitly rather than assumed:
 
 | UO assessment label | design-system-ASK Evidence State role | Note |
 | --- | --- | --- |

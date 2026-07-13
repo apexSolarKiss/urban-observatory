@@ -1,6 +1,6 @@
 # Source Strategy
 
-This document describes the public-data source posture for `urban-observatory`'s v0 work. It is prioritized but open-ended: it names source tiers and reliability considerations, not specific canonical datasets.
+This document describes the public-data source posture for [`urban-observatory`](../README.md)'s v0 work. It is prioritized but open-ended: it names source tiers and reliability considerations, not specific canonical datasets.
 
 For the broader method, see [`methodology.md`](methodology.md). For the v0 scope this source strategy supports, see [`v0-scope.md`](v0-scope.md).
 

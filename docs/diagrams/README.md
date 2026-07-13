@@ -1,6 +1,6 @@
 # docs/diagrams/
 
-Illustrative **Class A diagrams** for urban-observatory, rendered by consuming
+Illustrative **Class A diagrams** for [urban-observatory](../../README.md), rendered by consuming
 the shared diagram patterns from
 [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK)
 **by reference** (pinned local mirror; no CDN, no fork).
@@ -11,7 +11,7 @@ trust the prose.
 
 ## The trifecta (three diagrams, not four)
 
-Following the axis-separation lesson (see asset-pipeline-ASK's
+Following the axis-separation lesson (see [asset-pipeline-ASK](https://github.com/apexSolarKiss/asset-pipeline-ASK)'s
 `docs/layer-disambiguation-note-v1.md`), these are **different artifacts on
 different meta-axes** — not four views of one picture. Each is fixed by two
 orthogonal questions: *what is it slicing* (the whole repo, or one conceptual
@@ -85,7 +85,7 @@ surface is the only one that consumes Spectral State; **color encodes state only
 
 ## Theme by embedding surface
 
-Adopted from the design-system-ASK convention ***Theme by embedding surface***, pinned at
+Adopted from the [design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) convention ***Theme by embedding surface***, pinned at
 design-system-ASK `main` **`7921b79`** (PR #49, merged 2026-06-21). This is a visual-consumption
 convention, not an engine/CSS/token change — it only settles which existing theme variant a surface
 embeds. Both `-light` and `-dark` exports are always generated and retained; the surface selects the
@@ -117,5 +117,5 @@ with the `PNG` button.
 When the upstream tokens/fonts (or, later, Spectral State) change and a refresh
 is wanted, re-sync `_dsa-tokens/` from the new commit, regenerate `MANIFEST.md`,
 and bump the affected diagram's `source-vN` / `render-vN` stamp. Propose changes
-to the tokens themselves upstream at the `design-system-ASK` control surface —
+to the tokens themselves upstream at the [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) control surface —
 never edit the vendored mirror or the upstream engine/CSS here.
