@@ -1,6 +1,6 @@
 # UO artifact template
 
-Reusable rendering machinery for **urban-observatory human-readable artifacts** —
+Reusable rendering machinery for **[urban-observatory](../../README.md) human-readable artifacts** —
 the sealed, single-file HTML documents the project produces for human review
 (e.g. planning-validity reviews). This directory is the repo-local **source of
 truth** for *how* those artifacts are rendered. It does **not** contain any
@@ -10,7 +10,7 @@ held operator-side.
 ## Purpose
 
 Turn a canonical Markdown source into one **self-contained HTML file**:
-design-system-ASK token CSS + the UO artifact-template overlay + a token-based
+[design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) token CSS + the UO artifact-template overlay + a token-based
 prose stylesheet + base64-embedded fonts, all inlined. The output has no external
 dependencies — it opens with full styling from any location (local file, email
 attachment, copied folder), no network, no sidecar. That portability is the point:
@@ -76,7 +76,7 @@ holds a frozen copy for reproducible rendering.
 
 ## Light / dark contract (Class B v2)
 
-This template follows the design-system-ASK **Class B `output-artifact` v2**
+This template follows the [design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) **Class B `output-artifact` v2**
 contract (`040e7ca`). **Foreground is inherited, not rebound.** Since the
 foundation light-mode foreground ramp landed (design-system PR #18 / `f9eed18`),
 `colors_and_type.css` resolves `--fg-1/-2/-3` to **dark ink in light**
@@ -148,6 +148,6 @@ Steps 1, 3, and 4 are operator-side; step 2 is this template's job.
 
 When the design-system tokens change upstream and a refresh is wanted (a
 deliberate operator decision), re-copy `colors_and_type.css` + `fonts/*.woff2`
-from the target `design-system-ASK` commit, regenerate `_dsa-tokens/MANIFEST.md`
+from the target [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) commit, regenerate `_dsa-tokens/MANIFEST.md`
 with the new commit SHA and per-file hashes, and re-render any artifacts that
 should track the new state. Until then, builds are pinned to the recorded SHA.

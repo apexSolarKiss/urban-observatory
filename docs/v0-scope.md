@@ -1,6 +1,6 @@
 # v0 Scope
 
-`urban-observatory`'s v0 is a **bounded whole-city San Francisco Housing Element implementation-intelligence prototype**, structured as an APR-augmentation companion rather than an APR replacement.
+[`urban-observatory`](../README.md)'s v0 is a **bounded whole-city San Francisco Housing Element implementation-intelligence prototype**, structured as an APR-augmentation companion rather than an APR replacement.
 
 This document defines what v0 is, how it is bounded, and what it intentionally is not. It complements [`project-scope.md`](project-scope.md), which defines the project's overall scope and anti-goals.
 

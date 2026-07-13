@@ -1,6 +1,6 @@
 # Data Dictionary
 
-This document is the **working data dictionary** for the conceptual objects, attributes, and patterns `urban-observatory` is being developed around. It is a deeper expression of the interpretive chain named in [`object-model.md`](object-model.md) — a per-concept treatment with candidate fields, source / provenance requirements, and relationship notes — held at the conceptual level rather than as executable schema.
+This document is the **working data dictionary** for the conceptual objects, attributes, and patterns [`urban-observatory`](../README.md) is being developed around. It is a deeper expression of the interpretive chain named in [`object-model.md`](object-model.md) — a per-concept treatment with candidate fields, source / provenance requirements, and relationship notes — held at the conceptual level rather than as executable schema.
 
 It is **not** a schema. It is **not** a final data model. It is a **working hypothesis**, pressure-tested in part by manual chain extraction work, and explicitly deferred from machine-validated form until further prototype work justifies the commitment.
 
