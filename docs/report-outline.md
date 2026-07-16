@@ -1,6 +1,6 @@
 # Report Outline
 
-This document describes the structure of the project's first artifact: the **Housing Element Implementation Risk Brief**, framed as a forward-looking APR-augmentation companion rather than an APR replacement.
+This document describes the structure of the project's first artifact: the **Housing Element Implementation Risk Brief**, framed as a forward-looking APR-augmentation companion rather than an APR replacement. The brief is a **narrower proof component** of the broader civic implementation observatory (see [`project-scope.md`](project-scope.md)) — a bounded v0 output through which the assumption-centered interpretive method is tested — not the observatory's full scope. v0 predates the commitment-lifecycle framing and does not yet exercise it.
 
 The outline is a description, not a template. Section headings and artifact-class composition are named here so contributors and reviewers can read the intended structure; specific findings, signal cards, and pattern summaries are deferred to later phases.
 
@@ -42,7 +42,7 @@ The composition is named so contributors and reviewers can distinguish narrative
 
 ## Posture
 
-The brief is interpretive support, not enforcement, grading, prediction, or compliance determination. Public phrasing follows the discipline of evidence-supported implementation sensitivity, not failure language (see [`methodology.md`](methodology.md)).
+The brief is interpretive support, not enforcement, grading, prediction, or compliance determination. Public phrasing follows the discipline of evidence-supported implementation sensitivity, not failure language (see [`methodology.md`](methodology.md)). It presents progress, delay, change, and uncertainty under the same evidence standards, and records missing information as an observability limit rather than reading it as success or failure.
 
 v0 brief work is staged:
 
