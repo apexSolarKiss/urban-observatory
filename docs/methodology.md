@@ -2,15 +2,15 @@
 
 This document describes the proposed method [`urban-observatory`](../README.md) is being developed to test, and what its method does *not* do.
 
-The methodology is method-first and public-data-only. It is designed to produce written interpretations with explicit uncertainty, traceable provenance, and modest claims. A first site-abstracted worked pattern now demonstrates the method on one real case (see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)); beyond it, no datasets, notebooks, or named-site analyses have been produced, and this document describes the method as a working hypothesis still being tested by concrete prototype work.
+The methodology is method-first and public-data-only. It is designed to produce written interpretations with explicit uncertainty, traceable provenance, and modest claims. It applies the same evidence standards to evidence of progress and evidence of delay, and to supporting and weakening evidence alike. A first site-abstracted worked pattern now demonstrates the method on one real case (see [`method-appendix-worked-pattern.md`](method-appendix-worked-pattern.md)); beyond it, no datasets, notebooks, or named-site analyses have been produced, and this document describes the method as a working hypothesis still being tested by concrete prototype work.
 
 ## Public-data only
 
 The method uses only publicly available data — plans, environmental reviews, agendas, permit records, progress reports, capital plans, funding records, policy documents, and other artifacts that any researcher or member of the public can access. The method does not require proprietary data, scraped private sources, or vendor partnerships.
 
-This is a deliberate architectural choice, not a starting compromise. Most of the signals relevant to interpreting urban implementation already exist publicly — they are fragmented, inconsistently updated, and difficult to synthesize, but they exist. The method's value comes from connecting and interpreting them, not from acquiring novel data.
+This is a deliberate architectural choice, not a starting compromise. Public data serves as an **auditable common floor**: anyone can inspect and challenge a claim against its source, and the method cites what it draws on. Many of the signals relevant to interpreting urban implementation exist publicly — fragmented, inconsistently updated, and difficult to synthesize, but present — and the method's value comes from connecting and interpreting them, not from acquiring novel data.
 
-The implication: claims the method makes can be inspected and challenged against their source. The method cites what it draws on.
+This is **not a completeness claim.** Some decisive implementation conditions are not public, or not public in time to matter. Where information is missing, the method records the gap as an **observability limit** — it does not infer success, stability, or failure from absence. The account the method maintains is therefore *partial, public, and provenance-preserving, with declared blind spots.*
 
 ## Continuous interpretation, not retrieval
 
