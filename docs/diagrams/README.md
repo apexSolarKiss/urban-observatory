@@ -43,6 +43,7 @@ docs/diagrams/
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
 │   ├── spectral-state.css                         Spectral State v1.1 (verbatim) — interactive spine only
 │   └── fonts/                                      Inter + JetBrains Mono (+ OFL licenses)
+├── diagrams-fit.js                                upstream fit contract (#77-#80) — loaded BEFORE the engine, verbatim, DO NOT EDIT
 ├── diagrams-static-H-engine.js                    upstream engine — consumed verbatim, DO NOT EDIT
 ├── diagrams.css                                   upstream style layer — consumed verbatim, DO NOT EDIT
 ├── export-png.js                                  upstream PNG export (static) — consumed verbatim, DO NOT EDIT
@@ -82,6 +83,10 @@ surface is the only one that consumes Spectral State; **color encodes state only
 - **Light + dark both work** (verified for the architecture tree, both themes).
 - **Pin:** see [`_dsa-tokens/MANIFEST.md`](_dsa-tokens/MANIFEST.md) for the current
   upstream pin (single source of truth — this README does not duplicate fast-aging pin state).
+- **Renderer generation.** The current diagram renderer contract combines the DS panel-aware
+  fit helper (#77/#79), the dynamic interaction floor in the H and interactive-spine engines
+  (#78), and the static page exporter through #80. Exact owner pins and propagation state live
+  in the operator consumer ledger.
 
 ## Theme by embedding surface
 
