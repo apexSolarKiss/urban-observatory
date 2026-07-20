@@ -43,6 +43,7 @@ docs/diagrams/
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
 │   ├── spectral-state.css                         Spectral State v1.1 (verbatim) — interactive spine only
 │   └── fonts/                                      Inter + JetBrains Mono (+ OFL licenses)
+├── diagrams-fit.js                                upstream fit contract (#77-#80) — loaded BEFORE the engine, verbatim, DO NOT EDIT
 ├── diagrams-static-H-engine.js                    upstream engine — consumed verbatim, DO NOT EDIT
 ├── diagrams.css                                   upstream style layer — consumed verbatim, DO NOT EDIT
 ├── export-png.js                                  upstream PNG export (static) — consumed verbatim, DO NOT EDIT
