@@ -8,9 +8,11 @@
 
 ## Operating Model
 
-- operating model: single-node (Claude Code as control surface and executor) — default for new ASK projects
-- live operator: Claude Code
-- optional advisors: GPT
+- operating model: adversarial collaboration — an ASK-apexed advisor–executor topology; the family default, articulated in [`apexSolarKiss/control-surface`](https://github.com/apexSolarKiss/control-surface)
+- execution surface: Claude Code — repo-attached; plans and performs authorized work under `AGENTS.md`, single-writer-per-branch
+- advisor surface: GPT — non-writing external challenge, reconstruction, and verification from outside the execution thread
+
+ASK is the source-of-intent and authorization apex, the relay across surfaces, and the final adjudicator. **Direct execution** — ASK driving the executor without an advisor pass where a separate pass would not materially reduce uncertainty — is a bounded task-level path within this model, not a separate model and not necessarily the absence of a configured advisor surface.
 
 The workflow rules apply regardless of which agent does the executing. Rules live in repo-local `AGENTS.md`.
 
