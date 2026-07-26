@@ -605,7 +605,7 @@ Execution jurisdiction does not transfer artifact ownership. ASK may suspend or 
 <!-- BEGIN local-delta -->
 ## urban-observatory-Local
 
-These rules are the repo-local delta for `urban-observatory` (a separately-operated ASK ecology consumer) on top of the shared protocol above. It installs the `advisor-project-surface` profile and opts into the standing upstream-conformance grant (installed above). `urban-observatory`'s local delta wins for `urban-observatory` where an explicit conflict exists.
+These rules are the repo-local delta for `urban-observatory` (a separately-operated ASK ecology consumer) on top of the resolved carrier above. This repo opts into the standing upstream-conformance grant (installed above). `urban-observatory`'s local delta wins for `urban-observatory` where an explicit conflict exists.
 
 ## Required Reading Before Meaningful Work (UO layer)
 
