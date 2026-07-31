@@ -777,9 +777,9 @@ Then read the latest milestone or finding artifact relevant to the task.
 
 The generic terminal `-TBI` feed-obligation overlay, feed/ingestion boundary, filename-resolution, and disposition mechanics are owned by the shared §Inbound Handoff TBI Marker. Two UO-local specifics extend it.
 
-The exact intake destination for routed inbound handoff memos is `urban-observatory-EXTERNAL/sources of intent/`.
+The exact intake destination for routed inbound handoff memos is the current intent-inbox path declared by `urban-observatory-EXTERNAL/_INDEX-urban-observatory-ASK.md`. Do not hard-code or infer a different path from historical records.
 
-Domain-authority-originated handoff memos may also carry terminal `-TBI` while in transit when the originating review surface has read-only access to UO external files. ASK routes those memos into UO `sources of intent/` with the suffix intact; UO resolves the overlay under the shared §Inbound Handoff TBI Marker.
+Domain-authority-originated handoff memos may also carry terminal `-TBI` while in transit. Route them into the declared UO intake with the suffix intact. The acting executor may place the memo directly only where it has write jurisdiction over that intake, or where a declared create-only aperture covers the executor’s origin class and the memo’s payload class; otherwise ASK routes the crossing by relaying the exact operation to an authorized executor. UO resolves the overlay under the shared §Inbound Handoff TBI Marker.
 
 ## Project-Specific Defaults
 
