@@ -67,6 +67,11 @@ diagrams (architecture tree, ontology) sit at top level and load
 references the shared mirror one level up at `../_dsa-tokens/`. The interactive
 surface is the only one that consumes Spectral State; **color encodes state only**.
 
+### Live navigation surface
+
+- `index.html` — ASK-branded live navigation surface for this folder's three diagram pages. It consumes the local Tier 1 + Tier 2 mirror and vendored `_dsa-surface/` carriers; its locally assigned Tier 3 does not propagate into any of the three diagrams.
+- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, and `surface-action` carriers plus the mode-aware ASK wordmark pair used only by `index.html`.
+
 ## Consumption discipline
 
 - **Consume by reference; no fork.** The engine, `diagrams.css`, and
@@ -78,8 +83,13 @@ surface is the only one that consumes Spectral State; **color encodes state only
 - **Pinned, offline, no CDN.** `_dsa-tokens/` is a pinned snapshot
   (`MANIFEST.md` records the commit SHA + per-file sha256). The diagrams inherit
   at generation time and **freeze for audit** — no runtime fetch, no font CDN.
-- **Tier 1 + Tier 2 only.** No ASK **Tier 3** (`logo-ASK`, "ASK Design System"
-  chrome) leaks into UO surfaces. UO owns its own content and its own Tier 3.
+- **Tier 1 + Tier 2 only, in the diagrams.** All three diagram artifacts remain
+  Tier 1 + Tier 2; no ASK **Tier 3** leaks into them. The exception is the
+  separate live navigation surface below: `index.html` carries an ASK-assigned
+  Tier-3 value for the current UO front door only. That value does **not**
+  propagate into the diagrams, does **not** make UO ASK-the-entity, and does
+  **not** come from `surface-shell`, which ships a mark slot and no mark. Any
+  future independent urban-observatory brand is a separate identity migration.
 - **Light + dark both work** (verified for the architecture tree, both themes).
 - **Pin:** see [`_dsa-tokens/MANIFEST.md`](_dsa-tokens/MANIFEST.md) for the current
   upstream pin (single source of truth — this README does not duplicate fast-aging pin state).
