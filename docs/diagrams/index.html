@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>urban-observatory // diagrams</title>
+<meta name="description" content="urban-observatory // the civic implementation observatory's three illustrative figures — the architecture tree, the Axis-A ontology, and the interactive information-architecture state spine.">
+<meta name="color-scheme" content="light dark">
+<!-- ============================================================
+     DIAGRAM FRONT DOOR — urban-observatory/docs/diagrams/index.html
+
+     A live navigation surface for the three diagram pages in this folder. It
+     opens from the deployment or by double-click from a clean clone. Local
+     assets and destinations inside the deployed `docs/` root resolve relative
+     to this file. Repo-root owner documents outside that root, and fleet routes
+     to other repos or surfaces, use canonical external locators.
+
+     This page is URBAN-OBSERVATORY-OWNED composition over vendored
+     design-system-ASK carriers. The carriers under _dsa-surface/ are pinned
+     byte-identical copies and are never hand-edited here; the tokens and fonts
+     resolve from the existing _dsa-tokens/ mirror this folder already carries
+     for the diagrams, so no second token or font copy exists.
+
+     TIER BOUNDARY. This page is an ASK-branded surface and carries an
+     ASK-assigned Tier-3 value in the shell's mark slot. The three diagrams it
+     indexes remain Tier 1 + Tier 2 only — the assignment does not propagate
+     into them, does not make urban-observatory ASK-the-entity, and does not
+     come from surface-shell, which ships a slot and no mark. Any future
+     independent urban-observatory brand is a separate identity migration.
+     See README.md.
+
+     The diagrams are ILLUSTRATIVE, not source of truth. Repo prose is
+     authoritative; each card links the document that owns what it draws, where
+     a current public owner exists. The state spine is authored in its own data
+     carrier and has no separate governing-prose owner, so it carries no third
+     action rather than borrowing one.
+     ============================================================ -->
+<link rel="stylesheet" href="_dsa-tokens/colors_and_type.css">
+<link rel="stylesheet" href="_dsa-surface/surface-panel.css">
+<link rel="stylesheet" href="_dsa-surface/surface-action.css">
+<link rel="stylesheet" href="_dsa-surface/surface-shell.css">
+<style>
+  :root { --gap: 20px; }
+  /* Local delta only. The foundation already binds the gradient, the foreground
+     ramp, the sans default and antialiasing; restating them here would also
+     reset background-attachment and give this surface a different gradient
+     behavior from the rest of the family. What remains is a full-height field.
+
+     No page-wide font-family sits here. Mono is the earned exception, declared
+     by the roles that hold it — the shell title, badge and footer, the compact
+     actions, and code literals through the foundation — never a page default. */
+  body { min-height: 100vh; }
+
+  /* min(320px, 100%): keep the 320px track minimum wherever the content column
+     can hold it, but let the track shrink to the available width on a narrow
+     phone. A bare 320px minimum overflows the shell's content column at a 320px
+     viewport. */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: var(--gap); }
+
+  /* Card chrome and column rhythm resolve from the vendored surface-panel
+     contract. Only what that contract deliberately leaves to the consuming
+     surface stays here. */
+  .card .cls { font-size: var(--fs-caption); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); }
+  .card p { color: var(--fg-2); }
+
+  /* The action ROW is this page's — where controls sit in the card, how they
+     wrap, and the rhythm above them. The controls themselves are the vendored
+     surface-action contract and declare their own type, geometry, paint and
+     interaction. */
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 6px; }
+
+  /* Repo-level destinations. Each has exactly one target, so each is a
+     full-panel link — the panel IS the anchor and carries no control inside it.
+     That is the opposite relationship from a diagram card, which is inert and
+     carries its own actions, and the two must not be conflated. */
+  .routes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: var(--gap); margin-top: var(--space-8); }
+  .route { min-width: 0; }
+  .route .name { display: block; }
+  /* Two declarations the shared panel contract deliberately does NOT own: the
+     supporting foreground, which each consuming surface keeps, and the URL
+     break. Without the foreground these descriptions inherit
+     `a.surface-panel`'s --fg-1 and collapse onto the title's level; `anywhere`
+     gives the bare repository URL a break opportunity and lowers its
+     min-content contribution. */
+  .route .what { display: block; color: var(--fg-2); overflow-wrap: anywhere; }
+
+  .page-note { margin: 40px 0 0; color: var(--fg-3); font-size: var(--fs-caption); line-height: 1.7;
+               display: flex; flex-direction: column; gap: var(--space-3); }
+  /* The foundation styles bare `p` at Body size on its own line-height and
+     foreground, and an element rule outranks what a container passes down — so
+     size, line-height AND color are restated as `inherit`. Without color these
+     paragraphs render brighter than the code spans inside them. */
+  .page-note p { margin: 0; font-size: inherit; line-height: inherit; color: inherit; }
+  .page-note code { color: var(--fg-2); }
+</style>
+</head>
+<body>
+<div class="surface">
+
+  <header class="surface-head">
+    <div class="surface-head-main">
+      <a class="surface-mark" href="index.html" aria-label="urban-observatory diagrams home">
+        <img class="surface-mark-light" src="_dsa-surface/assets/logo-ASK-white.png" alt="" aria-hidden="true" width="2160" height="974">
+        <img class="surface-mark-dark" src="_dsa-surface/assets/logo-ASK-lavender-ASK.png" alt="" aria-hidden="true" width="2160" height="974">
+      </a>
+      <h1 class="surface-title"><span class="org">apexSolarKiss</span> <span class="sep" aria-hidden="true">//</span> urban-observatory <span class="sep" aria-hidden="true">//</span> diagrams</h1>
+      <p class="surface-lede">Three figures for the civic implementation observatory — two structural, one operational
+        state. Diagrams are orientation aids and age; the repo prose is source of truth, and each figure below
+        links the document that owns what it draws.</p>
+      <span class="surface-badge">illustrative &gt;&gt; not source of truth</span>
+    </div>
+  </header>
+
+  <hr class="surface-rule">
+
+  <main class="surface-payload">
+
+  <div class="grid">
+
+    <div class="card surface-panel">
+      <div class="cls">tree // TREE_ARCHITECTURE</div>
+      <h2 class="surface-panel-title">architecture tree</h2>
+      <p class="surface-panel-support">Where the repo's surfaces live — the execution files, the <code>docs/</code> prose that carries the method, the Class B artifact template, the Class A diagrams, external context, and what is authorized but not yet built. A structural atlas, not a state claim.</p>
+      <div class="actions">
+        <a class="surface-action" href="urban-observatory_architecture-tree.html">open</a>
+        <a class="surface-action surface-action--secondary" href="urban-observatory_architecture-tree.source.js">source</a>
+        <a class="surface-action surface-action--secondary" href="../architecture.md">architecture</a>
+      </div>
+    </div>
+
+    <div class="card surface-panel">
+      <div class="cls">tree // TREE_ONTOLOGY</div>
+      <h2 class="surface-panel-title">ontology</h2>
+      <p class="surface-panel-support">Axis A — the kinds of concepts the method reasons over: the interpretive chain, candidate signal subtypes, supporting primitives, the assessment vocabulary, and output classifications. Structural classification, asserting no maturity state.</p>
+      <div class="actions">
+        <a class="surface-action" href="urban-observatory_ontology.html">open</a>
+        <a class="surface-action surface-action--secondary" href="urban-observatory_ontology.source.js">source</a>
+        <a class="surface-action surface-action--secondary" href="../object-model.md">object model</a>
+      </div>
+    </div>
+
+    <div class="card surface-panel">
+      <div class="cls">interactive spine // IA_STATE_SPINE</div>
+      <h2 class="surface-panel-title">information architecture — state</h2>
+      <p class="surface-panel-support">The operational whole read as state: which surfaces and seams are earned, structural, partial, held, proposed or external, and where the open questions sit. Hover a node to preview it, click to lock it, and the inspector holds its state and evidence. Color encodes state only.</p>
+      <div class="actions">
+        <a class="surface-action" href="interactive/urban-observatory_ia-state-spine.html">open</a>
+        <a class="surface-action surface-action--secondary" href="interactive/urban-observatory_ia-state-spine.data.js">data</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="routes">
+    <a class="route surface-panel" href="https://github.com/apexSolarKiss/urban-observatory" target="_blank" rel="noopener">
+      <span class="name surface-panel-title">repository</span>
+      <span class="what surface-panel-support">github.com/apexSolarKiss/urban-observatory</span>
+    </a>
+    <a class="route surface-panel" href="https://github.com/apexSolarKiss/urban-observatory/blob/main/README.md" target="_blank" rel="noopener">
+      <span class="name surface-panel-title">urban-observatory</span>
+      <span class="what surface-panel-support">What the observatory is for, what it reads, and the scope and method documents that carry it.</span>
+    </a>
+    <a class="route surface-panel" href="https://github.com/apexSolarKiss/method-ASK" target="_blank" rel="noopener">
+      <span class="name surface-panel-title">method-ASK</span>
+      <span class="what surface-panel-support">The upstream methodology layer this project's working practice draws on.</span>
+    </a>
+    <a class="route surface-panel" href="https://github.com/apexSolarKiss/design-system-ASK" target="_blank" rel="noopener">
+      <span class="name surface-panel-title">design-system-ASK</span>
+      <span class="what surface-panel-support">The visual authority. This surface vendors its carriers; it defines none of them.</span>
+    </a>
+    <a class="route surface-panel" href="https://a-s-k.studio/" target="_blank" rel="noopener">
+      <span class="name surface-panel-title">A-S-K.studio</span>
+      <span class="what surface-panel-support">The ASK meta-brand front door.</span>
+    </a>
+  </div>
+
+  <div class="page-note">
+    <p>Drag to pan, scroll to zoom, and use the HUD controls in the bottom-left; <code>⤢</code> fits the figure. Theme follows the operating system, and the diagrams default to dark as repository documentation.</p>
+    <p>Each figure carries its data file beside it — <code>.source.js</code> for the two static trees, <code>.data.js</code> for the state spine. Source advances when the authored content changes; the renderer advances only when its realization does. See <code>README.md</code> for why this repo builds three diagrams and not four, and for the full contents list.</p>
+    <p>These pages consume the vendored token mirror in <code>_dsa-tokens/</code> and the surface carriers in <code>_dsa-surface/</code>, both pinned byte-identical to <code>design-system-ASK</code> and never hand-edited here.</p>
+  </div>
+
+  </main>
+
+  <footer class="surface-footer">
+    <a href="README.md">README</a>
+    <a href="../architecture.md">architecture</a>
+    <a href="https://github.com/apexSolarKiss/urban-observatory" target="_blank" rel="noopener">repository</a>
+    <a href="https://a-s-k.studio/" target="_blank" rel="noopener">A-S-K.studio</a>
+  </footer>
+
+</div>
+</body>
+</html>
