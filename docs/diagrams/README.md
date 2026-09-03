@@ -70,7 +70,7 @@ surface is the only one that consumes Spectral State; **color encodes state only
 ### Live navigation surface
 
 - `index.html` — ASK-branded live navigation surface for this folder's three diagram pages. It consumes the local Tier 1 + Tier 2 mirror and vendored `_dsa-surface/` carriers; its locally assigned Tier 3 does not propagate into any of the three diagrams.
-- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, and `surface-action` carriers plus the mode-aware ASK wordmark pair used only by `index.html`.
+- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, `surface-action` and `surface-text-link` carriers, the optional `surface-shell.js` navigation runtime, and the mode-aware ASK wordmark pair, all used only by `index.html`. `surface-shell.js` is vendored because that surface **adopts** the shell's responsive navigation; the three diagram pages adopt none of it and load none of these files. `surface-text-link.css` is vendored as the fourth Foundations sibling but is deliberately **not** linked: it is opt-in by class, and `index.html` currently carries no unboxed textual link that qualifies — its breadcrumb links are styled by `surface-shell.css`'s own rule, its routes are full-panel links, and its footer destinations are compact actions.
 
 ## Consumption discipline
 

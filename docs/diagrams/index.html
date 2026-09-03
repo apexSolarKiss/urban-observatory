@@ -106,7 +106,19 @@
         <img class="surface-mark-light" src="_dsa-surface/assets/logo-ASK-white.png" alt="" aria-hidden="true" width="2160" height="974">
         <img class="surface-mark-dark" src="_dsa-surface/assets/logo-ASK-lavender-ASK.png" alt="" aria-hidden="true" width="2160" height="974">
       </a>
-      <h1 class="surface-title"><span class="org">apexSolarKiss</span> <span class="sep" aria-hidden="true">//</span> urban-observatory <span class="sep" aria-hidden="true">//</span> diagrams</h1>
+      <!-- BREADCRUMB, not a plain title. The test is public ANCESTRY, not local
+           rootedness: this page is the root of the diagrams family, and it still
+           sits under two real, navigable public ancestors. The chain is authored
+           once, visibly, and the navigation panel derives its current path from
+           it — which is why no data-nav-root-* configuration appears below.
+           Segments carry the human-facing name of the place they go, not a
+           repository namespace, so the former `apexSolarKiss` reads `ASK` and
+           `apex solar kiss`. `urban-observatory` is static: it is real structural
+           context with no public page of its own, and inventing a destination to
+           manufacture a link is the failure the ancestry rule guards against. -->
+      <nav class="surface-breadcrumb" aria-label="Breadcrumb">
+        <h1 class="surface-title"><a class="org" href="https://a-s-k.studio/">ASK</a> <span class="sep" aria-hidden="true">//</span> <a href="https://a-s-k.studio/apex-solar-kiss">apex solar kiss</a> <span class="sep" aria-hidden="true">//</span> urban-observatory <span class="sep" aria-hidden="true">//</span> <span class="page" aria-current="page">diagrams</span></h1>
+      </nav>
       <p class="surface-lede">Three figures for the civic implementation observatory — two structural, one operational
         state. Diagrams are orientation aids and age; the repo prose is source of truth, and each figure below
         links the document that owns what it draws.</p>
@@ -185,13 +197,45 @@
 
   </main>
 
+  <!-- Terminal destinations, as compact actions. They remain anchors: three of
+       these leave the origin entirely, and a button would keep the look while
+       losing the destination. The shell owns the row; surface-action.css owns
+       their presentation and interaction. -->
   <footer class="surface-footer">
-    <a href="README.md">README</a>
-    <a href="../architecture.md">architecture</a>
-    <a href="https://github.com/apexSolarKiss/urban-observatory" target="_blank" rel="noopener">repository</a>
-    <a href="https://a-s-k.studio/" target="_blank" rel="noopener">A-S-K.studio</a>
+    <a class="surface-action surface-action--secondary" href="README.md">README</a>
+    <a class="surface-action surface-action--secondary" href="../architecture.md">architecture</a>
+    <a class="surface-action surface-action--secondary" href="https://github.com/apexSolarKiss/urban-observatory" target="_blank" rel="noopener">repository</a>
+    <a class="surface-action surface-action--secondary" href="https://a-s-k.studio/" target="_blank" rel="noopener">A-S-K.studio</a>
   </footer>
 
+  <!-- Responsive navigation. The identity mark discloses the panel; the runtime
+       upgrades that one authored anchor in place and derives the mobile seated
+       placement from it, so there is no second mark to drift.
+
+       PARENT FORM. This surface IS the diagrams front door, so its local
+       destinations are its CHILDREN rather than its siblings: the placeholder
+       carries a nested list. The current label and its aria-current are authored
+       once, in the visible breadcrumb above — `data-surface-nav-current` is an
+       inert position marker the runtime fills. `diagrams` is deliberately not
+       repeated as an "overview" child, because two rows reaching one destination
+       is the defect this IA removes. -->
+  <template class="surface-nav-source">
+    <ul class="surface-nav-local">
+      <li data-surface-nav-current>
+        <ul>
+          <li><a href="urban-observatory_architecture-tree.html">architecture tree</a></li>
+          <li><a href="urban-observatory_ontology.html">ontology</a></li>
+          <li><a href="interactive/urban-observatory_ia-state-spine.html">information architecture — state</a></li>
+        </ul>
+      </li>
+    </ul>
+    <p class="surface-nav-utilities">
+      <a class="surface-action surface-action--secondary" href="https://github.com/apexSolarKiss/urban-observatory" target="_blank" rel="noopener">repository</a>
+    </p>
+  </template>
+
 </div>
+
+<script src="_dsa-surface/surface-shell.js"></script>
 </body>
 </html>
