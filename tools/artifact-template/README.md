@@ -132,9 +132,121 @@ Review-package banners (`.uo-reviewer-status`, `.uo-proof`) are styled by the
 template so operator-side packaging can use them, but a *specific* package's
 banner text and review-orchestration files are assembled operator-side.
 
+## Review-document anatomy
+
+A human-review document rendered from this template must follow one ordering
+and anatomy contract. The contract fixes the order of the parts and what each
+part keeps visible. It does not require a document to carry every part.
+
+### The parts
+
+```text
+01  locator + masthead          the document's identity, kind and round, and its
+                                classification and audience, fixed when sealed
+02  reviewer brief              what the document tests and why; what the reviewer
+                                is asked to judge, and what not to judge
+03  decision request            one bounded question set with exactly one central
+                                question, and any response choices it offers
+04  executive result            the result the document reports; where source
+                                contact occurred, what it changed
+05  finding index               one entry per finding unit
+06  finding unit (repeated)     status or identifier · finding · significance ·
+                                limit (what it does not establish) · evidence and
+                                its locator
+07  prior-position delta        what changed, stayed or was withdrawn against a
+                                named earlier position
+08  unresolved + later-check    what the document cannot conclude; its staleness
+    register                    and observability limits; missing sources; what
+                                must be checked later
+09  response / handoff format   how the reviewer answers
+10  seal + provenance           the render seal and the provenance behind the
+                                document
+```
+
+Parts must appear in this order. The review-status and proof-of-assembly
+banners the template styles belong to 01; the rendered footer is 10's seal
+line. Review questions and response templates that a package carries as
+separate orchestration files stay there; they are not moved into the document.
+
+A document declares one kind, and its kind decides which parts are required.
+Any other part appears only when it has content — never as an empty band or a
+"not applicable" placeholder.
+
+### Kinds
+
+Every kind requires 01, 02 and 10. A kind profile adds the parts a document of
+that kind cannot be read without. Profiles differ because review kinds differ:
+a document built to withhold a result from its reader cannot require an
+executive result.
+
+```text
+kind            requires, beyond 01 · 02 · 10   status
+guided-review   04 · 06 · 08                    PROVISIONAL
+confirmation    07                              PROVISIONAL
+```
+
+A profile stays provisional until a declared proof document of its kind has
+been rendered and reviewed against it. Only a reviewed change to this section
+lifts that status. A kind without a profile must not be rendered through this
+template until one is added here.
+
+**A contract failure is a finding about the contract, never a reason to change
+the content.** When a real document cannot satisfy the contract, the profile or
+the anatomy is reviewed. Source content is never added, moved or reworded to
+make a check pass.
+
+### What stays visible
+
+Each part and sub-part is ALWAYS VISIBLE unless it is listed under MAY
+DISCLOSE. Disclosure uses the native `<details>` / `<summary>` element, with
+no script.
+
+```text
+ALWAYS VISIBLE, including
+  03   every question's prompt; the central question's prompt and its detail
+  06   each unit's status or identifier, finding, significance and limit;
+       each evidence surface's title, summary lines, and what it does and
+       does not mean; each evidence row's labels, claim and assessed state;
+       any quoted source passage the finding relies on; any live constraint,
+       confidence cap or other uncertainty on the evidence
+  08   the whole register, never reduced to the limits each finding unit states
+  10   the seal line
+
+MAY DISCLOSE
+  03   a non-central question's detail
+  06   field-level evidence listings and finding metadata, beneath visible
+       summary lines
+  10   the provenance table, as one block
+```
+
+### Approval before a reviewer sees a document
+
+Approval to show a document to its reviewer is a gate in the operator-side
+package workflow. It is not a document part: a sealed review document carries
+no approval block, and its status records no approval state.
+
+### Checks
+
+A document fails the contract when:
+
+- it declares no kind, or a kind without a profile;
+- a part its kind requires is missing;
+- a part is empty or out of order, or a part other than 06 repeats;
+- 03 is present without exactly one central question;
+- an ALWAYS VISIBLE element sits inside a disclosure;
+- it carries content outside the ten parts.
+
+`build.py` has no syntax for declaring a kind or a part yet; that arrives with
+the renderer change that enforces these checks. Until then, package review
+applies them to the rendered document.
+
+A document sealed before this contract keeps its bytes and its structure. This
+contract gives no reason to regenerate one.
+
 ## How a human-review package is generated
 
-1. Author / finalize the canonical Markdown source operator-side.
+1. Author / finalize the canonical Markdown source operator-side, in the
+   review-document anatomy above.
 2. Render it with `build.py` to a sealed single-file HTML.
 3. Operator-side, assemble the review package around it: the sealed HTML, the
    canonical Markdown as audit substrate, a MANIFEST binding the render to the
