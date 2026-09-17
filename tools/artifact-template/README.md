@@ -22,7 +22,10 @@ review artifacts must survive delivery without a stylesheet or font going missin
 tools/artifact-template/
 ├── README.md               this file
 ├── artifact.template.html  the design-system <head> shell + UO overlay (CSS) + banner styles
-├── build.py                the renderer: Markdown source -> sealed single-file HTML
+├── build.py                the renderer: Markdown source -> sealed single-file HTML + package MANIFEST
+├── pin_check.py            clone-side pin checks for a pinned extraction
+├── requirements.txt        the pinned `markdown` version
+├── tests/                  unit tests (synthetic sources only)
 └── _dsa-tokens/            VENDORED, PINNED design-system-ASK token snapshot (build input)
     ├── MANIFEST.md         records the upstream commit SHA + per-file sha256
     ├── colors_and_type.css foundational tokens (used verbatim; never edited here)
@@ -31,17 +34,137 @@ tools/artifact-template/
 
 ## Usage
 
+For a seal, this is the invocation from a pinned extraction of this directory
+(see "Pinned extraction and pin checks"), not from a working clone:
+
 ```bash
-# requires python3 + the `markdown` package (pip install markdown)
-python3 tools/artifact-template/build.py \
-  --source path/to/source.md \
-  --out    path/to/output.html \
-  --title  "optional <title>"
+# requires python3 + the `markdown` version pinned in requirements.txt
+python3 -B <render-dir>/tools/artifact-template/build.py \
+  --source    path/to/source.md \
+  --out       path/to/output.html \
+  --manifest  path/to/MANIFEST.md \
+  --uo-commit <40-hex commit the renderer was extracted from> \
+  [--local-css path/to/local.css]
 ```
 
-The output is a single `.html` file. The build fails loudly if it would emit a
-non-self-contained file (an external `<link>`/`@import`, a relative font URL, or
-an unreplaced template marker).
+`--out` and `--manifest` must not exist: a regenerated render is a new
+artifact. On success the build writes the sealed `.html` file and its package
+MANIFEST; on failure it writes neither. `<title>` comes from the source's meta
+block.
+
+Run `build.py` and `pin_check.py` with `python3 -B`. A `__pycache__` directory
+or `.pyc` file in this directory fails the build and the pin check, because a
+compiled file can be imported in place of its source.
+
+Run the tests from a clone with
+`python3 -B -m unittest discover -s tools/artifact-template/tests`.
+
+### Source grammar
+
+A source is one meta block followed by containers. Markdown sits inside the
+containers; nothing but blank lines sits outside them.
+
+```text
+:::meta
+kind: guided-review
+title: <one line>
+id: <one line>
+round: <one line>
+classification: <one line>
+audience: <one line>
+:::
+
+:::part 02
+Markdown.
+:::
+```
+
+- The meta keys are exactly `kind`, `title`, `id`, `round`, `classification`
+  and `audience`, each once, each a non-empty single line. Any other key fails
+  the build.
+- A container opens with `:::<kind> <tokens>` and closes with `:::`, both at
+  the start of a line. Containers nest. A `:::` line inside fenced or
+  indented code is code text.
+- Unclosed containers, a close with nothing open, unknown kinds or tokens,
+  repeated tokens, and a container in a position its row does not allow all
+  fail the build with the line number.
+
+```text
+container                          allowed position                         emits
+:::part NN                         top level; NN is 01 to 10                section[data-uo-part]
+:::question [central]              directly inside :::part 03               div[data-uo-role="question"]
+:::finding                         directly inside :::part 06               div[data-uo-role="finding"]
+:::disclose question-detail "S"    inside a non-central :::question,        details[data-uo-disclose] with
+                                   after its prompt                         summary S
+:::disclose evidence "S"           inside :::finding, after visible lines
+:::disclose provenance "S"         directly inside :::part 10, at most once
+:::table <role per column>         inside a part, around exactly one        data-uo-cell on every th and td
+                                   pipe table
+```
+
+- Parts 01 and 10 are generated even when the source omits them. The meta
+  block drives 01's status rail (classification · audience · kind · round) and
+  masthead (title; id, kind and round), and 10 always ends with the seal line.
+  The masthead title is the document's only `h1`; authored headings use `##`
+  to `####`.
+- Table roles are `key`, `text`, `num` and `status`, one per column. Every
+  pipe table is wrapped in `:::table`. Column alignment colons are not
+  accepted. The build records each column's role as `data-uo-cell` on every
+  cell; it applies no role styling yet, numeric alignment included, so every
+  cell renders left-aligned. Every row must have as many cells as the header
+  row (an escaped `\|` or a `|` inside a code span is not a cell boundary).
+- Only payload table cells wrap. Outside a table cell, a long unbroken token
+  in prose or a code span, a heading, a disclosure summary or the masthead
+  title can make the page scroll horizontally.
+- The empty-container checks, the lines that must precede a disclosure and a
+  disclosure's summary count visible text only: at least one character that
+  is not whitespace, a control or format character, a default ignorable code
+  point (zero-width space, Hangul filler and the like), U+2800 BRAILLE PATTERN
+  BLANK or a combining mark on its own. Other glyph-blank characters are
+  checked at package review.
+- **Raw HTML in the source fails the build**, including comments. Put literal
+  tags in a code span or write `&lt;`; `\<` is not an escape.
+- Links are `https://` or `http://` only. Images are not accepted: an image is
+  a relative dependency.
+
+### Payload-local CSS
+
+Any container except `:::part 01` and `:::part 10`, which carry the generated
+masthead and seal line, may carry one `local=<name>` token, where `<name>`
+matches `[a-z][a-z0-9-]{0,31}`. It emits `class="uo-local-<name>"` on that
+container's element only. `--local-css` adds a third `<style>` block holding
+the file's bytes unchanged; the package MANIFEST records their sha256. The file:
+
+- must scope every selector under `main.uo-md .uo-local-<name>`, for a name
+  the source uses, with no sibling (`~`, `+`) or column combinator outside
+  brackets and parentheses, no quote character (write attribute values
+  unquoted) and balanced brackets and parentheses;
+- may not contain comments, at-rules, `url(`, `image-set(` or another function
+  that can load a resource, a quoted string inside a function, `</`,
+  backslashes, custom property declarations or `!important`.
+
+The build checks selectors, not the effect of declarations: a scoped rule can
+still move, hide or overlay its own container's content. Package review checks
+the rendered effect, and that local CSS does not re-derive a shared role.
+Local names and local CSS belong to the payload and stay operator-side; none
+enters this repo.
+
+### What the build refuses
+
+The build fails, writing nothing, when:
+
+- the source breaks the grammar or the anatomy checks below, or contains raw
+  HTML;
+- the final HTML carries an element, class or attribute outside the renderer's
+  allowlist, or its CSS carries `@import`, a `url(` other than an embedded
+  font, or `image-set(` or another function that can load a resource;
+- a vendored `_dsa-tokens/` file is missing, or its bytes do not match the
+  sha256 recorded in `_dsa-tokens/MANIFEST.md`, or that manifest's commit or
+  short row is malformed;
+- the installed `markdown` is not the pinned version;
+- this directory holds a `__pycache__` directory or a `.pyc` file;
+- the output would not be self-contained (an external `<link>`/`@import`, a
+  relative font URL, or an unreplaced template marker).
 
 ## Inheritance from design-system-ASK
 
@@ -66,8 +189,12 @@ vendored so artifact builds are **reproducible without a sibling checkout** of
 
 - **a build dependency snapshot, not a fork** and not a second source of truth;
 - **pinned** — `_dsa-tokens/MANIFEST.md` records the exact upstream commit SHA and
-  a per-file `sha256`; the rendered footer records the pinned SHA so any drift is
-  auditable;
+  a per-file `sha256`; the build verifies every vendored file's bytes against
+  those hashes before sealing, and the seal line and package MANIFEST record the
+  manifest's commit only when every file matches, so any drift is auditable.
+  That the commit row names the upstream state those bytes came from is
+  established when the snapshot is re-synced and reviewed; the build has no
+  upstream checkout and does not re-check it;
 - **updated only by explicit re-sync** from upstream (a deliberate operator
   action), never silently.
 
@@ -129,8 +256,9 @@ operator-side, and are **not** committed here:
 - any project evidence, absorption memos, or private working material.
 
 Review-package banners (`.uo-reviewer-status`, `.uo-proof`) are styled by the
-template so operator-side packaging can use them, but a *specific* package's
-banner text and review-orchestration files are assembled operator-side.
+template, but a *specific* package's banner text and review-orchestration files
+are assembled operator-side. `build.py` cannot emit them yet: raw HTML fails
+the build and the final-HTML allowlist rejects their classes.
 
 ## Review-document anatomy
 
@@ -236,30 +364,80 @@ A document fails the contract when:
 - an ALWAYS VISIBLE element sits inside a disclosure;
 - it carries content outside the ten parts.
 
-`build.py` has no syntax for declaring a kind or a part yet; that arrives with
-the renderer change that enforces these checks. Until then, package review
-applies them to the rendered document.
+`build.py` enforces these checks when it renders, fail-closed, through the
+source grammar in "Usage". The build cannot see which sentences an author
+placed inside an allowed disclosure; package review checks that nothing this
+section keeps ALWAYS VISIBLE sits inside one.
 
 A document sealed before this contract keeps its bytes and its structure. This
 contract gives no reason to regenerate one.
 
+## Pinned extraction and pin checks
+
+The renderer is not run from a working clone. Per render, extract this
+directory at a pinned commit into that render's own build directory, run it
+there, and discard the extraction after sealing. The pin checks run from the
+clone, never from the extraction: an extracted `build.py` cannot vouch for its
+own descent.
+
+```bash
+git -C <clone> fetch origin --prune
+git -C <clone> merge-base --is-ancestor <sha> origin/main     # exit 0 required
+git -C <clone> archive <sha> tools/artifact-template | tar -x -C <render-dir>
+python3 -B <render-dir>/tools/artifact-template/build.py --uo-commit <sha> ...
+```
+
+`pin_check.py` runs the same checks from the clone's own tree and performs no
+fetch:
+
+```bash
+python3 -B <clone>/tools/artifact-template/pin_check.py --clone <clone> \
+  --commit <sha> [--extracted <render-dir>/tools/artifact-template] [--descends-from <sha>]
+```
+
+- It fails unless `<sha>` exists and is an ancestor of `origin/main`.
+- With `--extracted`, it fails unless the extraction's tree digest equals the
+  digest of a fresh `git archive <sha>`. Package review recomputes that digest
+  from `git archive <sha>` in an empty directory and compares it with the
+  package MANIFEST; a mismatch fails the package.
+- With `--descends-from`, it fails unless that commit is an ancestor of
+  `<sha>`.
+
+The tree digest is the SHA-256 of the lines `<sha256>  ./<relpath>\n` for every
+regular file under `tools/artifact-template/`, paths in byte order. A
+`__pycache__` directory or `.pyc` file fails the digest instead of being
+skipped. The package MANIFEST's digest is recorded by the renderer running from
+the extraction; `pin_check.py --extracted`, run from the clone on the final
+extraction, is what verifies it.
+
+A seal for a TMK-facing artifact must also descend from the urban-observatory
+merge of the unit (U6) that adopts the final presentation. That anchor does not
+exist yet; it is recorded here when that unit lands, and no TMK-facing artifact
+is sealed through this path before it.
+The renderer does not enforce audience. The checker runs from the clone's
+mutable working tree: the git objects vouch, not the checker's bytes.
+
 ## How a human-review package is generated
 
-1. Author / finalize the canonical Markdown source operator-side, in the
-   review-document anatomy above.
-2. Render it with `build.py` to a sealed single-file HTML.
-3. Operator-side, assemble the review package around it: the sealed HTML, the
-   canonical Markdown as audit substrate, a MANIFEST binding the render to the
-   pinned design-system SHA, and the review-orchestration files (bootstrap,
-   questions, handoff template).
-4. Deliver the package for human review.
+1. Author the canonical Markdown source operator-side, in the source grammar
+   and the review-document anatomy above.
+2. Extract this directory at a pinned commit and run the clone-side pin checks.
+3. Render. `build.py` writes the sealed single-file HTML and its package
+   MANIFEST.
+4. Operator-side, assemble the review package: the sealed HTML, its MANIFEST,
+   the canonical Markdown as audit substrate, and the review-orchestration
+   files.
+5. Run the mandatory preflight on the sealed HTML.
+6. Deliver the package for human review.
 
-Steps 1, 3, and 4 are operator-side; step 2 is this template's job.
+Steps 2 and 3 are this template's job. Steps 1, 4, 5 and 6 are operator-side.
 
 ## Re-syncing the token snapshot
 
 When the design-system tokens change upstream and a refresh is wanted (a
 deliberate operator decision), re-copy `colors_and_type.css` + `fonts/*.woff2`
 from the target [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) commit, regenerate `_dsa-tokens/MANIFEST.md`
-with the new commit SHA and per-file hashes, and re-render any artifacts that
-should track the new state. Until then, builds are pinned to the recorded SHA.
+with the new commit SHA and per-file hashes, and render new artifacts at the
+new pin. A sealed artifact keeps the pin it was sealed with and is never
+regenerated to track the new state. Until a re-sync lands, builds are pinned to
+the recorded SHA.
