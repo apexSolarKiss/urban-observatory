@@ -370,6 +370,23 @@ class Grammar(RenderCase):
     def test_N11_empty_meta_value(self):
         self.fails(mutate(GUIDED, "round: R1\n", "round: \n"), r"meta key 'round' has an empty value")
 
+    def test_N11e_invisible_meta_value(self):
+        values = {
+            "title": "Synthetic guided review",
+            "id": "SYN-GR-001",
+            "round": "R1",
+            "classification": "synthetic fixture",
+            "audience": "renderer test",
+        }
+        for key, original in values.items():
+            for value in ("\u200b", "\u2060", "\u3164", "\u2800", "\u0301"):
+                with self.subTest(key=key, value=repr(value)):
+                    self.reset_tmp()
+                    source = mutate(
+                        GUIDED, "%s: %s\n" % (key, original),
+                        "%s: %s\n" % (key, value))
+                    self.fails(source, r"meta key '%s' has no visible text" % key)
+
     def test_N11b_multiline_meta_value(self):
         self.fails(mutate(GUIDED, "round: R1\n", "round: R1\n  continued\n"), r"is not 'key: value' on one line")
 

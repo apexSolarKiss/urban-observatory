@@ -80,7 +80,7 @@ Markdown.
 ```
 
 - The meta keys are exactly `kind`, `title`, `id`, `round`, `classification`
-  and `audience`, each once, each a non-empty single line. Any other key fails
+  and `audience`, each once, each a single line containing visible text. Any other key fails
   the build.
 - A container opens with `:::<kind> <tokens>` and closes with `:::`, both at
   the start of a line. Containers nest. A `:::` line inside fenced or

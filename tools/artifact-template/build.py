@@ -371,6 +371,8 @@ def _parse_meta(lines, start):
             raise BuildError("meta line %d: meta key %r repeated" % (n, key))
         if not value:
             raise BuildError("meta line %d: meta key %r has an empty value" % (n, key))
+        if not has_visible_text(value):
+            raise BuildError("meta line %d: meta key %r has no visible text" % (n, key))
         meta[key] = value
         i += 1
     else:
