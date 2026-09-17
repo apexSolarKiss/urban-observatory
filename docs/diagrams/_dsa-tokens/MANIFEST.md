@@ -11,11 +11,11 @@ This mirror is a **build input, not a fork** and not a second source of truth.
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `2bbab417863d3cffe74c7324899f494a840d69b7` |
-| short | `2bbab41` |
-| commit date | `2026-09-03 13:16:29 -0700` |
-| commit subject | `feat(identity): add canonical ASK browser icons (#138)` |
-| synced at | `2026-09-03` |
+| commit | `067691a2fb6ca979cb6a5b0c9ca1d97790134b3f` |
+| short | `067691a` |
+| commit date | `2026-09-17 15:41:55 -0700` |
+| commit subject | `Merge pull request #155 from apexSolarKiss/feat/prg-019-shared-language-batch-b` |
+| synced at | `2026-09-17` |
 | consuming surface | `urban-observatory/docs/diagrams/` |
 | scope | Tier 1 + Tier 2 only (no Tier 3) |
 
@@ -38,14 +38,20 @@ _dsa-tokens/
 
 | file | sha256 |
 | --- | --- |
-| `colors_and_type.css` | `fd8207bf361eff3e4071f699b87a7f29c829a0e3605c551b5f310ae52da92e9a` |
+| `colors_and_type.css` | `4fed9d796a0d51072802f430b9528459a5cbb9c709fa1964bf5b13f18464122a` |
 | `spectral-state.css` | `dd30fdc0b7b9174801129f0d01f45e22da5bbd92ff47e58d7aabaeea64f0d05b` |
 | `fonts/InterVariable.woff2` | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | `fonts/InterVariable-Italic.woff2` | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | `fonts/JetBrainsMono.woff2` | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | `fonts/JetBrainsMono-Italic.woff2` | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 
-**Re-sync 2026-09-03 (`28e9318` → `2bbab41`, `colors_and_type.css` only):** crosses **three** carrier-changing owner events, and is the first re-sync in this mirror's history that is **not** render-neutral. **#129** (`85181c1`) — the **structural** event: it adds the root-only `--bg-edge` Tier-1 role and a root `color-scheme` declaration, and it rewrites the base reset's `background: var(--bg-gradient)` **shorthand** into the `background-image` **longhand**, adding `html { background-color: var(--bg-edge) }` and `body { background-color: transparent }`. The shorthand had been resetting `background-color` to `transparent`, leaving the canvas with no solid layer for the browser to derive its over-scroll pocket from. **#136** (`b8d1f56`) — the **value-bearing** event: the light `--bg-edge` is rebound `var(--ask-white)` → `var(--ask-lavender-light)` (`#E2D3F0`), and `--ask-lavender-light` gains a comment naming that second duty. No existing palette value changed — `--ask-lavender-light` is `#E2D3F0` before and after; what is new is the **role**, not the colour. **#137** (`6b513cf`) — comment-only follow-through inside the same block. One file re-vendored: `colors_and_type.css` (sha256 `acd76409…` → `fd8207bf…`, 13,375 → 15,463 B; new value in the file table). `spectral-state.css` and the four fonts are **byte-identical** between `28e9318` and `2bbab41` and remain pinned at `1231d03` — this mirror stays at **mixed pins**.
+**Re-sync 2026-09-17 (`2bbab41` → `067691a`, `colors_and_type.css` only):** crosses **one** carrier-changing owner event for this mirror, **PRG-019 SL3** (`31e283e`, DS **#154**) — `--tracking-caption: 0.14em` is added to the Tier-1 token block, and the foundation's `.caption` utility is rebound from `letter-spacing: var(--tracking-wide)` (0.08em) to `var(--tracking-caption)` (0.14em). Caption becomes a role with its own tracking rather than a borrower of the operative mono value. **SL3 is a coupled pair, and this repo vendors both halves**, so the second half travels in the same commit outside this mirror: `../interactive/diagrams-interactive-spine.css` (`9178d8d` → `7e43a98`) gains an explicit `letter-spacing: var(--tracking-wide)` on the spine's own `.caption` band, which set none before and therefore expressed the foundation's. Taking the token half alone would have moved that band 0.08em → 0.14em; the two are atomic here and are not separable across commits. One file re-vendored **in this mirror**: `colors_and_type.css` (sha256 `fd8207bf…` → `4fed9d79…`, 15,463 → 15,496 B; new value in the file table). `spectral-state.css` and the four fonts are **byte-identical** between `2bbab41` and `067691a` and remain pinned at `1231d03` — this mirror stays at **mixed pins**.
+
+**Render impact — measured neutral on all three diagram surfaces, and neutral for a different reason on each.** Headless Chrome, computed `letter-spacing` on the live `.caption` elements of the actual committed pages over `file://`, before and after. **Architecture tree** and **ontology**: 0.6px before, 0.6px after (10px × 0.06em) — `diagrams.css` loads after the foundation and sets its own `.caption { letter-spacing: 0.06em }` at equal specificity, so these pages never expressed the foundation value and cannot move with it. **Interactive IA spine**: 0.8px before, 0.8px after (10px × 0.08em) — this page *did* express the foundation value, and holds only because SL3's spine half re-pins it to `--tracking-wide` in the same commit. A **control run with the token half applied alone** measured that same band at **1.4px**, which is the regression the coupling exists to prevent and the reason the pair is not split. `index.html` carries no `.caption` element; its local `.card .cls` label keeps its own literal `0.14em` (1.96px, unmoved) and is UO-authored chrome, not a vendored carrier. **Render stamps held** — not merely because UO commits no diagram rasters, but because the tracking on every committed page was measured unchanged across the event. **No raster consequence:** the repo commits no diagram export of any kind; the only images under `docs/diagrams/` are the two vendored ASK wordmark PNGs in `_dsa-surface/assets/`, which no diagram page loads.
+
+**Outside this mirror, in the same commit.** The `_dsa-surface/` carriers re-synced to the same owner pin for **SL4** (`e7f5ec2`, DS #154) and **SL7** (`881a996`, DS #155): `surface-action.css` (`727ef8a` → `d887782`) and `surface-panel.css` (`b251e7c` → `12582f5`). SL4 suspends the compact action's and the full-panel link's transition and press scale under `prefers-reduced-motion: reduce`; measured on `index.html`, `transition-duration` goes 0.22s → 0s under `reduce` and is unchanged at 0.22s otherwise. SL7 re-authors the panel's glass recipe as four grouped axis rules so `surface-treatments.css` can share it; measured on `index.html` across 19 computed box and paint properties on `.surface-panel`, `a.surface-panel` and `.surface-action`, the two states are identical. The new `surface-treatments.css` is **not vendored** — no surface in this repo carries a `surface-material-*`, `surface-attach-*` or `surface-elevation-*` class, and `surface-panel.css` defines the axis selectors itself, so nothing dangles. Every other vendored carrier in `docs/diagrams/` was verified byte-identical to the owner at `067691a` and **not** re-vendored: `_dsa-surface/surface-shell.css` and `surface-shell.js`, `_dsa-tokens/spectral-state.css`, `diagrams.css`, `diagrams-fit.js`, both engines and both `export-png.js` exporters.
+
+**Prior re-sync 2026-09-03 (`28e9318` → `2bbab41`, `colors_and_type.css` only):** crosses **three** carrier-changing owner events, and is the first re-sync in this mirror's history that is **not** render-neutral. **#129** (`85181c1`) — the **structural** event: it adds the root-only `--bg-edge` Tier-1 role and a root `color-scheme` declaration, and it rewrites the base reset's `background: var(--bg-gradient)` **shorthand** into the `background-image` **longhand**, adding `html { background-color: var(--bg-edge) }` and `body { background-color: transparent }`. The shorthand had been resetting `background-color` to `transparent`, leaving the canvas with no solid layer for the browser to derive its over-scroll pocket from. **#136** (`b8d1f56`) — the **value-bearing** event: the light `--bg-edge` is rebound `var(--ask-white)` → `var(--ask-lavender-light)` (`#E2D3F0`), and `--ask-lavender-light` gains a comment naming that second duty. No existing palette value changed — `--ask-lavender-light` is `#E2D3F0` before and after; what is new is the **role**, not the colour. **#137** (`6b513cf`) — comment-only follow-through inside the same block. One file re-vendored: `colors_and_type.css` (sha256 `acd76409…` → `fd8207bf…`, 13,375 → 15,463 B; new value in the file table). `spectral-state.css` and the four fonts are **byte-identical** between `28e9318` and `2bbab41` and remain pinned at `1231d03` — this mirror stays at **mixed pins**.
 
 **Render impact — declared, not neutral.** Two effects reach this repo's surfaces, and neither touches the composition inside the viewport. First, the **browser edge**: `html` now carries a solid `--bg-edge` under the gradient, so the over-scroll pocket resolves lavender in light and near-black in dark instead of the browser default. Second, **`color-scheme`**: the root now declares it, which is what the three diagram pages gain — `index.html` already carried `<meta name="color-scheme" content="light dark">`, the other three did not, and they now take theme-appropriate scrollbars and form-control rendering from the foundation. Both are the point of the owner change rather than a side effect of vendoring it.
 
@@ -64,7 +70,7 @@ _dsa-tokens/
 This mirror carries `colors_and_type.css` + fonts (everything the **static**
 Class A diagrams need, `diagram-static-H`) **and** `spectral-state.css` (Spectral
 State v1.1), required by the **interactive** IA spine (`diagram-interactive-spine`,
-in `../interactive/`). Now at **mixed pins**: `colors_and_type.css` @ `2bbab41` (DS #137);
+in `../interactive/`). Now at **mixed pins**: `colors_and_type.css` @ `067691a` (DS #154);
 `spectral-state.css` + the four fonts @ `1231d03` (prior `b5d158e`) — see the
 field table and the re-sync notes.
 
@@ -76,7 +82,7 @@ diagrams-interactive-spine.css`. Color on the interactive surface encodes
 ## Binding
 
 This manifest binds the rendered diagram files in `docs/diagrams/` to a known
-upstream `design-system-ASK` state (current pins: `colors_and_type.css` @ `2bbab41`, `spectral-state.css` + fonts @ `1231d03`; prior `b5d158e`). The diagram `<head>` records the
+upstream `design-system-ASK` state (current pins: `colors_and_type.css` @ `067691a`, `spectral-state.css` + fonts @ `1231d03`; prior `2bbab41`). The diagram `<head>` records the
 `source-vN` / `render-vN` stamp; this manifest records the upstream pin. If the
 two diverge, the diagram is reading tokens that have drifted from its audit point.
 
