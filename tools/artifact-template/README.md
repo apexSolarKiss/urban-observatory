@@ -94,12 +94,12 @@ container                          allowed position                         emit
 :::part NN                         top level; NN is 01 to 10                section[data-uo-part]
 :::question [central]              directly inside :::part 03               div[data-uo-role="question"]
 :::finding                         directly inside :::part 06               div[data-uo-role="finding"]
-:::disclose question-detail "S"    inside a non-central :::question,        details[data-uo-disclose] with
-                                   after its prompt                         summary S
-:::disclose evidence "S"           inside :::finding, after visible lines
+:::disclose question-detail "S"    inside a non-central :::question,        details.uo-details[data-uo-disclose]
+                                   after its prompt                         with summary S and its content in
+:::disclose evidence "S"           inside :::finding, after visible lines   div.uo-details__body
 :::disclose provenance "S"         directly inside :::part 10, at most once
-:::table <role per column>         inside a part, around exactly one        data-uo-cell on every th and td
-                                   pipe table
+:::table <role per column> ["C"]   inside a part, around exactly one        data-uo-cell on every th and td;
+                                   pipe table                               data-uo-label + label element per td; caption C
 ```
 
 - Parts 01 and 10 are generated even when the source omits them. The meta
@@ -110,12 +110,75 @@ container                          allowed position                         emit
 - Table roles are `key`, `text`, `num` and `status`, one per column. Every
   pipe table is wrapped in `:::table`. Column alignment colons are not
   accepted. The build records each column's role as `data-uo-cell` on every
-  cell; it applies no role styling yet, numeric alignment included, so every
-  cell renders left-aligned. Every row must have as many cells as the header
-  row (an escaped `\|` or a `|` inside a code span is not a cell boundary).
-- Only payload table cells wrap. Outside a table cell, a long unbroken token
-  in prose or a code span, a heading, a disclosure summary or the masthead
-  title can make the page scroll horizontally.
+  cell. Every row must have as many cells as the header row (an escaped `\|`
+  or a `|` inside a code span is not a cell boundary).
+- Role styling comes from the template's data-table roles: a `num` column,
+  header included, is right-aligned with tabular figures; a `key` cell takes
+  the key emphasis. `text` and `status` cells take no role styling.
+- An optional quoted caption follows the roles and must contain visible text.
+  It renders as the table's `caption`, in the template's data-table caption
+  style, except that it keeps the case the author wrote: the renderer's
+  stylesheet sets `text-transform: none` for the caption and the disclosure
+  summary, because those two roles carry authored payload text whose case can
+  carry meaning (`mW`, `pH`). The rest of the role — mono face, 11px, weight
+  500, letter-spacing and colour — is the template's. The template's own
+  `.uo-data-table` caption is not changed. The design-system `.caption` class
+  is not emitted.
+- Every body cell carries `data-uo-label`, its column's header text with tags
+  removed and whitespace collapsed, and a `span.uo-cell-label` holding that
+  header cell's own inline markup. The build checks the attribute against its
+  header and the element's text against the same header.
+- The payload table is the review document's dense review table: a UO profile
+  role, not a design-system rule. Its values are the renderer stylesheet's
+  (`MD_CSS` in `build.py`: the mono face at `--fs-caption`, 14px, with a 1px
+  `--artifact-line` grid), with the template's `num`, `key` and caption roles
+  on top. They are not the template's `.uo-data-table` values (12px, soft row
+  rules), which the renderer does not reach. Which values govern is not
+  decided here: it is left to ASK and to the unit that adopts the final
+  presentation (U6), and every value stays provisional until then.
+- Text outside a preformatted block wraps: an ordinary word moves to the next
+  line whole, and only a token longer than the line breaks inside itself. On
+  screen a preformatted block keeps its lines and scrolls inside its own box.
+- Table cells, the header row included, fit the table to the prose measure
+  first: a word moves to the next line whole when it fits its column, and a
+  word wider than its column breaks inside itself, so the table does not
+  grow past the measure. In a table with many columns, above 960px, header
+  and body words in narrow columns break inside the word, and so do numeric
+  and status values: a number or a status word can split across lines, even
+  one character per line, and a reader can take the pieces for separate
+  values. The rows view below does not apply at those widths.
+- At widths of 960px and below, the template's existing narrow-width
+  threshold, every table shows one row at a time: each body cell is a block
+  whose `span.uo-cell-label` shows its column's header above its value. The
+  header row stays in the document but is moved out of view with a clip, not
+  removed with `display: none`. In Chrome's accessibility tree the table, its
+  rows and its column headers remain, and a stacked cell's accessible name
+  begins with its label ("Count 12"). Screen readers and other browsers are
+  not tested. No cell is dropped and nothing scrolls sideways. In print the
+  page width decides, so a portrait page shows rows this way too.
+- The visible label is an element carrying the header cell's own inline
+  markup, not generated text, so a link in a header is a working link in
+  every stacked cell of that column and inline code is still code. A run of
+  whitespace, no-break and other space characters included, shows as one
+  space in the checked attribute; the element reproduces the header's own
+  text. The label is left-aligned in every column, a `num` column's included,
+  and selecting a stacked row copies the labels with the values.
+- Because the header row is out of view at those widths, a header link inside
+  it would otherwise take keyboard focus while invisible. When anything in
+  that row is focused the row returns to view, stacked, so the focused
+  element is on screen. The same link is reachable without it, in the visible
+  label of every cell in its column.
+- A disclosure takes the template's disclosure role. Its summary is set in the
+  mono face at the template's 11px label size, weight 500 and letter-spaced,
+  as an inline box with a `+` or `–` marker in place of the browser's
+  triangle, dimmer than body text. The summary keeps the case the author
+  wrote, for the reason given for the caption above; the marker, and every
+  other value of the role, is the template's. Its content sits in
+  `div.uo-details__body`, whose padding and 1.55 line height apply to content
+  that sets no line height of its own (list items, table cells). Inside it a
+  paragraph takes the template's smaller bottom margin and a code span the
+  template's code padding; a preformatted block renders as it does outside a
+  disclosure.
 - The empty-container checks, the lines that must precede a disclosure and a
   disclosure's summary count visible text only: at least one character that
   is not whitespace, a control or format character, a default ignorable code
@@ -126,6 +189,28 @@ container                          allowed position                         emit
   tags in a code span or write `&lt;`; `\<` is not an escape.
 - Links are `https://` or `http://` only. Images are not accepted: an image is
   a relative dependency.
+
+### Renderer chrome classes
+
+The build emits these classes only, each on the element listed. Every one is
+styled by the template or the renderer's stylesheet.
+
+```text
+element   renderer chrome classes
+div       uo-shell · uo-status-rail · uo-details__body
+main      uo-md
+header    uo-head
+dl        uo-head__meta
+span      uo-status-rail__primary · uo-status-rail__sep · uo-cell-label
+footer    uo-foot
+details   uo-details
+```
+
+Beyond these, a container may carry its `uo-local-<name>` class (below), and
+a fenced code block's `code` may carry `language-<name>`. A `details` element
+carries `uo-details`, followed by its local class if it has one.
+`uo-details__body` sits only directly inside `details`, and `uo-cell-label`
+only directly inside `td`. Any other class fails the build.
 
 ### Payload-local CSS
 
@@ -236,6 +321,19 @@ Design principles:
 - **Dark mode is the foundation's** — the dark `@media` / `[data-theme="dark"]`
   blocks resolve `--fg-*` and `--line-*` to lavender; `--artifact-line` inherits
   the foundation lines in dark.
+
+The template's dark selectors are the foundation's own
+(`:root[data-theme="dark"], .theme-dark`), so `--artifact-line`,
+`--artifact-line-soft`, `--uo-code-bg` and `--uo-soft-bg` resolve dark wherever
+the foundation's tokens do.
+
+**Print.** The page prints on its own theme ground
+(`print-color-adjust: exact` on the root), as it reads on screen. Without it the
+ground drops out: the light theme's white lines vanish on white paper and the
+dark theme's lavender text prints on white. No token is rebound for print. The
+rule also prints the ground when a reader has turned background graphics off.
+The ground does not extend into page margins a browser applies. A preformatted
+block wraps in print instead of being cut off at the page edge.
 
 **History (resolved):** an earlier version of this template carried a local
 `--fg` rebind, because the foundation light ramp was still white and base-element
