@@ -130,7 +130,10 @@ with the `PNG` button.
 ## Re-syncing
 
 When the upstream tokens/fonts (or, later, Spectral State) change and a refresh
-is wanted, re-sync `_dsa-tokens/` from the new commit, regenerate `MANIFEST.md`,
-and bump the affected diagram's `source-vN` / `render-vN` stamp. Propose changes
-to the tokens themselves upstream at the [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) control surface —
+is wanted, re-sync the vendored carriers from the new commit and regenerate
+`_dsa-tokens/MANIFEST.md`. Then classify each consuming diagram under its own
+`source-vN` // `render-vN` contract: advance `source-vN` only for a
+source-generation change, and advance `render-vN` and regenerate any committed
+raster only for a rendered-output change. A pin advance alone does neither.
+Propose changes to the tokens themselves upstream at the [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) control surface —
 never edit the vendored mirror or the upstream engine/CSS here.
