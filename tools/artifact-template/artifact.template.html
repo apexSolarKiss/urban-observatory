@@ -16,6 +16,7 @@
    Weights: Inter 200/400, Mono 300/500.
    Disclosure: native <details>/<summary>, no JS.
    Theme: system / auto via prefers-color-scheme; explicit override reserved.
+   Print: the page prints on its own theme ground (see the print rule below).
    ========================================================================= */
 
 body { margin: 0; min-height: 100vh; }
@@ -23,6 +24,9 @@ body { margin: 0; min-height: 100vh; }
 /* ── Theme inheritance ───────────────────────────────────────────────
    Default = system / auto via prefers-color-scheme.
    Override = data-theme="dark" or data-theme="light" on :root (reserved).
+   The dark selectors match the foundation's own dark block
+   (`:root[data-theme="dark"], .theme-dark`), so a .theme-dark root resolves
+   these artifact tokens dark along with the foundation's.
    No JS toggle. Tier 3 utility tokens (--uo-code-bg, --uo-soft-bg) are
    theme-aware. */
 :root {
@@ -46,7 +50,8 @@ body { margin: 0; min-height: 100vh; }
   --artifact-line:      rgba(255, 255, 255, 0.90); /* rules · borders · table lines (light) */
   --artifact-line-soft: rgba(255, 255, 255, 0.55); /* fainter dividers (light) */
 }
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+.theme-dark {
   --artifact-line:      var(--line-1);             /* dark: foundation lavender lines read fine */
   --artifact-line-soft: var(--line-2);
 }
@@ -77,7 +82,8 @@ body { margin: 0; min-height: 100vh; }
     --uo-soft-bg: rgba(212, 198, 225, 0.06);
   }
 }
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+.theme-dark {
   --uo-code-bg: rgba(212, 198, 225, 0.10);
   --uo-soft-bg: rgba(212, 198, 225, 0.06);
 }
@@ -389,7 +395,8 @@ body { margin: 0; min-height: 100vh; }
   width: 100%;
   margin: 0 0 var(--space-4);
 }
-.uo-data-table caption {
+.uo-data-table caption,
+.uo-md table > caption {
   text-align: left;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -406,7 +413,8 @@ body { margin: 0; min-height: 100vh; }
   vertical-align: top;
   border-bottom: 1px solid var(--artifact-line-soft);
 }
-.uo-data-table td.num, .uo-data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.uo-data-table td.num, .uo-data-table th.num,
+.uo-md th[data-uo-cell="num"], .uo-md td[data-uo-cell="num"] { text-align: right; font-variant-numeric: tabular-nums; }
 .uo-data-table th {
   color: var(--fg-3);
   font-weight: var(--fw-medium);
@@ -418,7 +426,8 @@ body { margin: 0; min-height: 100vh; }
 .uo-data-table tr:last-child th,
 .uo-data-table tr:last-child td { border-bottom: none; }
 .uo-data-table tr.uo-row-key td,
-.uo-data-table tr.uo-row-key th { color: var(--fg-1); font-weight: var(--fw-medium); }
+.uo-data-table tr.uo-row-key th,
+.uo-md td[data-uo-cell="key"] { color: var(--fg-1); font-weight: var(--fw-medium); }
 
 /* ── Cards ──────────────────────────────────────────────────────────── */
 .uo-card {
@@ -657,7 +666,7 @@ details.uo-details > .uo-details__body {
 }
 details.uo-details > .uo-details__body p { margin: 0 0 var(--space-3); }
 details.uo-details > .uo-details__body p:last-child { margin-bottom: 0; }
-details.uo-details > .uo-details__body code { font-family: var(--font-mono); font-size: 0.86em; background: var(--uo-code-bg); padding: 1px 5px; border-radius: var(--radius-xs); }
+details.uo-details > .uo-details__body :not(pre) > code { font-family: var(--font-mono); font-size: 0.86em; background: var(--uo-code-bg); padding: 1px 5px; border-radius: var(--radius-xs); }
 
 /* ── Disposition block ──────────────────────────────────────────────── */
 .uo-disposition {
@@ -688,6 +697,16 @@ details.uo-details > .uo-details__body code { font-family: var(--font-mono); fon
 }
 .uo-footer dt { letter-spacing: 0.06em; text-transform: uppercase; }
 .uo-footer dd { margin: 0; color: var(--fg-2); }
+
+/* ── Print ──────────────────────────────────────────────────────────────
+   The page prints on its own theme ground, as it reads on screen: without this
+   the ground drops out, so the light theme's white structural lines vanish on
+   white paper and the dark theme's lavender text prints on white. No token is
+   rebound for print. It also prints the ground when background graphics are
+   turned off in the print dialog. */
+@media print {
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 
 /* ── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 960px) {

@@ -76,7 +76,18 @@ FONTS = [
 # Token-based prose stylesheet for the Markdown-rendered body. All values are
 # design tokens; text resolves through --fg-*, whose values are the foundation's
 # (the template's copied dark block repeats them unchanged), so base-element and
-# class rules stay consistent.
+# class rules stay consistent. The narrow-width table block (a screen, or a print
+# page, 960px wide or less) adds layout mechanics that are not tokens: the
+# template's existing 960px threshold, and a header row kept in the document
+# but moved out of view with a clip (not display: none) while every body cell
+# shows its column's header above its value, left-aligned in every column, in
+# a real span.uo-cell-label carrying the header's own inline markup so a link
+# or a code span survives; the row returns to view when it takes focus, so no
+# link is focusable while invisible. text-transform: none restores the
+# authored case of the two roles that carry authored payload text, the caption
+# and the disclosure summary, and changes no other value of either role. A
+# preformatted block inside a disclosure body repeats .uo-md's own line
+# height, so it renders as it does outside a disclosure.
 MD_CSS = """
 .uo-shell { max-width: 1120px; margin: 0 auto; padding: var(--space-7) var(--space-6) var(--space-10); }
 .uo-md { max-width: 80ch; margin: 0 auto; font-size: var(--fs-small); font-weight: var(--fw-extralight); line-height: 1.6; color: var(--fg-1); }
@@ -96,12 +107,29 @@ MD_CSS = """
 .uo-md code { font-family: var(--font-mono); font-size: 0.86em; font-weight: var(--fw-light); background: var(--uo-code-bg); padding: 0.08em 0.34em; border-radius: var(--radius-xs); }
 .uo-md pre { background: var(--uo-soft-bg); padding: var(--space-4); border-radius: var(--radius-sm); overflow-x: auto; border: 1px solid var(--artifact-line-soft); margin: 0 0 var(--space-4); }
 .uo-md pre code { background: none; padding: 0; font-size: var(--fs-caption); line-height: 1.55; }
+.uo-md .uo-details__body pre { line-height: 1.6; }
 .uo-md table { width: 100%; border-collapse: collapse; margin: 0 0 var(--space-5); font-family: var(--font-mono); font-size: var(--fs-caption); }
+main.uo-md table > caption { text-transform: none; }
+.uo-md details.uo-details > summary { text-transform: none; }
 .uo-md th, .uo-md td { border: 1px solid var(--artifact-line); padding: var(--space-2) var(--space-3); text-align: left; vertical-align: top; }
 .uo-md th, .uo-md td { overflow-wrap: anywhere; }
+.uo-md .uo-cell-label { display: none; }
 .uo-md thead th { font-weight: var(--fw-medium); border-bottom: 2px solid var(--artifact-line); }
 .uo-md .uo-foot { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--artifact-line); font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--fg-2); }
 .uo-md .uo-foot p { font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--fg-2); margin: 0 0 var(--space-2); }
+.uo-md { overflow-wrap: anywhere; }
+@media (max-width: 960px) {
+  .uo-md table, .uo-md caption, .uo-md tbody, .uo-md tr, .uo-md td { display: block; }
+  .uo-md thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .uo-md thead:focus-within { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
+  .uo-md thead:focus-within tr, .uo-md thead:focus-within th { display: block; }
+  .uo-md tbody tr + tr { margin-top: var(--space-3); }
+  .uo-md td + td { border-top: 0; }
+  .uo-md .uo-cell-label { display: block; font-weight: var(--fw-medium); text-align: left; }
+}
+@media print {
+  .uo-md pre { white-space: pre-wrap; }
+}
 """
 
 
@@ -135,19 +163,21 @@ RESOURCE_FUNCTION = re.compile(r"(?<![\w-])(-webkit-image-set|image-set|image|cr
 # Final-HTML allowlist.
 BODY_ELEMENTS = frozenset(
     "div section header main footer h1 h2 h3 h4 p ul ol li blockquote pre code em strong a hr br "
-    "table thead tbody tr th td details summary dl dt dd span".split()
+    "table caption thead tbody tr th td details summary dl dt dd span".split()
 )
 HEAD_ELEMENTS = frozenset(("meta", "title", "style"))
 VOID_ELEMENTS = frozenset(("meta", "br", "hr"))
 # Renderer chrome classes, by the element that may carry each. Every one must
-# exist in artifact.template.html or MD_CSS (a test asserts it).
+# exist in artifact.template.html or MD_CSS (a test asserts it), and README.md's
+# "Renderer chrome classes" table must list the same set (a test asserts it).
 CHROME_CLASSES = {
-    "div": ("uo-shell", "uo-status-rail"),
+    "div": ("uo-shell", "uo-status-rail", "uo-details__body"),
     "main": ("uo-md",),
     "header": ("uo-head",),
     "dl": ("uo-head__meta",),
-    "span": ("uo-status-rail__primary", "uo-status-rail__sep"),
+    "span": ("uo-status-rail__primary", "uo-status-rail__sep", "uo-cell-label"),
     "footer": ("uo-foot",),
+    "details": ("uo-details",),
 }
 LOCAL_CLASS_ELEMENTS = ("section", "div", "details", "table")
 DATA_VALUES = {
@@ -236,6 +266,7 @@ class Node:
         self.disclose = None      # disclose class
         self.summary = None       # disclose
         self.roles = None         # table
+        self.caption = None       # table
         self.local = None
 
     def ancestors(self):
@@ -442,8 +473,15 @@ def _open_container(kind, tokens, lineno, parent, root):
         node.disclose, node.summary = words[0], quoted[0]
     elif kind == "table":
         roles = []
-        for typ, val in positional:
-            if typ != "word" or val not in TABLE_ROLES:
+        for i, (typ, val) in enumerate(positional):
+            if typ == "quoted":
+                if i != len(positional) - 1:
+                    raise BuildError("line %d: :::table takes at most one quoted caption, after its column roles" % lineno)
+                if not has_visible_text(val):
+                    raise BuildError("line %d: a :::table caption must contain visible text" % lineno)
+                node.caption = val
+                continue
+            if val not in TABLE_ROLES:
                 raise BuildError("line %d: table role %r outside the closed set %s" % (lineno, val, ", ".join(TABLE_ROLES)))
             roles.append(val)
         if not roles:
@@ -606,6 +644,15 @@ def _render_markdown(md, text_node):
 
 
 TABLE_CELL = re.compile(r"<(th|td)((?:\s[^>]*)?)>")
+HEADER_CELL = re.compile(r"<th(?:\s[^>]*)?>(.*?)</th>", re.S)
+
+
+def cell_label(text):
+    """A header cell's text as a body cell's data-uo-label carries it: whitespace
+    runs collapsed to one space, outer whitespace removed. The renderer applies it
+    to the header's rendered text with tags removed and character references
+    decoded; the allowlist applies it to the parsed header text and compares."""
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def _render_table(md, node):
@@ -623,6 +670,11 @@ def _render_table(md, node):
     columns = len(TABLE_CELL.findall(rows[0])) if rows else 0
     if columns != len(node.roles):
         raise BuildError("line %d: :::table declares %d roles for %d columns" % (node.line, len(node.roles), columns))
+    heads = HEADER_CELL.findall(rows[0])
+    labels = [cell_label(html.unescape(re.sub(r"<[^>]*>", "", h))) for h in heads]
+    # The visible narrow-width label is a real element carrying the header cell's own
+    # inline markup, so a header's link stays a link and its inline code stays code.
+    label_html = [h.strip() for h in heads]
 
     def fix_row(m):
         i = [0]
@@ -632,12 +684,18 @@ def _render_table(md, node):
             i[0] += 1
             if role is None:
                 raise BuildError("line %d: a table row has more cells than declared roles" % node.line)
-            return '<%s data-uo-cell="%s"%s>' % (cm.group(1), role, cm.group(2))
+            if cm.group(1) != "td":
+                return '<th data-uo-cell="%s"%s>' % (role, cm.group(2))
+            column = i[0] - 1
+            return '<td data-uo-cell="%s" data-uo-label="%s"%s><span class="uo-cell-label">%s</span>' % (
+                role, _esc(labels[column]), cm.group(2), label_html[column])
         return "<tr>" + TABLE_CELL.sub(cell, m.group(1)) + "</tr>"
 
     out = re.sub(r"<tr>(.*?)</tr>", fix_row, out, flags=re.S)
     if node.local:
         out = out.replace("<table>", '<table class="uo-local-%s">' % node.local, 1)
+    if node.caption is not None:
+        out = re.sub(r"(<table[^>]*>)", lambda t: "%s\n<caption>%s</caption>" % (t.group(1), _esc(node.caption)), out, count=1)
     return out
 
 
@@ -696,8 +754,10 @@ def _render_node(md, node, counts):
         return '<div data-uo-role="finding"%s>\n%s\n</div>' % (_local_attr(node), inner)
     if node.kind == "disclose":
         counts["disclosures"] += 1
-        return '<details data-uo-disclose="%s"%s><summary>%s</summary>\n%s\n</details>' % (
-            node.disclose, _local_attr(node), _esc(node.summary), inner)
+        local = " uo-local-%s" % node.local if node.local else ""
+        return ('<details data-uo-disclose="%s" class="uo-details%s"><summary>%s</summary>\n'
+                '<div class="uo-details__body">\n%s\n</div>\n</details>') % (
+            node.disclose, local, _esc(node.summary), inner)
     raise BuildError("internal: unexpected node %r" % node.kind)
 
 
@@ -942,6 +1002,7 @@ class _Allowlist(HTMLParser):
         self.styles = []
         self.in_style = False
         self.h1_ok = 0
+        self.tables = []          # per open <table>: header labels, current column, header text being read
 
     def err(self, msg):
         self.errors.append("%s (output line %d)" % (msg, self.getpos()[0]))
@@ -1004,6 +1065,8 @@ class _Allowlist(HTMLParser):
         if tag == "style":
             self.in_style = True
             self.styles.append("")
+        if "body" in tags:
+            self._track_table_start(tag, a)
         if tag not in VOID_ELEMENTS:
             self.stack.append((tag, a.get("class")))
 
@@ -1020,10 +1083,57 @@ class _Allowlist(HTMLParser):
         self.stack.pop()
         if tag == "style":
             self.in_style = False
+        if (self.tables and tag == "span" and self.tables[-1]["label"] is not None
+                and len(self.stack) == self.tables[-1]["label"]["depth"]):
+            lab = self.tables[-1]["label"]
+            self.tables[-1]["label"] = None
+            if cell_label(lab["text"]) != lab["expected"]:
+                self.err("<span class=\'uo-cell-label\'> text %r does not equal its column's header text %r"
+                         % (cell_label(lab["text"]), lab["expected"]))
+        if self.tables and tag == "td" and not self.tables[-1].get("cell_seen_label", True):
+            self.err("<td> without its <span class='uo-cell-label'>: the visible narrow-width label "
+                     "is the operable header representation and may not be dropped")
+        if self.tables and tag == "th" and self.tables[-1]["text"] is not None:
+            self.tables[-1]["labels"].append(cell_label(self.tables[-1]["text"]))
+            self.tables[-1]["text"] = None
+        if tag == "table" and self.tables:
+            self.tables.pop()
 
     def handle_data(self, data):
         if self.in_style:
             self.styles[-1] += data
+        if self.tables and self.tables[-1]["text"] is not None:
+            self.tables[-1]["text"] += data
+        if self.tables and self.tables[-1]["label"] is not None:
+            self.tables[-1]["label"]["text"] += data
+
+    def _track_table_start(self, tag, a):
+        """Every body cell carries data-uo-label equal to its column's header text."""
+        if tag == "table":
+            self.tables.append({"labels": [], "column": 0, "text": None, "label": None,
+                                "cell_seen_label": True})
+            return
+        if not self.tables:
+            return
+        t = self.tables[-1]
+        if tag == "tr":
+            t["column"] = 0
+        elif tag == "th":
+            if "thead" in self.tags():
+                t["text"] = ""
+        elif tag == "td":
+            column = t["column"]
+            t["column"] += 1
+            expected = t["labels"][column] if column < len(t["labels"]) else None
+            t["cell_seen_label"] = False
+            if "data-uo-label" not in a:
+                self.err("<td> without data-uo-label")
+            elif a["data-uo-label"] != expected:
+                self.err("<td data-uo-label=%r> does not equal its column's header text %r" % (a["data-uo-label"], expected))
+        elif tag == "span" and "uo-cell-label" in (a.get("class") or "").split(" ") and t["label"] is None:
+            t["cell_seen_label"] = True
+            t["label"] = {"text": "", "depth": len(self.stack),
+                          "expected": t["labels"][t["column"] - 1] if 0 < t["column"] <= len(t["labels"]) else None}
 
     def _check_attrs(self, tag, a, parent):
         for k, v in a.items():
@@ -1041,6 +1151,8 @@ class _Allowlist(HTMLParser):
                 pass
             elif k == "data-uo-central" and tag == "div" and v == "true" and a.get("data-uo-role") == "question":
                 pass
+            elif k == "data-uo-label" and tag == "td":
+                pass                  # value checked against the column's header text (_track_table_start)
             elif k == "class":
                 self._check_class(tag, v, parent)
             else:
@@ -1051,16 +1163,28 @@ class _Allowlist(HTMLParser):
             self.err("<section> without data-uo-part")
         if tag == "details" and "data-uo-disclose" not in a:
             self.err("<details> without data-uo-disclose")
+        if tag == "details" and "uo-details" not in (a.get("class") or "").split(" "):
+            self.err("<details> without class uo-details")
+        if tag == "caption" and parent != "table":
+            self.err("<caption> outside <table>")
 
     def _check_class(self, tag, v, parent):
         if tag == "code" and parent == "pre" and re.match(r"^language-[a-z0-9+-]+$", v):
             return
-        if v in CHROME_CLASSES.get(tag, ()):
-            return
-        m = re.match(r"^uo-local-([a-z][a-z0-9-]{0,31})$", v)
-        if m and tag in LOCAL_CLASS_ELEMENTS:
-            return
-        self.err("class %r not allowed on <%s>" % (v, tag))
+        # one chrome class, or one local class, or on <details> only "uo-details uo-local-<name>"
+        tokens = v.split(" ")
+        chrome = tokens[0] if tokens[0] in CHROME_CLASSES.get(tag, ()) else None
+        rest = tokens[1:] if chrome else tokens
+        ok = len(rest) <= 1 and all(re.match(r"^uo-local-[a-z][a-z0-9-]{0,31}$", t) and tag in LOCAL_CLASS_ELEMENTS
+                                    for t in rest)
+        if chrome and rest and (tag, chrome) != ("details", "uo-details"):
+            ok = False
+        if not ok or (chrome is None and not rest):
+            self.err("class %r not allowed on <%s>" % (v, tag))
+        elif chrome == "uo-details__body" and parent != "details":
+            self.err("class 'uo-details__body' allowed only on a <div> directly inside <details>")
+        elif chrome == "uo-cell-label" and parent != "td":
+            self.err("class 'uo-cell-label' allowed only on a <span> directly inside <td>")
 
 
 def check_final_html(doc, n_styles):
