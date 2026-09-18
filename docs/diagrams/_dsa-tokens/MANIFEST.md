@@ -93,8 +93,11 @@ font CDN. This mirror exists to prevent that.
 
 - Any file in `_dsa-tokens/` (including this manifest) is overwritten on the next
   deliberate re-sync. Local changes are silently lost.
-- To pick up upstream changes (palette, type, fonts, or — later — Spectral State),
-  re-sync from the new commit, regenerate this manifest, and bump the consuming
-  diagrams' `render-vN` stamp.
+- To pick up upstream changes, re-sync from the new commit, regenerate this
+  manifest, and classify the effect on each consuming diagram under its own
+  `source-vN` // `render-vN` contract.
+- Advance `render-vN` and regenerate any committed raster only when rendered
+  output actually changes. A re-sync or pin advance does not itself change a
+  render.
 - To propose changes to the tokens themselves, hand them up to the
   `design-system-ASK` control surface — never edit them here.
