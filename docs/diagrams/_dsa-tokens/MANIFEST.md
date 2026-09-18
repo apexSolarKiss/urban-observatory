@@ -81,10 +81,15 @@ diagrams-interactive-spine.css`. Color on the interactive surface encodes
 
 ## Binding
 
-This manifest binds the rendered diagram files in `docs/diagrams/` to a known
-upstream `design-system-ASK` state (current pins: `colors_and_type.css` @ `067691a`, `spectral-state.css` + fonts @ `1231d03`; prior `2bbab41`). The diagram `<head>` records the
-`source-vN` / `render-vN` stamp; this manifest records the upstream pin. If the
-two diverge, the diagram is reading tokens that have drifted from its audit point.
+This manifest records the vendored owner-carrier pins: the upstream
+`design-system-ASK` state each file listed above was copied from (current
+pins: `colors_and_type.css` @ `067691a`, `spectral-state.css` + fonts @
+`1231d03`; prior `2bbab41`). Each diagram's `<head>` records a separate
+identity, its `source-vN` // `render-vN` tuple: the authored source and the
+rendered output. The two planes advance independently, and a pin advance alone
+changes neither tuple. Drift means the vendored bytes differ from this manifest,
+or a diagram's tuple no longer describes its own source or output — not that
+the pin and a tuple differ.
 
 The diagram files do **not** hot-link to live `design-system-ASK` CSS or to any
 font CDN. This mirror exists to prevent that.
