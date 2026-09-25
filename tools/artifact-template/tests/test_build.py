@@ -164,7 +164,7 @@ class Positives(RenderCase):
         r = self.render(with_table())
         h = r["html"]
         self.assertEqual(r["parts"], ["01", "02", "03", "04", "06", "08", "10"])
-        self.assertIn('<section data-uo-part="03">', h)
+        self.assertIn('<section data-uo-part="03" id="uo-part-03">', h)
         self.assertIn('<div data-uo-role="question" data-uo-central="true">', h)
         self.assertIn('<div data-uo-role="finding">', h)
         for cls in ("question-detail", "evidence", "provenance"):
@@ -175,8 +175,8 @@ class Positives(RenderCase):
         r = self.render(CONFIRMATION)
         self.assertEqual(r["parts"], ["01", "02", "07", "10"])
         h = r["html"]
-        self.assertIn('<section data-uo-part="01">\n<div class="uo-status-rail">', h)
-        self.assertRegex(h, r'<section data-uo-part="10">\n<footer class="uo-foot">')
+        self.assertIn('<section data-uo-part="01" id="uo-part-01">\n<div class="uo-status-rail">', h)
+        self.assertRegex(h, r'<section data-uo-part="10" id="uo-part-10">\n<footer class="uo-foot">')
 
     def test_all_ten_parts_render_in_order(self):
         src = GUIDED
@@ -186,7 +186,10 @@ class Positives(RenderCase):
         src = mutate(src, ":::part 10\n", ":::part 09\nSynthetic response format.\n:::\n\n:::part 10\n")
         r = self.render(src)
         self.assertEqual(r["parts"], ["01", "02", "03", "04", "05", "06", "06", "07", "08", "09", "10"])
-        self.assertEqual(re.findall(r'<section data-uo-part="(\d\d)">', r["html"]), r["parts"])
+        self.assertEqual(re.findall(r'<section data-uo-part="(\d\d)" id="uo-part-\d\d(?:-\d+)?">', r["html"]), r["parts"])
+        self.assertEqual(re.findall(r'<section data-uo-part="\d\d" id="([a-z0-9-]+)">', r["html"]),
+                         ["uo-part-01", "uo-part-02", "uo-part-03", "uo-part-04", "uo-part-05", "uo-part-06",
+                          "uo-part-06-2", "uo-part-07", "uo-part-08", "uo-part-09", "uo-part-10"])
         self.assertEqual(r["counts"]["findings"], 2)
 
     def test_ordered_list_start_and_link_title_allowed(self):
@@ -283,7 +286,7 @@ class Positives(RenderCase):
     def test_local_hook_without_css_allowed(self):
         src = mutate(GUIDED, ":::part 02\n", ":::part 02 local=wide-a\n")
         h = self.render(src)["html"]
-        self.assertIn('<section data-uo-part="02" class="uo-local-wide-a">', h)
+        self.assertIn('<section data-uo-part="02" id="uo-part-02" class="uo-local-wide-a">', h)
         self.assertEqual(len(re.findall(r"<style>", h)), 2)
 
     def test_manifest_emission(self):
@@ -891,6 +894,26 @@ class Provenance(unittest.TestCase):
         os.unlink(os.path.join(self.owner, "_dsa-tokens", "fonts", "InterVariable.woff2"))
         self.assert_fails(self.run_copy(), r"dependency file missing: _dsa-tokens/fonts/InterVariable.woff2")
 
+    def test_U3_wordmark_byte_changed(self):
+        p = os.path.join(self.owner, "_dsa-tokens", "assets", "logo-ASK.svg")
+        with open(p, "ab") as f:
+            f.write(b"\n")
+        self.assert_fails(self.run_copy(), r"dependency bytes do not match the manifest: _dsa-tokens/assets/logo-ASK.svg")
+
+    def test_U3_wordmark_manifest_row_missing(self):
+        p = os.path.join(self.owner, "_dsa-tokens", "MANIFEST.md")
+        with open(p, encoding="utf-8") as f:
+            text = f.read()
+        new = re.sub(r"^\| assets/logo-ASK.svg sha256 .*\n", "", text, flags=re.M)
+        self.assertNotEqual(new, text)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(new)
+        self.assert_fails(self.run_copy(), r"no sha256 row for assets/logo-ASK.svg")
+
+    def test_U3_wordmark_file_missing(self):
+        os.unlink(os.path.join(self.owner, "_dsa-tokens", "assets", "logo-ASK.svg"))
+        self.assert_fails(self.run_copy(), r"dependency file missing: _dsa-tokens/assets/logo-ASK.svg")
+
     def test_F6_planted_pycache_fails_before_it_is_imported(self):
         real = os.path.join(self.owner, "pin_check.py")
         with open(real, encoding="utf-8") as f:
@@ -1287,7 +1310,7 @@ class Presentation(unittest.TestCase):
     def test_U2_theme_dark_resolves_the_template_tokens(self):
         dark = [(sels, d) for m, sels, d in self.tpl if m is None and ':root[data-theme="dark"]' in sels]
         declared = sorted(k for sels, d in dark for k in d)
-        self.assertEqual(declared, ["--artifact-line", "--artifact-line-soft", "--uo-code-bg", "--uo-soft-bg"])
+        self.assertEqual(declared, ["--artifact-line", "--artifact-line-soft", "--uo-code-bg", "--uo-mark", "--uo-soft-bg"])
         for sels, d in dark:
             self.assertEqual(sels, (':root[data-theme="dark"]', ".theme-dark"))
         with open(os.path.join(HERE, "_dsa-tokens", "colors_and_type.css"), encoding="utf-8") as f:
@@ -1301,6 +1324,330 @@ class Presentation(unittest.TestCase):
             if m and "print" in m:
                 self.assertEqual([k for k in d if k.startswith("--")], [])
 
+
+
+BANNERS_01 = """:::part 01
+:::banner review-status
+Synthetic status line.
+:::
+
+:::banner proof "Synthetic proof title"
+Synthetic proof line.
+:::
+:::
+
+"""
+
+
+def with_part_01(src=GUIDED, part=BANNERS_01):
+    return mutate(src, ":::part 01\nSynthetic locator line.\n:::\n\n", part)
+
+
+def vendored_wordmark():
+    with open(os.path.join(HERE, "_dsa-tokens", build.WORDMARK), encoding="utf-8") as f:
+        text = f.read()
+    return (re.search(r'viewBox="([^"]+)"', text).group(1), re.findall(r'<path d="([^"]*)"\s*/>', text))
+
+
+# The masthead's index and every element around it, by the subject of a selector.
+FOCUS_RING_ANCESTORS = re.compile(r"(?:\.uo-(?:index|head|shell|md)\b|^(?::root|html|body|section|header|details|summary|nav|ol|li)\b)",
+                                  re.I)
+
+
+def focus_ring_hazards(css):
+    """Declarations that could hide or clip the browser's own focus ring on the mark slot and the index
+    links: any outline property or `all`, anywhere; overflow, clip or contain on the index or its ancestors."""
+    found = []
+    for m, sels, d in css_rules(css):
+        for prop, value in d.items():
+            name = prop.strip().lower()
+            subjects = [re.split(r"[\s>+~]+", sel.strip())[-1] for sel in sels]
+            if name.startswith("outline") or name == "all" or (
+                    name in ("overflow", "overflow-x", "overflow-y", "clip", "clip-path", "contain")
+                    and any(FOCUS_RING_ANCESTORS.search(x) for x in subjects)):
+                found.append("%s { %s: %s }" % (", ".join(sels), name, value))
+    return found
+
+
+class Identity(RenderCase):
+    """U3: the assigned wordmark, the section ids and the generated section index, and the part-01 banners."""
+
+    def banner(self, body, pattern, head=":::banner proof"):
+        return self.fails(with_part_01(part=":::part 01\n%s\n%s:::\n:::\n\n" % (head, body)), pattern)
+
+    def test_U3_masthead_order_mark_slot_and_index(self):
+        h = self.render(GUIDED)["html"]
+        head = re.search(r'<section data-uo-part="01" id="uo-part-01">\n(.*?)\n</section>', h, flags=re.S).group(1)
+        self.assertRegex(head, r'^<div class="uo-status-rail">.*</div>\n<header class="uo-head">\n'
+                               r'<details class="uo-index"><summary class="uo-index__mark"><svg class="uo-mark" [^>]*>.*</svg>'
+                               r'<span class="uo-index__label">sections</span></summary>\n'
+                               r'<nav class="uo-index__list" aria-label="Sections"><ol>.*</ol></nav>\n</details>\n'
+                               r'<h1>Synthetic guided review</h1>\n<dl class="uo-head__meta">.*</dl>\n</header>\n'
+                               r'<p>Synthetic locator line.</p>$')
+        links = re.findall(r'<li><a href="#([a-z0-9-]+)">([^<]+)</a></li>', h)
+        self.assertEqual(links, [("uo-part-01", "01 locator + masthead"), ("uo-part-02", "02 reviewer brief"),
+                                 ("uo-part-03", "03 decision request"), ("uo-part-04", "04 executive result"),
+                                 ("uo-part-06", "06 finding unit"), ("uo-part-08", "08 unresolved + later-check register"),
+                                 ("uo-part-10", "10 seal + provenance")])
+        self.assertEqual([sid for sid, _ in links], re.findall(r'<section data-uo-part="\d\d" id="([a-z0-9-]+)"', h))
+
+    def test_U3_index_lists_only_the_sections_present(self):
+        h = self.render(CONFIRMATION)["html"]
+        self.assertEqual(re.findall(r'<li><a href="#([a-z0-9-]+)">', h), ["uo-part-01", "uo-part-02", "uo-part-07", "uo-part-10"])
+
+    def test_U3_wordmark_carries_the_vendored_geometry(self):
+        h = self.render(GUIDED)["html"]
+        svg = re.search(r'<svg class="uo-mark" viewBox="([^"]+)" fill="currentColor" role="img" aria-label="ASK">(.*?)</svg>',
+                        h, flags=re.S)
+        self.assertIsNotNone(svg)
+        viewbox, paths = vendored_wordmark()
+        self.assertEqual(svg.group(1), viewbox)
+        self.assertEqual(re.findall(r'<path d="([^"]*)"/>', svg.group(2)), paths)
+        self.assertEqual(len(paths), 3)
+        self.assertEqual(h.count("<svg"), 1)
+
+    def test_U3_repeated_06_ids_and_labels(self):
+        src = mutate(GUIDED, ":::part 08\n", ":::part 06\n:::finding\nA second finding.\n:::\n:::\n\n"
+                                             ":::part 06\n:::finding\nA third finding.\n:::\n:::\n\n:::part 08\n")
+        h = self.render(src)["html"]
+        self.assertEqual(re.findall(r'<section data-uo-part="06" id="([a-z0-9-]+)"', h),
+                         ["uo-part-06", "uo-part-06-2", "uo-part-06-3"])
+        self.assertIn('<li><a href="#uo-part-06-2">06 finding unit 2</a></li>', h)
+        self.assertIn('<li><a href="#uo-part-06-3">06 finding unit 3</a></li>', h)
+
+    def test_U3_authored_section_links_fail(self):
+        """Only the renderer's section index links inside the document; a source link is http(s) only."""
+        http_only = r"only https:// and http:// links are allowed"
+        at_result = "The synthetic executive result.\n"
+        cases = {
+            "inline": mutate(GUIDED, at_result, "See [x](#uo-part-08).\n"),
+            "inline, existing part 01": mutate(GUIDED, at_result, "See [x](#uo-part-01).\n"),
+            "inline, titled": mutate(GUIDED, at_result, 'See [x](#uo-part-08 "t").\n'),
+            "reference": mutate(GUIDED, at_result, "See [x][r].\n\n[r]: #uo-part-08\n"),
+            "absent part": mutate(GUIDED, at_result, "See [x](#uo-part-05).\n"),
+            "malformed": mutate(GUIDED, at_result, "See [x](#uo-part-11).\n"),
+            "bare #": mutate(GUIDED, at_result, "See [x](#).\n"),
+            "table cell": with_table(table=TABLE.replace("| first claim |", "| [x](#uo-part-08) |")),
+            "table header": with_table(table=TABLE.replace("| Claim |", "| [x](#uo-part-08) |")),
+            "disclosure body": mutate(GUIDED, "Field-level listing.\n", "Field-level listing, [x](#uo-part-08).\n"),
+            "banner body": with_part_01(part=":::part 01\n:::banner proof\nSee [x](#uo-part-08).\n:::\n:::\n\n"),
+        }
+        for name, src in cases.items():
+            with self.subTest(form=name):
+                self.reset_tmp()
+                self.fails(src, http_only)
+
+    def test_U3_banners_render_with_generated_flags(self):
+        h = self.render(with_part_01())["html"]
+        self.assertIn('</header>\n<div class="uo-reviewer-status">\n<p class="uo-reviewer-status__flag">review status</p>\n'
+                      '<div class="uo-reviewer-status__body">\n<p>Synthetic status line.</p>\n</div>\n</div>\n'
+                      '<div class="uo-proof">\n<p class="uo-proof__flag">proof of assembly</p>\n'
+                      '<p class="uo-proof__title">Synthetic proof title</p>\n'
+                      '<div class="uo-proof__body">\n<p>Synthetic proof line.</p>\n</div>\n</div>\n</section>', h)
+
+    def test_U3_banners_keep_source_order(self):
+        h = self.render(with_part_01(part=":::part 01\nA locator line.\n\n:::banner proof\nP.\n:::\n\n"
+                                          ":::banner review-status\nR.\n:::\n:::\n\n"))["html"]
+        self.assertLess(h.index("<p>A locator line.</p>"), h.index('<div class="uo-proof">'))
+        self.assertLess(h.index('<div class="uo-proof">'), h.index('<div class="uo-reviewer-status">'))
+
+    def test_U3_proof_without_title_and_title_escaped(self):
+        h = self.render(with_part_01(part=':::part 01\n:::banner proof\nA line.\n:::\n:::\n\n'))["html"]
+        self.assertNotIn('class="uo-proof__title"', h)
+        self.reset_tmp()
+        h = self.render(with_part_01(part=':::part 01\n:::banner proof "A <b> & title"\nA line.\n:::\n:::\n\n'))["html"]
+        self.assertIn('<p class="uo-proof__title">A &lt;b&gt; &amp; title</p>', h)
+
+    def test_U3_banner_outside_part_01_fails(self):
+        self.fails(mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n",
+                          "What this synthetic document tests.\n\n:::banner proof\nA line.\n:::\n"),
+                   r":::banner is allowed directly inside :::part 01 only, not :::part 02")
+
+    def test_U3_banner_at_top_level_fails(self):
+        self.fails(mutate(GUIDED, ":::part 02\n", ":::banner proof\nA line.\n:::\n\n:::part 02\n"),
+                   r":::banner is allowed directly inside :::part 01 only")
+
+    def test_U3_repeated_banner_fails(self):
+        self.fails(with_part_01(part=":::part 01\n:::banner review-status\nA.\n:::\n:::banner review-status\nB.\n:::\n:::\n\n"),
+                   r"part 01 carries at most one :::banner review-status")
+
+    def test_U3_banner_kind_and_title_rules(self):
+        cases = [
+            (":::banner\n", r":::banner takes one kind from review-status, proof, first"),
+            (":::banner approval\n", r":::banner takes one kind from review-status, proof, first"),
+            (":::banner \"T\" proof\n", r":::banner takes one kind from review-status, proof, first"),
+            (":::banner proof proof\n", r"repeated token|takes one kind"),
+            (":::banner review-status \"T\"\n", r"only :::banner proof takes a quoted title"),
+            (":::banner proof \"A\" \"B\"\n", r"at most one non-empty quoted title"),
+            (":::banner proof \"\"\n", r"at most one non-empty quoted title"),
+            (":::banner proof \"​\"\n", r"at most one non-empty quoted title"),
+            (":::banner proof local=x\n", r"takes no local= hook"),
+        ]
+        for head, pattern in cases:
+            with self.subTest(head=head):
+                self.reset_tmp()
+                self.fails(with_part_01(part=":::part 01\n%sA line.\n:::\n:::\n\n" % head), pattern)
+
+    def test_U3_banner_holds_markdown_only(self):
+        self.banner(TABLE, r":::table sits inside :::banner proof \(line \d+\); a banner holds Markdown only")
+        self.reset_tmp()
+        self.banner("> A quoted line.\n", r"holds a quotation; its rule would draw a second edge inside the banner's ruled frame")
+        self.reset_tmp()
+        self.fails(with_part_01(part=":::part 01\n:::banner review-status\n- a list item\n\n  > nested quote\n:::\n:::\n\n"),
+                   r":::banner review-status \(line \d+\) holds a quotation")
+        self.reset_tmp()
+        self.banner("## A heading\n", r"holds a heading; a banner carries its flag and title only")
+
+    def test_U3_empty_banner_fails(self):
+        self.fails(with_part_01(part=":::part 01\n:::banner review-status\n​\n:::\n:::\n\n"),
+                   r":::banner review-status \(line \d+\) is empty")
+
+    def test_U3_banner_counts_as_part_01_content(self):
+        r = self.render(with_part_01(part=":::part 01\n:::banner proof\nA line.\n:::\n:::\n\n"))
+        self.assertEqual(r["parts"][0], "01")
+
+    def test_U3_wordmark_svg_rejects_other_shapes(self):
+        good = b'<?xml version="1.0"?>\n<svg viewBox="0 0 10 10" fill="currentColor"><path d="M0 0h1z"/></svg>\n'
+        self.assertEqual(build.wordmark_svg(good), '<svg class="uo-mark" viewBox="0 0 10 10" fill="currentColor" '
+                                                   'role="img" aria-label="ASK"><path d="M0 0h1z"/></svg>')
+        bad = [
+            (b'<svg viewBox="0 0 10 10" fill="currentColor"><g><path d="M0"/></g></svg>', r"not one svg of path elements"),
+            (b'<svg viewBox="0 0 10 10" fill="currentColor"><path d="M0" onload="x()"/></svg>', r"not one svg of path elements"),
+            (b'<svg viewBox="0 0 10 10" fill="currentColor"><script>x()</script></svg>', r"not one svg of path elements"),
+            (b'<svg viewBox="0 0 10 10" fill="currentColor"></svg>', r"not one svg of path elements"),
+            (b'<svg viewBox="0 0 10 10" fill="#fff"><path d="M0"/></svg>', r"numeric viewBox or fill=\"currentColor\""),
+            (b'<svg viewBox="url(x)" fill="currentColor"><path d="M0"/></svg>', r"numeric viewBox or fill=\"currentColor\""),
+            (b'<svg fill="currentColor"><path d="M0"/></svg>', r"numeric viewBox or fill=\"currentColor\""),
+            (b'<svg viewBox="0 0 10 10" fill="currentColor" transform="scale(-1 1)"><path d="M0"/></svg>',
+             r"carries svg attributes other than id, xmlns, viewBox and fill, each once"),
+            (b'<svg viewBox="0 0 10 10" fill="currentColor" style="fill:red"><path d="M0"/></svg>',
+             r"carries svg attributes other than id, xmlns, viewBox and fill, each once"),
+            (b'<svg data-viewBox="0 0 10 10" viewBox="-5 0 10 10" fill="currentColor"><path d="M0"/></svg>',
+             r"carries svg attributes other than id, xmlns, viewBox and fill, each once"),
+            (b'<svg viewBox="0 0 10 10" fill="currentColor" fill="#000"><path d="M0"/></svg>',
+             r"carries svg attributes other than id, xmlns, viewBox and fill, each once"),
+            (b'<svg viewBox="0 0 10 10" fill=currentColor><path d="M0"/></svg>',
+             r"carries svg attributes other than id, xmlns, viewBox and fill, each once"),
+        ]
+        for data, pattern in bad:
+            with self.subTest(data=data):
+                with self.assertRaises(build.BuildError) as cm:
+                    build.wordmark_svg(data)
+                self.assertRegex(str(cm.exception), pattern)
+
+    def test_U3_allowlist_rejects_misplaced_identity_chrome(self):
+        h = self.render(with_part_01())["html"]
+        svg = re.search(r'<svg class="uo-mark".*?</svg>', h, flags=re.S).group(0)
+        nav = re.search(r'<nav class="uo-index__list".*?</nav>', h, flags=re.S).group(0)
+        brief = "<p>What this synthetic document tests, and what not to judge.</p>"
+        bad = [
+            (h.replace(' id="uo-part-03"', ''), r"<section> without its id"),
+            (h.replace(' id="uo-part-03"', ' id="uo-part-05"'), r"<section id='uo-part-05'> does not name its part '03'"),
+            (h.replace(' id="uo-part-03"', ' id="x"'), r"<section id='x'> does not name its part '03'"),
+            (h.replace('href="#uo-part-10"', 'href="#uo-part-09"'), r"the section index must link every section, in order"),
+            (h.replace('href="#uo-part-01"', 'href="#top"'), r"a section-index link names a section id, #uo-part-NN"),
+            (h.replace('href="#uo-part-01"', 'href="#uo-part-01-1"'), r"a section-index link names a section id, #uo-part-NN"),
+            (h.replace('href="#uo-part-01"', 'href="#UO-PART-01"'), r"a section-index link names a section id, #uo-part-NN"),
+            (h.replace(' id="uo-part-03"', ' id="uo-part-03-1"'), r"<section id='uo-part-03-1'> does not name its part '03'"),
+            (h.replace(' id="uo-part-03"', ' id="uo-part-3"'), r"<section id='uo-part-3'> does not name its part '03'"),
+            (h.replace(brief, brief + '<p><a href="#uo-part-08">x</a></p>'), r"only https:// and http:// links are allowed"),
+            (h.replace(brief, brief + svg), r"<svg> is the masthead's wordmark only, in the mark slot"),
+            (h.replace(svg, svg + svg), r"exactly one <svg>, the masthead's wordmark, required \(found 2\)"),
+            (h.replace(svg, ""), r"exactly one <svg>, the masthead's wordmark, required \(found 0\)"),
+            (h.replace('aria-label="ASK"', 'aria-label="Other"'), r"<svg> carries the wordmark's attributes only"),
+            (h.replace('role="img" aria-label="ASK">', 'role="img" aria-label="ASK">text'), r"text inside the wordmark"),
+            (h.replace('role="img" aria-label="ASK">', 'role="img" aria-label="ASK"><span>x</span>'),
+             r"the wordmark holds path elements only"),
+            (h.replace(brief, brief + '<p><path d="M0"></path></p>'), r"<path> outside the wordmark"),
+            (h.replace(brief, brief + nav), r"<nav> is the section index's list only"),
+            (h.replace('aria-label="Sections"', 'aria-label="Parts"'), r"<nav> carries aria-label Sections"),
+            (h.replace('<details class="uo-index">', '<details class="uo-index" data-uo-disclose="evidence">'),
+             r"the section index is not an authored disclosure"),
+            (h.replace(brief, brief + '<details class="uo-index"><summary>x</summary></details>'),
+             r"<details class='uo-index'> is the masthead's section index only"),
+            (h.replace(brief, brief + '<div class="uo-proof"><p class="uo-proof__flag">x</p></div>'),
+             r"<div class='uo-proof'> sits only directly in part 01"),
+            (h.replace(brief, brief + '<p class="uo-reviewer-status__flag">x</p>'),
+             r"class 'uo-reviewer-status__flag' sits only directly in its <div class='uo-reviewer-status'>"),
+            (h.replace('<p class="uo-proof__title">', '<p class="uo-reviewer-status__flag">'),
+             r"class 'uo-reviewer-status__flag' sits only directly in its <div class='uo-reviewer-status'>"),
+            (h.replace('<li><a href="#uo-part-08">08 unresolved + later-check register</a></li>', ''),
+             r"the section index must link every section, in order"),
+            (h.replace('<li><a href="#uo-part-02">02 reviewer brief</a></li><li><a href="#uo-part-03">03 decision request</a></li>',
+                       '<li><a href="#uo-part-03">03 decision request</a></li><li><a href="#uo-part-02">02 reviewer brief</a></li>'),
+             r"the section index must link every section, in order"),
+            (h.replace(nav, '<nav class="uo-index__list" aria-label="Sections"><ol></ol></nav>'),
+             r"the section index must link every section, in order"),
+            (h.replace('<h1>', '<details class="uo-index"><summary>x</summary></details>\n<h1>'),
+             r"exactly one section index, <details class='uo-index'>, required \(found 2\)"),
+            (h.replace('</summary>\n<nav', '</summary><summary class="uo-index__mark">y</summary>\n<nav'),
+             r"exactly one mark slot, <summary class='uo-index__mark'>, required \(found 2\)"),
+        ]
+        for doc, pattern in bad:
+            with self.subTest(pattern=pattern):
+                self.assertNotEqual(doc, h)
+                with self.assertRaises(build.BuildError) as cm:
+                    build.check_final_html(doc, 2)
+                self.assertRegex(str(cm.exception), pattern)
+
+    def test_U3_repeated_section_id_fails(self):
+        src = mutate(GUIDED, ":::part 08\n", ":::part 06\n:::finding\nA second finding.\n:::\n:::\n\n:::part 08\n")
+        h = self.render(src)["html"]
+        with self.assertRaises(build.BuildError) as cm:
+            build.check_final_html(h.replace(' id="uo-part-06-2"', ' id="uo-part-06"'), 2)
+        self.assertRegex(str(cm.exception), r"section id 'uo-part-06' repeated")
+
+    def test_U3_wordmark_takes_the_design_system_pairing(self):
+        tpl = css_rules(template_css())
+        found = {(m, sels): d["--uo-mark"] for m, sels, d in tpl if "--uo-mark" in d}
+        self.assertEqual(found, {
+            (None, (":root",)): "var(--ask-white)",
+            (None, (':root[data-theme="dark"]', ".theme-dark")): "var(--ask-lavender-ask)",
+            ("(prefers-color-scheme: dark)", (':root:not([data-theme="light"]):not([data-theme="dark"])',)):
+                "var(--ask-lavender-ask)",
+        })
+        self.assertEqual(rules_with(tpl, ".uo-md .uo-mark")[0]["color"], "var(--uo-mark)")
+
+    def test_U3_banner_and_index_rules_outrank_the_prose_rules(self):
+        """The banners and the index sit inside main.uo-md, where MD_CSS's element rules also match them."""
+        tpl, md = css_rules(template_css()), css_rules(build.MD_CSS)
+        pairs = [(".uo-md .uo-reviewer-status__flag", ".uo-md p"), (".uo-md .uo-proof__flag", ".uo-md p"),
+                 (".uo-md .uo-proof__title", ".uo-md p"), (".uo-md .uo-reviewer-status__body p", ".uo-md p"),
+                 (".uo-md .uo-proof__body p", ".uo-md p"), (".uo-md .uo-reviewer-status__body strong", ".uo-md strong"),
+                 (".uo-md .uo-proof__body strong", ".uo-md strong"), (".uo-md .uo-proof__body em", ".uo-md em"),
+                 (".uo-md .uo-index__list ol", ".uo-md ol"), (".uo-md .uo-index__list li", ".uo-md li"),
+                 (".uo-md .uo-index__list a", ".uo-md a")]
+        for ours, prose in pairs:
+            with self.subTest(selector=ours):
+                self.assertTrue(rules_with(tpl, ours), ours)
+                self.assertTrue(rules_with(md, prose), prose)
+                self.assertGreater(specificity(ours), specificity(prose))
+
+    def test_U3_no_rule_hides_or_clips_the_focus_ring(self):
+        """The mark slot and the index links keep the browser's own focus ring, measured in U3. No stylesheet
+        here declares an outline or `all`, and none clips the index or its ancestors; a change to either
+        reopens that measurement."""
+        with open(os.path.join(HERE, "_dsa-tokens", "colors_and_type.css"), encoding="utf-8") as f:
+            foundation = f.read()
+        self.assertEqual(focus_ring_hazards(template_css()) + focus_ring_hazards(build.MD_CSS)
+                         + focus_ring_hazards(foundation), [])
+        for extra in (".uo-md .uo-index__list a:focus-visible { outline: 2px solid transparent; }",
+                      "summary { all: unset; }",
+                      ".uo-md .uo-index__mark { outline-color: rgba(0,0,0,0); }",
+                      ".uo-md .uo-index { overflow: hidden; }",
+                      "main.uo-md { overflow: hidden; }",
+                      "A:FOCUS { OUTLINE: none; }",
+                      ".uo-md .uo-index__mark:focus { outline: none; }"):
+            with self.subTest(extra=extra):
+                self.assertEqual(len(focus_ring_hazards(extra)), 1)
+        self.assertEqual(focus_ring_hazards(".uo-md pre { overflow-x: auto; } .uo-md { overflow-wrap: anywhere; }"), [])
+
+    def test_U3_manifest_states_the_wordmark_embedding(self):
+        m = " ".join(self.render(GUIDED)["manifest_text"].split())
+        self.assertIn("The wordmark is embedded as the masthead's inline svg, carrying the file's viewBox and path data "
+                      "unchanged, so its embedded text is not byte-equal to the hashed file either.", m)
+        dep = build.verify_dependencies()
+        self.assertEqual(dep["files"][-1]["path"], "_dsa-tokens/" + build.WORDMARK)
 
 
 def readme_profiles(readme):
@@ -1353,7 +1700,7 @@ class Consistency(unittest.TestCase):
 
     def test_U2_drifted_chrome_class_table_detected(self):
         readme = self.readme()
-        drifted = readme.replace("details   uo-details\n", "details   uo-details · uo-card\n")
+        drifted = readme.replace("details   uo-details · uo-index\n", "details   uo-details · uo-index · uo-card\n")
         self.assertNotEqual(drifted, readme)
         self.assertNotEqual(readme_chrome_classes(drifted), build.CHROME_CLASSES)
 

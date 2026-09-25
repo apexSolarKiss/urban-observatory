@@ -49,16 +49,21 @@ body { margin: 0; min-height: 100vh; }
      left untouched. */
   --artifact-line:      rgba(255, 255, 255, 0.90); /* rules · borders · table lines (light) */
   --artifact-line-soft: rgba(255, 255, 255, 0.55); /* fainter dividers (light) */
+  /* The assigned logo-ASK wordmark takes the design system's pairing: white on
+     the light gradient, lavender-ASK on the dark one, never the text color. */
+  --uo-mark: var(--ask-white);
 }
 :root[data-theme="dark"],
 .theme-dark {
   --artifact-line:      var(--line-1);             /* dark: foundation lavender lines read fine */
   --artifact-line-soft: var(--line-2);
+  --uo-mark: var(--ask-lavender-ask);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="dark"]) {
     --artifact-line:      var(--line-1);
     --artifact-line-soft: var(--line-2);
+    --uo-mark: var(--ask-lavender-ask);
   }
 }
 @media (prefers-color-scheme: dark) {
@@ -153,6 +158,24 @@ body { margin: 0; min-height: 100vh; }
 .uo-status-rail__sep { display: inline-block; width: 1px; height: 0.9em; background: var(--artifact-line-soft); }
 
 .uo-head { margin: 0 0 var(--space-7); }
+/* ── Mark slot + section index: the assigned wordmark discloses an index of the
+   document's parts, with no script. Structure only; its values stay provisional
+   until the unit that adopts the final presentation (U6). ─────────────── */
+.uo-md .uo-index { margin: 0 0 var(--space-5); }
+.uo-md .uo-index__mark { display: flex; align-items: center; gap: var(--space-3); cursor: pointer; width: max-content; list-style: none; }
+.uo-md .uo-index__mark::-webkit-details-marker { display: none; }
+.uo-md .uo-mark { display: block; height: 28px; width: auto; color: var(--uo-mark); }
+.uo-md .uo-index__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.uo-md .uo-index__list ol { margin: var(--space-3) 0 0; padding-left: var(--space-5); font-family: var(--font-mono); font-size: 12px; }
+.uo-md .uo-index__list li { margin: 0 0 var(--space-1); }
+.uo-md .uo-index__list a { color: inherit; border-bottom: 1px solid var(--artifact-line); text-decoration: none; }
 .uo-head__eyebrow {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -216,7 +239,9 @@ body { margin: 0; min-height: 100vh; }
 .uo-head__provenance code { font-family: var(--font-mono); font-size: 0.86em; background: var(--uo-code-bg); padding: 1px 5px; border-radius: var(--radius-xs); }
 
 /* ── Reviewer-status banner (render-only; disambiguates review status) ─ */
-.uo-reviewer-status {
+/* The renderer emits both banners inside main.uo-md, so their rules are scoped
+   there: the renderer's .uo-md prose rules would otherwise outrank them. */
+.uo-md .uo-reviewer-status {
   margin: 0 0 var(--space-7);
   padding: var(--space-5) var(--space-6);
   border: 1px solid var(--ask-emphasis-cyan);
@@ -227,7 +252,7 @@ body { margin: 0; min-height: 100vh; }
   backdrop-filter: blur(20px);
   box-shadow: 0 0 0 1px rgba(0, 190, 255, 0.28), var(--shadow-lg);
 }
-.uo-reviewer-status__flag {
+.uo-md .uo-reviewer-status__flag {
   display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -240,7 +265,7 @@ body { margin: 0; min-height: 100vh; }
   border-radius: var(--radius-xs);
   margin: 0 0 var(--space-4);
 }
-.uo-reviewer-status__body {
+.uo-md .uo-reviewer-status__body {
   font-family: var(--font-sans);
   font-size: var(--fs-small);
   font-weight: var(--fw-extralight);
@@ -248,12 +273,12 @@ body { margin: 0; min-height: 100vh; }
   color: var(--fg-1);
   max-width: 78ch;
 }
-.uo-reviewer-status__body p { margin: 0 0 var(--space-3); }
-.uo-reviewer-status__body p:last-child { margin-bottom: 0; }
-.uo-reviewer-status__body strong { color: var(--fg-1); font-weight: var(--fw-regular); }
+.uo-md .uo-reviewer-status__body p { margin: 0 0 var(--space-3); }
+.uo-md .uo-reviewer-status__body p:last-child { margin-bottom: 0; }
+.uo-md .uo-reviewer-status__body strong { color: var(--fg-1); font-weight: var(--fw-regular); }
 
 /* ── Proof-of-assembly banner (read this first) ─────────────────────── */
-.uo-proof {
+.uo-md .uo-proof {
   margin: 0 0 var(--space-9);
   padding: var(--space-6) var(--space-7);
   border: 1px solid var(--ask-emphasis-violet);
@@ -264,7 +289,7 @@ body { margin: 0; min-height: 100vh; }
   backdrop-filter: blur(20px);
   box-shadow: 0 0 0 1px rgba(170, 64, 255, 0.30), var(--shadow-lg);
 }
-.uo-proof__flag {
+.uo-md .uo-proof__flag {
   display: inline-block;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -277,7 +302,7 @@ body { margin: 0; min-height: 100vh; }
   border-radius: var(--radius-xs);
   margin: 0 0 var(--space-4);
 }
-.uo-proof__title {
+.uo-md .uo-proof__title {
   font-family: var(--font-sans);
   font-size: var(--fs-h3);
   font-weight: var(--fw-light);
@@ -287,16 +312,16 @@ body { margin: 0; min-height: 100vh; }
   margin: 0 0 var(--space-4);
   max-width: 60ch;
 }
-.uo-proof__body {
+.uo-md .uo-proof__body {
   font-size: var(--fs-small);
   font-weight: var(--fw-extralight);
   line-height: 1.6;
   color: var(--fg-1);
   max-width: 76ch;
 }
-.uo-proof__body p { margin: 0 0 var(--space-3); }
-.uo-proof__body strong { font-weight: var(--fw-regular); color: var(--fg-1); }
-.uo-proof__body em { font-style: italic; color: var(--fg-2); }
+.uo-md .uo-proof__body p { margin: 0 0 var(--space-3); }
+.uo-md .uo-proof__body strong { font-weight: var(--fw-regular); color: var(--fg-1); }
+.uo-md .uo-proof__body em { font-style: italic; color: var(--fg-2); }
 .uo-proof__absent {
   list-style: none;
   margin: var(--space-4) 0;
@@ -723,9 +748,9 @@ details.uo-details > .uo-details__body :not(pre) > code { font-family: var(--fon
   marker). It generates the <body> itself: a .uo-shell > main.uo-md wrapper
   around the rendered Markdown, plus a provenance footer. The markup below is
   a minimal example of the body shape build.py emits — it is NOT consumed by
-  the renderer and carries no live content. Operator-side review packaging may
-  add the .uo-reviewer-status / .uo-proof banners (styled in <head>) around the
-  rendered body for specific review packages.
+  the renderer and carries no live content. The .uo-reviewer-status / .uo-proof
+  banners (styled in <head>) are emitted by build.py from a :::banner container
+  in part 01; a specific package's banner text comes from that package's source.
 -->
 <body>
 <div class="uo-shell">

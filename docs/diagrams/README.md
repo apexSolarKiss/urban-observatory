@@ -88,8 +88,12 @@ surface is the only one that consumes Spectral State; **color encodes state only
   separate live navigation surface below: `index.html` carries an ASK-assigned
   Tier-3 value for the current UO front door only. That value does **not**
   propagate into the diagrams, does **not** make UO ASK-the-entity, and does
-  **not** come from `surface-shell`, which ships a mark slot and no mark. Any
-  future independent urban-observatory brand is a separate identity migration.
+  **not** come from `surface-shell`, which ships a mark slot and no mark.
+  Outside this directory, the sealed review documents rendered by
+  [`tools/artifact-template/`](../../tools/artifact-template/README.md) carry
+  the ASK wordmark under an ASK assignment whose scope that template's README
+  records; that value does not reach the diagrams either. Any future
+  independent urban-observatory brand is a separate identity migration.
 - **Light + dark both work** (verified for the architecture tree, both themes).
 - **Pin:** see [`_dsa-tokens/MANIFEST.md`](_dsa-tokens/MANIFEST.md) for the current
   upstream pin (single source of truth — this README does not duplicate fast-aging pin state).
