@@ -4,12 +4,13 @@ Render a urban-observatory human-readable artifact to a sealed, single-file HTML
 
 Takes a canonical Markdown source and produces one self-contained HTML file:
 design-system-ASK token CSS + UO artifact-template overlay + a token-based prose
-stylesheet + base64-embedded fonts, all inlined. The output has no external
+stylesheet + base64-embedded fonts + the assigned wordmark as inline svg, all
+inlined. The output has no external
 dependencies — it opens with full styling from any location (local file, email
 attachment, copied folder) with no network and no sidecar.
 
 This is the REUSABLE rendering machinery for the UO artifact class. Specific
-review packages (e.g. TMK guided-review packages, with their own banners and
+review packages (e.g. TMK guided-review packages, with their own banner text and
 review-orchestration files) are assembled operator-side from this template; they
 are not part of this repo.
 
@@ -152,8 +153,21 @@ GENERATED_PARTS = ("01", "10")          # the renderer generates their chrome
 META_KEYS = ("kind", "title", "id", "round", "classification", "audience")
 TITLE_MAX = 200
 
-CONTAINER_KINDS = ("part", "question", "finding", "disclose", "table")
+CONTAINER_KINDS = ("part", "question", "finding", "disclose", "table", "banner")
 DISCLOSE_CLASSES = ("question-detail", "evidence", "provenance")
+# Part 01's two review banners. The renderer writes each flag; the source
+# supplies the body (and, for proof, an optional title).
+BANNERS = {
+    "review-status": ("uo-reviewer-status", "review status"),
+    "proof": ("uo-proof", "proof of assembly"),
+}
+# The anatomy's part names, as the masthead's section index lists them.
+PART_NAMES = {
+    "01": "locator + masthead", "02": "reviewer brief", "03": "decision request",
+    "04": "executive result", "05": "finding index", "06": "finding unit",
+    "07": "prior-position delta", "08": "unresolved + later-check register",
+    "09": "response / handoff format", "10": "seal + provenance",
+}
 TABLE_ROLES = ("key", "text", "num", "status")
 LOCAL_NAME = re.compile(r"^[a-z][a-z0-9-]{0,31}$")
 CHROME_PARTS = ("01", "10")             # carry generated identity and seal chrome; no local= hook
@@ -163,7 +177,7 @@ RESOURCE_FUNCTION = re.compile(r"(?<![\w-])(-webkit-image-set|image-set|image|cr
 # Final-HTML allowlist.
 BODY_ELEMENTS = frozenset(
     "div section header main footer h1 h2 h3 h4 p ul ol li blockquote pre code em strong a hr br "
-    "table caption thead tbody tr th td details summary dl dt dd span".split()
+    "table caption thead tbody tr th td details summary dl dt dd span nav svg path".split()
 )
 HEAD_ELEMENTS = frozenset(("meta", "title", "style"))
 VOID_ELEMENTS = frozenset(("meta", "br", "hr"))
@@ -171,14 +185,23 @@ VOID_ELEMENTS = frozenset(("meta", "br", "hr"))
 # exist in artifact.template.html or MD_CSS (a test asserts it), and README.md's
 # "Renderer chrome classes" table must list the same set (a test asserts it).
 CHROME_CLASSES = {
-    "div": ("uo-shell", "uo-status-rail", "uo-details__body"),
+    "div": ("uo-shell", "uo-status-rail", "uo-details__body", "uo-reviewer-status", "uo-reviewer-status__body",
+            "uo-proof", "uo-proof__body"),
     "main": ("uo-md",),
     "header": ("uo-head",),
     "dl": ("uo-head__meta",),
-    "span": ("uo-status-rail__primary", "uo-status-rail__sep", "uo-cell-label"),
+    "span": ("uo-status-rail__primary", "uo-status-rail__sep", "uo-cell-label", "uo-index__label"),
     "footer": ("uo-foot",),
-    "details": ("uo-details",),
+    "details": ("uo-details", "uo-index"),
+    "summary": ("uo-index__mark",),
+    "nav": ("uo-index__list",),
+    "svg": ("uo-mark",),
+    "p": ("uo-reviewer-status__flag", "uo-proof__flag", "uo-proof__title"),
 }
+# The assigned ASK wordmark, a vendored build input (README, "Inheritance").
+WORDMARK = "assets/logo-ASK.svg"
+# A section id names its part; a repeated 06 takes -2, -3, ... in order.
+SECTION_ID = re.compile(r"^uo-part-(0[1-9]|10)(-[2-9]|-[1-9][0-9]+)?$")
 LOCAL_CLASS_ELEMENTS = ("section", "div", "details", "table")
 DATA_VALUES = {
     "data-uo-part": PART_NUMBERS,
@@ -267,6 +290,8 @@ class Node:
         self.summary = None       # disclose
         self.roles = None         # table
         self.caption = None       # table
+        self.banner = None        # banner: its kind
+        self.title = None         # banner proof: optional title
         self.local = None
 
     def ancestors(self):
@@ -360,6 +385,8 @@ def _label(node):
         return ":::question central (line %d)" % node.line
     if node.kind == "disclose":
         return ":::disclose %s (line %d)" % (node.disclose, node.line)
+    if node.kind == "banner":
+        return ":::banner %s (line %d)" % (node.banner, node.line)
     return ":::%s (line %d)" % (node.kind, node.line)
 
 
@@ -487,6 +514,20 @@ def _open_container(kind, tokens, lineno, parent, root):
         if not roles:
             raise BuildError("line %d: :::table takes one role per column" % lineno)
         node.roles = roles
+    elif kind == "banner":
+        if node.local:
+            raise BuildError("line %d: :::banner sits in part 01, which carries generated chrome, and takes no local= hook"
+                             % lineno)
+        words = [v for t, v in positional if t == "word"]
+        quoted = [v for t, v in positional if t == "quoted"]
+        if len(words) != 1 or words[0] not in BANNERS or positional[0][0] != "word":
+            raise BuildError("line %d: :::banner takes one kind from %s, first" % (lineno, ", ".join(BANNERS)))
+        if quoted and words[0] != "proof":
+            raise BuildError("line %d: only :::banner proof takes a quoted title" % lineno)
+        if len(quoted) > 1 or (quoted and not has_visible_text(quoted[0])):
+            raise BuildError("line %d: :::banner proof takes at most one non-empty quoted title" % lineno)
+        node.banner = words[0]
+        node.title = quoted[0] if quoted else None
 
     _check_position(node, parent, root)
     return node
@@ -494,6 +535,8 @@ def _open_container(kind, tokens, lineno, parent, root):
 
 def _check_position(node, parent, root):
     at = _label(None if parent is root else parent)
+    if parent is not root and parent.kind == "banner":
+        raise BuildError("line %d: :::%s sits inside %s; a banner holds Markdown only" % (node.line, node.kind, _label(parent)))
     if node.kind != "table" and parent is not root and parent.kind == "disclose":
         raise BuildError("K7: :::%s at line %d sits inside %s; ALWAYS VISIBLE content cannot be disclosed"
                          % (node.kind, node.line, _label(parent)))
@@ -509,6 +552,11 @@ def _check_position(node, parent, root):
     elif node.kind == "table":
         if parent is root:
             raise BuildError("line %d: :::table is allowed inside a part only, not at top level" % node.line)
+    elif node.kind == "banner":
+        if parent is root or parent.kind != "part" or parent.number != "01":
+            raise BuildError("line %d: :::banner is allowed directly inside :::part 01 only, not %s" % (node.line, at))
+        if any(isinstance(c, Node) and c.kind == "banner" and c.banner == node.banner for c in parent.children):
+            raise BuildError("line %d: part 01 carries at most one :::banner %s" % (node.line, node.banner))
     elif node.kind == "disclose":
         chain = [] if parent is root else [parent] + list(parent.ancestors())
         if any(a is not root and a.kind == "part" and a.number == "08" for a in chain):
@@ -577,7 +625,7 @@ def parse_source(text):
                 if len(stack) == 1:
                     raise BuildError("line %d: stray ':::' closes nothing" % lineno)
                 node = stack.pop()
-                if node.kind in ("question", "finding", "disclose") and not node.has_content():
+                if node.kind in ("question", "finding", "disclose", "banner") and not node.has_content():
                     raise BuildError("line %d: %s is empty" % (lineno, _label(node)))
                 continue
             m = re.match(r"^([a-z]+)(?:[ ]+(.*))?$", rest)
@@ -752,6 +800,18 @@ def _render_node(md, node, counts):
     if node.kind == "finding":
         counts["findings"] += 1
         return '<div data-uo-role="finding"%s>\n%s\n</div>' % (_local_attr(node), inner)
+    if node.kind == "banner":
+        if re.search(r"<blockquote\b", inner):
+            raise BuildError("line %d: %s holds a quotation; its rule would draw a second edge inside the banner's "
+                             "ruled frame, so it sits outside the banner" % (node.line, _label(node)))
+        if re.search(r"<h[1-6]\b", inner):
+            raise BuildError("line %d: %s holds a heading; a banner carries its flag and title only" % (node.line, _label(node)))
+        cls, flag = BANNERS[node.banner]
+        out = ['<div class="%s">' % cls, '<p class="%s__flag">%s</p>' % (cls, flag)]
+        if node.title is not None:
+            out.append('<p class="uo-proof__title">%s</p>' % _esc(node.title))
+        out += ['<div class="%s__body">\n%s\n</div>' % (cls, inner), "</div>"]
+        return "\n".join(out)
     if node.kind == "disclose":
         counts["disclosures"] += 1
         local = " uo-local-%s" % node.local if node.local else ""
@@ -761,8 +821,9 @@ def _render_node(md, node, counts):
     raise BuildError("internal: unexpected node %r" % node.kind)
 
 
-def render_body(meta, root, seal_footer):
-    """Returns (body inner HTML, counts, part numbers in order)."""
+def render_body(meta, root, seal_footer, mark):
+    """Returns (body inner HTML, counts, part numbers in order). Each section carries its part's id, and
+    the masthead's section index links to every section the document holds."""
     md = new_markdown()
     counts = {"questions": 0, "findings": 0, "disclosures": 0, "tables": 0}
     parts = [c for c in root.children if isinstance(c, Node)]
@@ -775,28 +836,62 @@ def render_body(meta, root, seal_footer):
         tail = Node("part", 0)
         tail.number = "10"
         parts.append(tail)
+    index, seen = [], {}
     for p in parts:
+        seen[p.number] = seen.get(p.number, 0) + 1
+        k = seen[p.number]
+        suffix = "" if k == 1 else "-%d" % k
+        index.append(("uo-part-%s%s" % (p.number, suffix), "%s %s%s" % (p.number, PART_NAMES[p.number],
+                                                                        "" if k == 1 else " %d" % k)))
+    for p, (sid, _) in zip(parts, index):
         inner = _render_children(md, p, counts)
         chunks = []
         if p.number == "01":
-            chunks.append(_masthead(meta))
+            chunks.append(_masthead(meta, mark, index))
         if inner:
             chunks.append(inner)
         if p.number == "10":
             chunks.append(seal_footer)
-        sections.append('<section data-uo-part="%s"%s>\n%s\n</section>' % (p.number, _local_attr(p), "\n".join(chunks)))
+        sections.append('<section data-uo-part="%s" id="%s"%s>\n%s\n</section>'
+                        % (p.number, sid, _local_attr(p), "\n".join(chunks)))
     return "\n\n".join(sections), counts, [p.number for p in parts]
 
 
-def _masthead(meta):
+def _masthead(meta, mark, index):
     rail_items = [meta["classification"], meta["audience"], meta["kind"], meta["round"]]
     rail = ['<span class="uo-status-rail__primary">%s</span>' % _esc(rail_items[0])]
     for item in rail_items[1:]:
         rail.append('<span class="uo-status-rail__sep"></span><span>%s</span>' % _esc(item))
     dl = "".join("<dt>%s</dt><dd>%s</dd>" % (k, _esc(meta[k])) for k in ("id", "kind", "round"))
+    items = "".join('<li><a href="#%s">%s</a></li>' % (sid, _esc(label)) for sid, label in index)
+    mark_slot = ('<details class="uo-index"><summary class="uo-index__mark">%s<span class="uo-index__label">sections</span>'
+                 '</summary>\n<nav class="uo-index__list" aria-label="Sections"><ol>%s</ol></nav>\n</details>' % (mark, items))
     return ('<div class="uo-status-rail">%s</div>\n'
-            '<header class="uo-head">\n<h1>%s</h1>\n<dl class="uo-head__meta">%s</dl>\n</header>'
-            % ("".join(rail), _esc(meta["title"]), dl))
+            '<header class="uo-head">\n%s\n<h1>%s</h1>\n<dl class="uo-head__meta">%s</dl>\n</header>'
+            % ("".join(rail), mark_slot, _esc(meta["title"]), dl))
+
+
+def wordmark_svg(data):
+    """The vendored wordmark as masthead chrome: its viewBox and path data unchanged, in the one svg the
+    allowlist admits, in the mark slot. Anything but one svg of path elements, with a numeric viewBox and
+    fill="currentColor", fails the build."""
+    text = re.sub(r"^\s*<\?xml[^>]*\?>\s*", "", data.decode("utf-8"))
+    m = re.fullmatch(r'<svg\b([^>]*)>\s*((?:<path d="[^"<>]*"\s*/>\s*)+)</svg>\s*', text)
+    if not m:
+        raise BuildError("the vendored wordmark _dsa-tokens/%s is not one svg of path elements" % WORDMARK)
+    attr = r'\s+([A-Za-z_:][-A-Za-z0-9_:.]*)="([^"<>]*)"'
+    pairs = re.findall(attr, m.group(1))
+    names = [k for k, _ in pairs]
+    if re.sub(attr, "", m.group(1)).strip() or len(set(names)) != len(names) \
+            or not set(names) <= {"id", "xmlns", "viewBox", "fill"}:
+        raise BuildError("the vendored wordmark _dsa-tokens/%s carries svg attributes other than id, xmlns, viewBox "
+                         "and fill, each once" % WORDMARK)
+    a = dict(pairs)
+    if not re.fullmatch(r"[0-9. ]+", a.get("viewBox", "")) or a.get("fill") != "currentColor":
+        raise BuildError("the vendored wordmark _dsa-tokens/%s lacks a numeric viewBox or fill=\"currentColor\"" % WORDMARK)
+    paths = re.findall(r'<path d="([^"<>]*)"\s*/>', m.group(2))
+    return ('<svg class="uo-mark" viewBox="%s" fill="currentColor" role="img" aria-label="ASK">%s</svg>'
+            % (a["viewBox"], "".join('<path d="%s"/>' % d for d in paths)))
 
 
 # ---------------------------------------------------------------------------
@@ -829,7 +924,7 @@ def verify_dependencies():
     if "short" in fields and fields["short"] != commit[:7]:
         raise BuildError("dependency manifest: short %r is not the commit's first 7 characters" % fields["short"])
     record = {"commit": commit, "short": commit[:7], "files": []}
-    for rel in ["colors_and_type.css"] + ["fonts/" + fn for fn in FONTS]:
+    for rel in ["colors_and_type.css"] + ["fonts/" + fn for fn in FONTS] + [WORDMARK]:
         expected = fields.get("%s sha256" % rel)
         if expected is None:
             raise BuildError("dependency manifest: no sha256 row for %s" % rel)
@@ -849,7 +944,7 @@ def verify_dependencies():
 
 def seal_tokens(dep):
     css = dep["files"][0]["data"].decode("utf-8")
-    for entry, fn in zip(dep["files"][1:], FONTS):
+    for entry, fn in zip(dep["files"][1:1 + len(FONTS)], FONTS):
         uri = "data:font/woff2;base64," + base64.b64encode(entry["data"]).decode("ascii")
         pattern = r"src:[^;]*fonts/" + re.escape(fn) + r"[^;]*;"
         css, n = re.subn(pattern, lambda _m: "src: url('" + uri + "') format('woff2');", css, flags=re.S)
@@ -1003,6 +1098,10 @@ class _Allowlist(HTMLParser):
         self.in_style = False
         self.h1_ok = 0
         self.tables = []          # per open <table>: header labels, current column, header text being read
+        self.ids = set()          # section ids
+        self.id_order = []        # section ids, in document order
+        self.index_hrefs = []     # the section index's link targets, in order; checked against id_order
+        self.part = None          # the open section's part
 
     def err(self, msg):
         self.errors.append("%s (output line %d)" % (msg, self.getpos()[0]))
@@ -1055,6 +1154,7 @@ class _Allowlist(HTMLParser):
             if tag not in BODY_ELEMENTS:
                 self.err("element <%s> not allowed" % tag)
             self._check_attrs(tag, a, parent)
+            self._check_place(tag, a.get("class"), parent)
         else:
             self.err("<%s> outside head and body" % tag)
         if tag == "h1":
@@ -1100,6 +1200,8 @@ class _Allowlist(HTMLParser):
             self.tables.pop()
 
     def handle_data(self, data):
+        if self.stack and self.stack[-1][0] in ("svg", "path") and data.strip():
+            self.err("text inside the wordmark")
         if self.in_style:
             self.styles[-1] += data
         if self.tables and self.tables[-1]["text"] is not None:
@@ -1135,11 +1237,50 @@ class _Allowlist(HTMLParser):
             t["label"] = {"text": "", "depth": len(self.stack),
                           "expected": t["labels"][t["column"] - 1] if 0 < t["column"] <= len(t["labels"]) else None}
 
+    def _check_place(self, tag, cls, parent):
+        """Where the masthead's mark slot and the wordmark may sit."""
+        top = self.stack[-1] if self.stack else (None, None)
+        if tag == "details" and cls == "uo-index" and top != ("header", "uo-head"):
+            self.err("<details class='uo-index'> is the masthead's section index only")
+        if tag == "summary" and cls == "uo-index__mark" and top != ("details", "uo-index"):
+            self.err("<summary class='uo-index__mark'> sits only in the section index")
+        if tag == "nav" and top != ("details", "uo-index"):
+            self.err("<nav> is the section index's list only")
+        if tag == "span" and cls == "uo-index__label" and top != ("summary", "uo-index__mark"):
+            self.err("<span class='uo-index__label'> sits only in the mark slot")
+        if tag == "svg" and top != ("summary", "uo-index__mark"):
+            self.err("<svg> is the masthead's wordmark only, in the mark slot")
+        if parent == "svg" and tag != "path":
+            self.err("the wordmark holds path elements only")
+        if tag == "path" and parent != "svg":
+            self.err("<path> outside the wordmark")
+        if parent == "path":
+            self.err("<path> holds nothing")
+        for banner, _ in BANNERS.values():
+            if tag == "div" and cls == banner and (top != ("section", None) or self.part != "01"):
+                self.err("<div class='%s'> sits only directly in part 01" % banner)
+            if cls in (banner + "__flag", banner + "__body", banner + "__title") and top != ("div", banner):
+                self.err("class '%s' sits only directly in its <div class='%s'>" % (cls, banner))
+
     def _check_attrs(self, tag, a, parent):
         for k, v in a.items():
             if k == "href" and tag == "a":
-                if not re.match(r"^https?://", v):
+                if v.startswith("#") and ("nav", "uo-index__list") in self.stack:
+                    # the renderer's section index; authored Markdown cannot reach a nav
+                    if SECTION_ID.match(v[1:]):
+                        self.index_hrefs.append(v[1:])
+                    else:
+                        self.err("<a href=%r>: a section-index link names a section id, #uo-part-NN" % v)
+                elif not re.match(r"^https?://", v):
                     self.err("<a href=%r>: only https:// and http:// links are allowed" % v)
+            elif k == "id" and tag == "section":
+                pass                  # checked below against the section's part
+            elif k in ("viewbox", "fill", "role", "aria-label") and tag == "svg":
+                pass                  # checked below
+            elif k == "d" and tag == "path":
+                pass
+            elif k == "aria-label" and tag == "nav":
+                pass
             elif k == "title" and tag == "a":
                 pass
             elif k == "start" and tag == "ol":
@@ -1161,10 +1302,32 @@ class _Allowlist(HTMLParser):
             self.err("<%s> without a table role" % tag)
         if tag == "section" and "data-uo-part" not in a:
             self.err("<section> without data-uo-part")
-        if tag == "details" and "data-uo-disclose" not in a:
-            self.err("<details> without data-uo-disclose")
-        if tag == "details" and "uo-details" not in (a.get("class") or "").split(" "):
-            self.err("<details> without class uo-details")
+        if tag == "section":
+            sid = a.get("id")
+            if sid is None:
+                self.err("<section> without its id")
+            elif not SECTION_ID.match(sid) or sid[8:10] != a.get("data-uo-part"):
+                self.err("<section id=%r> does not name its part %r" % (sid, a.get("data-uo-part")))
+            elif sid in self.ids:
+                self.err("section id %r repeated" % sid)
+            else:
+                self.ids.add(sid)
+                self.id_order.append(sid)
+            self.part = a.get("data-uo-part")
+        if tag == "svg" and not (a.get("class") == "uo-mark" and a.get("fill") == "currentColor" and a.get("role") == "img"
+                                 and a.get("aria-label") == "ASK" and re.match(r"^[0-9. ]+$", a.get("viewbox", ""))):
+            self.err("<svg> carries the wordmark's attributes only: class uo-mark, a numeric viewBox, "
+                     "fill currentColor, role img, aria-label ASK")
+        if tag == "nav" and a.get("aria-label") != "Sections":
+            self.err("<nav> carries aria-label Sections")
+        if tag == "details" and a.get("class") == "uo-index":
+            if "data-uo-disclose" in a:
+                self.err("the section index is not an authored disclosure")
+        else:
+            if tag == "details" and "data-uo-disclose" not in a:
+                self.err("<details> without data-uo-disclose")
+            if tag == "details" and "uo-details" not in (a.get("class") or "").split(" "):
+                self.err("<details> without class uo-details")
         if tag == "caption" and parent != "table":
             self.err("<caption> outside <table>")
 
@@ -1201,6 +1364,16 @@ def check_final_html(doc, n_styles):
         errors.append("expected %d <style> elements, found %d" % (n_styles, p.counts.get("style", 0)))
     if p.h1_ok != 1 or p.counts.get("h1", 0) != 1:
         errors.append("exactly one <h1>, the masthead title, required")
+    for tag, what in (("svg", "the masthead's wordmark"), ("nav", "the masthead's section index")):
+        if p.counts.get(tag, 0) != 1:
+            errors.append("exactly one <%s>, %s, required (found %d)" % (tag, what, p.counts.get(tag, 0)))
+    for tag, cls, what in (("details", "uo-index", "section index"), ("summary", "uo-index__mark", "mark slot")):
+        n = len(re.findall(r'<%s class="%s"' % (tag, cls), doc))
+        if n != 1:
+            errors.append("exactly one %s, <%s class='%s'>, required (found %d)" % (what, tag, cls, n))
+    if p.index_hrefs != p.id_order:
+        errors.append("the section index must link every section, in order: %s, not %s"
+                      % (" ".join(p.id_order), " ".join(p.index_hrefs)))
     if p.stack:
         errors.append("unclosed elements at end of output: %s" % "/".join(p.tags()))
     for css in p.styles:
@@ -1303,7 +1476,7 @@ def render(source_md, out_html, manifest_path, uo_commit, local_css=None, now=No
         "</footer>"
     ) % (render_ts, uo_commit[:7], dep["short"], _esc(os.path.basename(source_md)), source_sha)
 
-    body_html, counts, part_order = render_body(meta, root, footer)
+    body_html, counts, part_order = render_body(meta, root, footer, wordmark_svg(dep["files"][-1]["data"]))
     doc = (
         head
         + '\n<body>\n<div class="uo-shell">\n\n'
@@ -1340,7 +1513,9 @@ def _package_manifest(**k):
         "Each file below was hashed from the vendored bytes the render read and matched its sha256 row in the",
         "vendored `_dsa-tokens/MANIFEST.md`. The fonts are embedded as base64 of those same bytes. The token",
         "CSS is embedded with its font `src` declarations rewritten to `data:` URIs, so its embedded text is not",
-        "byte-equal to the hashed file. The commit is that manifest's commit row. The mapping from the commit",
+        "byte-equal to the hashed file. The wordmark is embedded as the masthead's inline svg, carrying the",
+        "file's viewBox and path data unchanged, so its embedded text is not byte-equal to the hashed file",
+        "either. The commit is that manifest's commit row. The mapping from the commit",
         "to these bytes is established when the snapshot is re-synced and reviewed; the renderer does not",
         "re-check it against design-system-ASK.",
         "",

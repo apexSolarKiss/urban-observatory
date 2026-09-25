@@ -11,8 +11,9 @@ held operator-side.
 
 Turn a canonical Markdown source into one **self-contained HTML file**:
 [design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) token CSS + the UO artifact-template overlay + a token-based
-prose stylesheet + base64-embedded fonts, all inlined. The output has no external
-dependencies — it opens with full styling from any location (local file, email
+prose stylesheet + base64-embedded fonts + the assigned wordmark as inline svg,
+all inlined. The output has no external dependencies — it opens with full
+styling from any location (local file, email
 attachment, copied folder), no network, no sidecar. That portability is the point:
 review artifacts must survive delivery without a stylesheet or font going missing.
 
@@ -29,6 +30,7 @@ tools/artifact-template/
 └── _dsa-tokens/            VENDORED, PINNED design-system-ASK token snapshot (build input)
     ├── MANIFEST.md         records the upstream commit SHA + per-file sha256
     ├── colors_and_type.css foundational tokens (used verbatim; never edited here)
+    ├── assets/logo-ASK.svg the assigned ASK wordmark (the masthead's mark; see "Inheritance")
     └── fonts/*.woff2        Inter + JetBrains Mono (embedded at build)
 ```
 
@@ -100,6 +102,10 @@ container                          allowed position                         emit
 :::disclose provenance "S"         directly inside :::part 10, at most once
 :::table <role per column> ["C"]   inside a part, around exactly one        data-uo-cell on every th and td;
                                    pipe table                               data-uo-label + label element per td; caption C
+:::banner review-status            directly inside :::part 01, at most      div.uo-reviewer-status: its flag, then
+                                   once                                     its body in div.uo-reviewer-status__body
+:::banner proof ["T"]              directly inside :::part 01, at most      div.uo-proof: its flag, title T if given,
+                                   once                                     then its body in div.uo-proof__body
 ```
 
 - Parts 01 and 10 are generated even when the source omits them. The meta
@@ -107,6 +113,25 @@ container                          allowed position                         emit
   masthead (title; id, kind and round), and 10 always ends with the seal line.
   The masthead title is the document's only `h1`; authored headings use `##`
   to `####`.
+- Every part's `section` carries a stable id, `uo-part-NN`; a repeated 06
+  takes `uo-part-06-2`, `uo-part-06-3` and so on, in order. The masthead opens
+  with the mark slot: the assigned wordmark, followed by the label "sections".
+  Selecting it opens the section index, a native `details` element with no
+  script, holding one link per section the document contains, in order, each
+  labeled with its part number and name. The index works from a local file.
+  These generated links are the only in-document links: a source link is
+  `https://` or `http://` (below).
+- A banner holds Markdown only. The renderer writes its flag ("review status"
+  or "proof of assembly"); the source supplies the body and, for proof, an
+  optional one-line title with visible text. A banner may not hold a
+  container, a heading or a quotation. A banner is the document's own
+  statement, not a represented voice, and a quotation's rule would draw a
+  second edge inside the banner's ruled frame (in the proof banner, a second
+  violet edge), so a quotation sits outside the banner, on its own rail. A
+  banner takes no `local=` hook. Within part 01 a banner sits where the source
+  places it; the build fixes neither its position nor the two banners' order.
+  What a banner may say is checked at package review, as in "Approval before a
+  reviewer sees a document".
 - Table roles are `key`, `text`, `num` and `status`, one per column. Every
   pipe table is wrapped in `:::table`. Column alignment colons are not
   accepted. The build records each column's role as `data-uo-cell` on every
@@ -197,20 +222,29 @@ styled by the template or the renderer's stylesheet.
 
 ```text
 element   renderer chrome classes
-div       uo-shell · uo-status-rail · uo-details__body
+div       uo-shell · uo-status-rail · uo-details__body · uo-reviewer-status · uo-reviewer-status__body · uo-proof · uo-proof__body
 main      uo-md
 header    uo-head
 dl        uo-head__meta
-span      uo-status-rail__primary · uo-status-rail__sep · uo-cell-label
+span      uo-status-rail__primary · uo-status-rail__sep · uo-cell-label · uo-index__label
 footer    uo-foot
-details   uo-details
+details   uo-details · uo-index
+summary   uo-index__mark
+nav       uo-index__list
+svg       uo-mark
+p         uo-reviewer-status__flag · uo-proof__flag · uo-proof__title
 ```
 
 Beyond these, a container may carry its `uo-local-<name>` class (below), and
-a fenced code block's `code` may carry `language-<name>`. A `details` element
-carries `uo-details`, followed by its local class if it has one.
-`uo-details__body` sits only directly inside `details`, and `uo-cell-label`
-only directly inside `td`. Any other class fails the build.
+a fenced code block's `code` may carry `language-<name>`. An authored
+disclosure's `details` carries `uo-details`, followed by its local class if it
+has one. `uo-details__body` sits only directly inside `details`, and
+`uo-cell-label` only directly inside `td`. The section index sits only in the
+masthead, its mark slot only in the index, and the wordmark's `svg`, holding
+`path` elements only, only in the mark slot; a document carries exactly one of
+each, and the index links every section, in order. A banner sits only directly
+in part 01, and its flag, title and body only directly in their banner. Any
+other class or placement fails the build.
 
 ### Payload-local CSS
 
@@ -246,6 +280,9 @@ The build fails, writing nothing, when:
 - a vendored `_dsa-tokens/` file is missing, or its bytes do not match the
   sha256 recorded in `_dsa-tokens/MANIFEST.md`, or that manifest's commit or
   short row is malformed;
+- the vendored wordmark is not one `svg` of `path` elements with a numeric
+  `viewBox` and `fill="currentColor"`, or its `svg` carries any attribute but
+  `id`, `xmlns`, `viewBox` and `fill`;
 - the installed `markdown` is not the pinned version;
 - this directory holds a `__pycache__` directory or a `.pyc` file;
 - the output would not be self-contained (an external `<link>`/`@import`, a
@@ -260,17 +297,25 @@ reference**, following the family tier model:
 - **Tier 1 + Tier 2** (foundational tokens, the ASK palette, Inter + JetBrains
   Mono) are consumed **verbatim** from the vendored `colors_and_type.css`. This
   repo never edits the foundational tokens.
-- **No Tier 3.** No `logo-ASK`, no ASK wordmark, no ASK-as-project chrome. The
-  artifact carries the *design language*, not the design-system's own identity.
+- **Tier 3 by assignment, for review documents only.** ASK has assigned the
+  `logo-ASK` wordmark to the review documents this template renders, as their
+  locally supplied Tier 3. That is the assignment's recorded scope: the
+  wordmark heads each such document's masthead and opens its section index.
+  It is an assignment, not inheritance, and it does not make
+  urban-observatory ASK-the-entity. No other design-system identity is
+  carried: no "ASK Design System" chrome. The review semantics — the anatomy,
+  the banners, the table roles — are urban-observatory's own. The token CSS
+  header's "TIER 3 — ASK instance identity (NOT inherited by children)" stays
+  true under an assignment.
 - **No fork.** The diagram-tree scaffold's light-mode fix was *mirrored as a
   pattern* (see the light/dark contract below), not copied. `diagrams.css` is not
   vendored, imported, or forked.
 
 ### Vendored token snapshot — a build input, not a source of truth
 
-`_dsa-tokens/` is a **pinned snapshot** of the design-system tokens + fonts,
-vendored so artifact builds are **reproducible without a sibling checkout** of
-`design-system-ASK`. It is explicitly:
+`_dsa-tokens/` is a **pinned snapshot** of the design-system tokens + fonts and
+the assigned wordmark, vendored so artifact builds are **reproducible without a
+sibling checkout** of `design-system-ASK`. It is explicitly:
 
 - **a build dependency snapshot, not a fork** and not a second source of truth;
 - **pinned** — `_dsa-tokens/MANIFEST.md` records the exact upstream commit SHA and
@@ -324,8 +369,12 @@ Design principles:
 
 The template's dark selectors are the foundation's own
 (`:root[data-theme="dark"], .theme-dark`), so `--artifact-line`,
-`--artifact-line-soft`, `--uo-code-bg` and `--uo-soft-bg` resolve dark wherever
-the foundation's tokens do.
+`--artifact-line-soft`, `--uo-code-bg`, `--uo-mark` and `--uo-soft-bg` resolve
+dark wherever the foundation's tokens do.
+
+The wordmark takes the design system's pairing, never the text color:
+`--uo-mark` is `--ask-white` on the light gradient and `--ask-lavender-ask` on
+the dark one.
 
 **Print.** The page prints on its own theme ground
 (`print-color-adjust: exact` on the root), as it reads on screen. Without it the
@@ -354,9 +403,9 @@ operator-side, and are **not** committed here:
 - any project evidence, absorption memos, or private working material.
 
 Review-package banners (`.uo-reviewer-status`, `.uo-proof`) are styled by the
-template, but a *specific* package's banner text and review-orchestration files
-are assembled operator-side. `build.py` cannot emit them yet: raw HTML fails
-the build and the final-HTML allowlist rejects their classes.
+template and emitted by `build.py` from a `:::banner` container in part 01. A
+*specific* package's banner text belongs to that package's source, and its
+review-orchestration files are assembled operator-side.
 
 ## Review-document anatomy
 
@@ -390,9 +439,10 @@ part keeps visible. It does not require a document to carry every part.
 ```
 
 Parts must appear in this order. The review-status and proof-of-assembly
-banners the template styles belong to 01; the rendered footer is 10's seal
-line. Review questions and response templates that a package carries as
-separate orchestration files stay there; they are not moved into the document.
+banners belong to 01, and the build places them there; the rendered footer is
+10's seal line. Review questions and response templates that a package carries
+as separate orchestration files stay there; they are not moved into the
+document.
 
 A document declares one kind, and its kind decides which parts are required.
 Any other part appears only when it has content — never as an empty band or a
@@ -533,8 +583,8 @@ Steps 2 and 3 are this template's job. Steps 1, 4, 5 and 6 are operator-side.
 ## Re-syncing the token snapshot
 
 When the design-system tokens change upstream and a refresh is wanted (a
-deliberate operator decision), re-copy `colors_and_type.css` + `fonts/*.woff2`
-from the target [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) commit, regenerate `_dsa-tokens/MANIFEST.md`
+deliberate operator decision), re-copy `colors_and_type.css`, `fonts/*.woff2`
+and `assets/logo-ASK.svg` from the target [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) commit, regenerate `_dsa-tokens/MANIFEST.md`
 with the new commit SHA and per-file hashes, and render new artifacts at the
 new pin. A sealed artifact keeps the pin it was sealed with and is never
 regenerated to track the new state. Until a re-sync lands, builds are pinned to
