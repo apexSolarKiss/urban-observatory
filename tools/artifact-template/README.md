@@ -207,8 +207,10 @@ container                          allowed position                         emit
   headers take the label role and its values the dense cell role (mono at the
   Small step, tabular figures). Any other table is a narrative table: label
   headers and document-body cells, the design-system `output-artifact` v3
-  rule until the shared table composition lands. Which tables are dense is the
-  author's declaration, never inferred.
+  rule. A table's text takes these shared roles; its geometry stays UO's
+  (below), and UO does not adopt the design system's document table
+  composition, which scrolls a table sideways in its own box. Which tables are
+  dense is the author's declaration, never inferred.
 - The table's geometry is UO's: a 1px `--artifact-line` grid, a 2px rule under
   the header row, and in a dense table the 1px 6px cell padding of ASK's
   2026-06-16 dense-table direction. A `num` column, header included, is
@@ -217,15 +219,18 @@ container                          allowed position                         emit
   It renders as the table's `caption` in the metadata role, which keeps the
   case the author wrote: a caption carries payload text whose case can carry
   meaning (`mW`, `pH`).
-- A header takes the label role, which sets its text in capitals. Where a
-  header's case carries meaning (`mW` is not `MW`), its column role carries
-  the one modifier `:authored-case`, as in `:::table dense key text
-  num:authored-case`. That column's header, and its label in every body cell,
-  sit in `span.uo-authored-case`, which keeps the case the author wrote and
-  changes no other value of the label role; every other header keeps the
-  capitals. An authored-case header must contain visible text, and holds text
-  and inline emphasis only. The span is a UO value on the label role, declared
-  to the rendered check as a profile with its exact count.
+- A header takes the label role, which sets its ordinary text in capitals.
+  Inline code in a header keeps its source case, in the header row and in the
+  header's repeated label in every body cell alike: the label role leaves code
+  in the case its source wrote. Where a header's case carries meaning (`mW` is
+  not `MW`), its column role carries the one modifier `:authored-case`, as in
+  `:::table dense key text num:authored-case`. That column's header, and its
+  label in every body cell, sit in `span.uo-authored-case`, which keeps the
+  case the author wrote and changes no other value of the label role; every
+  other header's ordinary text keeps the capitals. An authored-case header
+  must contain visible text, and holds text and inline emphasis only. The span
+  is a UO value on the label role, declared to the rendered check as a profile
+  with its exact count.
 - Every body cell carries `data-uo-label`, its column's header text with tags
   removed and whitespace collapsed, and a `span.uo-cell-label` holding that
   header cell's own inline markup, in the label role. The build checks the
@@ -480,7 +485,9 @@ register. This repo holds frozen copies for reproducible rendering.
 ## Light / dark contract (Class B v3)
 
 This template follows the [design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) **Class B `output-artifact` v3**
-contract (`c7de5ff`). **Foreground is inherited, not rebound.** The
+contract, at the revision the two snapshot manifests record
+(`_dsa-tokens/MANIFEST.md`, `_dsa-surface/MANIFEST.md`).
+**Foreground is inherited, not rebound.** The
 foundation resolves `--fg-1/-2/-3` to **dark ink in light**
 (`#6A637F` / `#827399` / `rgba(130,115,153,.62)`) and lavender in dark, and
 every text role sets its foreground through them. The template adds **no local
