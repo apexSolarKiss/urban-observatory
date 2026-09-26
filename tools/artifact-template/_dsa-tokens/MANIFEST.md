@@ -6,21 +6,23 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `6a824b9ea38f783aae61bd2f2d1c02497b347fea` |
-| short | `6a824b9` |
-| commit date | `2026-09-16 11:53:26 -0700` |
-| commit subject | `docs(output-artifact): permit the logo-ASK wordmark on an explicit ASK assignment (#153)` |
+| commit | `c7de5ff283961aaeede6495823548be40e57c206` |
+| short | `c7de5ff` |
+| commit date | `2026-09-25 18:35:40 -0700` |
+| commit subject | `surfaces: a visible keyboard-focus outline on the disclosure trigger (PRG-020) (#161)` |
 | synced at | `2026-09-25` |
 | consuming project | `urban-observatory` |
 | files copied | `colors_and_type.css`, `fonts/InterVariable.woff2`, `fonts/InterVariable-Italic.woff2`, `fonts/JetBrainsMono.woff2`, `fonts/JetBrainsMono-Italic.woff2`, `assets/logo-ASK.svg` |
-| colors_and_type.css sha256 | `fd8207bf361eff3e4071f699b87a7f29c829a0e3605c551b5f310ae52da92e9a` |
+| colors_and_type.css sha256 | `4fed9d796a0d51072802f430b9528459a5cbb9c709fa1964bf5b13f18464122a` |
 | fonts/InterVariable.woff2 sha256 | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | fonts/InterVariable-Italic.woff2 sha256 | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | fonts/JetBrainsMono.woff2 sha256 | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | fonts/JetBrainsMono-Italic.woff2 sha256 | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 | assets/logo-ASK.svg sha256 | `76babfb09522a9236f8ec43e7d72ce4c3f32be41982962cd14505493b7664e69` |
 
-**Re-sync 2026-09-25 (same pin `6a824b9`; one file added):** copies `assets/logo-ASK.svg`, the `logo-ASK` wordmark, from the pinned commit, because review documents rendered by this template carry that wordmark by ASK's assignment (see `tools/artifact-template/README.md`, "Inheritance from design-system-ASK"). The file is byte-identical at `6a824b9` and at `e161f59`, so the snapshot keeps a single pin. The token CSS and the four fonts are unchanged (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync carry the wordmark.
+**Re-sync 2026-09-25 at U6 (`6a824b9` → `c7de5ff`, `colors_and_type.css` only; one sibling snapshot added):** crosses one carrier-changing owner event, **#154** (`31e283e`): the new `--tracking-caption` token (`0.14em`) and the foundation `.caption` class bound to it. The renderer emits no `.caption`, so today's output does not change; the document register's modules read `--tracking-caption`, so the register cannot be adopted on the older pin. Commits after `31e283e` up to `c7de5ff` change neither `colors_and_type.css`, `fonts/` nor `assets/logo-ASK.svg`; the four fonts and the wordmark are **byte-identical** (same hashes). `colors_and_type.css` sha256 `fd8207bf…` → `4fed9d79…`, 15,463 → 15,496 B. **The document register's four modules are vendored beside this snapshot, in `../_dsa-surface/`, at the same commit;** that directory carries its own manifest in this format, and the build fails unless both manifests name the same commit. Composition with the renderer is proved on sealed renders at this pin (U6 review evidence). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-09-25 (same pin `6a824b9`; one file added):** copies `assets/logo-ASK.svg`, the `logo-ASK` wordmark, from the pinned commit, because review documents rendered by this template carry that wordmark by ASK's assignment (see `tools/artifact-template/README.md`, "Inheritance from design-system-ASK"). The file is byte-identical at `6a824b9` and at `e161f59`, so the snapshot keeps a single pin. The token CSS and the four fonts are unchanged (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync carry the wordmark.
 
 **Prior re-sync 2026-09-16 (`28e9318` → `6a824b9`, `colors_and_type.css` only):** crosses **three** carrier-changing owner events. **#129** (`85181c11`) adds the root-only browser / under-page edge: the `--bg-edge` role, a root-only `color-scheme` on each theme path (`:root`, `:root[data-theme="dark"]` and `:root.theme-dark`, and the `prefers-color-scheme` bridge), `html { background-color: var(--bg-edge) }`, `body { background-color: transparent }`, and the base background moved from the `background` shorthand to the `background-image` longhand. **#136** (`b8d1f563`) binds the light edge to `--ask-lavender-light` instead of `--ask-white`. **#137** (`6b513cf9`) is comment-only in this carrier. Commits after `6b513cf9` up to `6a824b9` change neither `colors_and_type.css` nor `fonts/`. **Composition with this template was reviewed before the copy:** renders of synthetic documents at `28e9318` and `6a824b9`, opened from `file://` in headless Chrome, across OS light and dark × `data-theme` absent / light / dark, `.theme-dark` on the root, and print. No cell regressed against `28e9318`: `color-scheme` and the page edge matched each cell's theme, every variable resolved to that theme except in the one cell below, and pixels were unchanged beyond the variance measured between repeated renders of identical files, apart from the browser-drawn page scrollbar, which now follows the theme. One incoherence exists at both pins and is not introduced by this copy: with `.theme-dark` on the root under an OS light scheme, the template's `--artifact-line`, `--artifact-line-soft`, `--uo-code-bg` and `--uo-soft-bg` stay light. Only `colors_and_type.css` changed (sha256 `acd76409…` → `fd8207bf…`, 13,375 → 15,463 B; new value in the field table); the four font files are **byte-identical** between `28e9318` and `6a824b9` (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
@@ -61,6 +63,8 @@ _dsa-tokens/
     ├── JetBrainsMono.woff2            JetBrains Mono (code + technical), OFL
     └── JetBrainsMono-Italic.woff2
 ```
+
+The document register's modules are a separate snapshot at the same commit, `../_dsa-surface/`, with its own `MANIFEST.md`.
 
 ## Do not hand-edit
 

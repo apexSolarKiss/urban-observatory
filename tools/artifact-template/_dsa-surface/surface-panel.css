@@ -1,0 +1,224 @@
+/* =========================================================================
+   surface-panel — shared visual contract for live content panels.
+
+   An OPT-IN LIVE-SURFACE VISUAL RULE under Foundations. It is not an artifact
+   scaffold, not a surface pattern, not a component, and it is deliberately
+   none of those: it owns PRESENTATION ONLY, and it owns no markup and no
+   semantics. There is no template here, no required element, and no generated
+   preview — a consuming surface writes its own markup and applies these
+   classes to it.
+
+   That boundary is the whole point. Two semantic forms share this appearance
+   while sharing neither structure nor behavior:
+
+     full-panel link    the panel element IS a native <a>; the whole panel is
+                        the hit target and it contains no other link
+     inert + internal   the panel is an <article> or <div> and carries its own
+       links            links inside it — nav, chips, or action rows
+
+   A component or a shared markup partial would have to either permit a link
+   nested inside a link — invalid, and an accessibility defect — or flatten a
+   difference that is real. A stylesheet does neither. It also means adopting
+   this costs a consumer nothing structurally: add the classes, delete the
+   local re-derivation.
+
+   What it does NOT own, on purpose:
+
+     support-copy foreground   each consuming surface owns its own; this
+                               module sets none.
+     interaction on inert      an <article> or <div> panel gets no hover, no
+       panels                  press, and no pointer affordance from here. Only
+                               a.surface-panel is given the repo's interaction
+                               contract, because only it is actually pressable.
+     layout of the payload     a consumer's own actions, chips, metadata rows,
+                               and grids stay the consumer's.
+
+   It introduces no token or new palette value. Geometry and the interaction
+   edge retain raw literals where no role token exists — the 20px blur, an
+   established value, and the 0.5px light-theme attention ring, new with the
+   hover and focus treatment; neither has a token to resolve through. Every text
+   size resolves through the foundation scale, and reusable colors resolve
+   through existing roles. An unruled raw color or raw text size here is a
+   defect.
+
+   Scope: live content panels carrying a primary title, supporting copy, and
+   optionally metadata and actions. Shared rectangularity is not shared
+   semantics — token specimens, diagram nodes, artifact-scaffold cards, chips,
+   badges, lightboxes, and image cards are NOT this population and must not be
+   conformed to it.
+
+   THE GLASS RECIPE IS AUTHORED HERE, ONCE. A panel selects three things that
+   are governed separately: the page material (the glass fill, the 20px blur and
+   the hairline edge), free attachment (every corner at --radius-lg) and raised
+   elevation (--shadow-md). surface-treatments.css offers each of those as its
+   own axis class, for a separate surface that is not a content panel. The axis
+   classes share these declarations by selector grouping and never restate
+   them, so a change to the recipe here reaches both. The panel material, which
+   does not blur, shares the fill and the edge the same way. Four rules name the
+   raised-elevation token again, because a box-shadow list cannot compose across
+   rules: the linked panel's hover and focus rules below (three, by theme) and
+   the composed emphasis shadow in surface-treatments.css. A change to the
+   raised elevation updates those rules as well.
+
+   Grouping changes nothing about a panel. Every selector in a list keeps its
+   own specificity, no two of these rules set the same property, and every
+   panel declaration stays in this file. It gives an axis class nothing else
+   either: a surface carrying one is not a content panel and takes none of the
+   panel's column, inset or interaction. The axis classes are defined here and
+   documented in surface-treatments.css, which a page loads after this file;
+   an artifact scaffold that inlines surface-treatments.css inlines this file
+   before it.
+   ========================================================================= */
+
+/* The panel. A column, always: the support line sits BELOW its title rather
+   than beside it, which is what makes a title-plus-support pair read the same
+   way on every surface that adopts this. min-width: 0 is load-bearing beside
+   any flex or grid parent — without it a long unbreakable string sets the
+   panel's minimum size and pushes the row wider than its container. */
+.surface-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+/* The glass recipe, one axis per rule. MATERIAL: the page material blurs; the
+   panel material shares the fill and the edge and does not blur. */
+.surface-panel,
+.surface-material-page,
+.surface-material-panel {
+  background: var(--surface-glass);
+  border: 1px solid var(--line-1);
+}
+.surface-panel,
+.surface-material-page {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+/* ATTACHMENT: free-standing, every corner rounded. */
+.surface-panel,
+.surface-attach-free {
+  border-radius: var(--radius-lg);
+}
+/* ELEVATION: raised. */
+.surface-panel,
+.surface-elevation-raised {
+  box-shadow: var(--shadow-md);
+}
+
+/* The panel primary label — Inter, sharing the primary-label object's size,
+   weight and tracking with surface-shell's structural title. LEADING is shared
+   with the shell's title forms on size, weight and tracking — but NOT on
+   leading. Both .surface-title forms take 1.16, a metric the shell owns and
+   earned from a wrapping, underlined locator; this label keeps --lh-heading
+   (1.12) because it is a single line and has no such condition. The shell's
+   older breadcrumb-only 1.35 is retired and is not what this refers to.
+
+   The FAMILY is where the two part, and it is owned by the SELECTOR, allocated
+   per role: `.surface-panel-title` is Inter, the foundation's default interface
+   and display family; `.surface-title` is the mono structural locator, in both
+   of the shell's title forms.
+   `.surface-action` is a third role and a separate mono exception — not this
+   one.
+
+   The allocation holds regardless of what a panel label says. A panel title
+   may name something technical or structural, and may contain `//` or any
+   other terminalcore grammar, and it stays Inter, because the selector owns
+   the role. Nothing here licenses reading a payload string to pick a family.
+   Size, weight and tracking are shared across this label and both shell-title
+   forms; leading is not, and that difference is deliberate. Those shared
+   declarations are what still make a primary label read as one object across
+   surfaces.
+
+   Do not conform either implementation to the other. */
+.surface-panel-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Supporting copy, on the foundation's Small supporting-text role. The pair
+   separates on SIZE — 24 against 18 — not on weight. Foreground is the
+   consuming surface's, deliberately. */
+.surface-panel-support {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-body);
+  letter-spacing: var(--tracking-normal);
+}
+
+/* A panel that is ITSELF a link. Only this form gets interaction, and it takes
+   the repo README's hover/press/focus contract verbatim so every consumer
+   inherits it rather than re-deriving it. Hover spends both approved limbs: the
+   opacity drop, plus the border turning PURE MAGENTA — the attention treatment a
+   compact action uses, shared with keyboard-visible focus. surface-action.css
+   carries the full account of both.
+
+   The apparent edge is 1.5px in light — the 1px border plus a 0.5px zero-blur
+   ring — and 1px in dark. There is no glow and no layout change. Press keeps its
+   scale.
+
+   THE RING COMPOSES WITH --shadow-md; IT NEVER REPLACES IT. A panel's resting
+   elevation is not an interaction state, so neither hover nor focus extinguishes
+   it: both restate the shadow and draw the ring outside it, and dark restates
+   the shadow alone. That is why the shadow appears in these rules at all. The
+   composition is with THIS module's resting shadow; a rule cannot read another
+   one. A consumer that gives a linked panel a different resting shadow restates
+   it in its own hover and focus rules — composed with the 0.5px ring in light,
+   alone under each dark path — later in source than this module.
+
+   The two states stay independent — focus persists after the pointer leaves —
+   and share only the paint. The 0.92 opacity drop remains hover's alone.
+
+   An inert panel gets none of this. A panel containing its own links is inert
+   HERE and its links carry their own affordances; nesting a link inside a
+   link is invalid, so this rule and that arrangement are mutually exclusive by
+   construction. */
+a.surface-panel {
+  text-decoration: none;
+  color: var(--fg-1);
+  /* NO `border-bottom: none` here. The foundation underlines anchors, but that
+     rule is element-level (0,0,1) and `.surface-panel`'s border shorthand is a
+     class (0,1,0), so the underline is already overridden — while a
+     `border-bottom: none` at (0,1,1) would outrank the shorthand and leave the
+     panel with three sides. Measured before this was removed: bottom width 0. */
+  border-color: var(--line-2);
+  transition:
+    border-color var(--dur-2) var(--ease-out),
+    opacity var(--dur-2) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+/* The SHARED paint, composed with the resting shadow. */
+a.surface-panel:hover,
+a.surface-panel:focus-visible {
+  border-color: var(--ask-emphasis-magenta);
+  box-shadow: var(--shadow-md), 0 0 0 0.5px var(--ask-emphasis-magenta);
+}
+/* Dark: the 1px magenta border and the resting shadow, no ring. The trailing
+   :where() keeps these at the shared rule's own specificity (0,2,1). */
+a.surface-panel:hover:where(:root[data-theme="dark"] *, .theme-dark, .theme-dark *),
+a.surface-panel:focus-visible:where(:root[data-theme="dark"] *, .theme-dark, .theme-dark *) { box-shadow: var(--shadow-md); }
+@media (prefers-color-scheme: dark) {
+  a.surface-panel:hover:where(:root:not([data-theme="light"]):not([data-theme="dark"]) *),
+  a.surface-panel:focus-visible:where(:root:not([data-theme="light"]):not([data-theme="dark"]) *) { box-shadow: var(--shadow-md); }
+}
+
+/* The limbs that are NOT shared. */
+a.surface-panel:hover { opacity: 0.92; }
+a.surface-panel:active { transform: scale(0.97); }
+a.surface-panel:focus-visible { outline: none; }
+
+/* Reduced motion. Transitions and the press scale are removed; the shared hover
+   and focus paint still applies, without animation. */
+@media (prefers-reduced-motion: reduce) {
+  a.surface-panel { transition: none; }
+  a.surface-panel:active { transform: none; }
+}

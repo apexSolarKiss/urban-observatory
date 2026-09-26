@@ -101,7 +101,7 @@ What changed against the synthetic earlier position.
 :::
 """
 
-TABLE = """:::table key text num status
+TABLE = """:::table dense key text num status
 | Row | Claim | Count | State |
 |---|---|---|---|
 | a | first claim | 12 | open |
@@ -164,19 +164,22 @@ class Positives(RenderCase):
         r = self.render(with_table())
         h = r["html"]
         self.assertEqual(r["parts"], ["01", "02", "03", "04", "06", "08", "10"])
-        self.assertIn('<section data-uo-part="03" id="uo-part-03">', h)
-        self.assertIn('<div data-uo-role="question" data-uo-central="true">', h)
-        self.assertIn('<div data-uo-role="finding">', h)
+        self.assertIn('<section data-uo-part="03" id="uo-part-03" class="doc-section">', h)
+        self.assertIn('<div data-uo-role="question" data-uo-central="true" class="doc-section">', h)
+        self.assertIn('<div data-uo-role="finding" class="doc-section">', h)
         for cls in ("question-detail", "evidence", "provenance"):
-            self.assertIn('<details data-uo-disclose="%s" class="uo-details"><summary>' % cls, h)
-        self.assertEqual(r["counts"], {"questions": 2, "findings": 1, "disclosures": 3, "tables": 1})
+            self.assertIn('<details data-uo-disclose="%s" class="uo-details %s"><summary><span class="surface-disclosure-label">'
+                          % (cls, build.DISCLOSURE), h)
+        self.assertEqual(r["counts"], {"questions": 2, "findings": 1, "disclosures": 3, "tables": 1, "quotations": 0,
+                                       "callouts": 0, "framing": 0, "synthesis": 0, "structures": 0,
+                                       "authored_case": 0})
 
     def test_confirmation_baseline_generates_01_and_10(self):
         r = self.render(CONFIRMATION)
         self.assertEqual(r["parts"], ["01", "02", "07", "10"])
         h = r["html"]
-        self.assertIn('<section data-uo-part="01" id="uo-part-01">\n<div class="uo-status-rail">', h)
-        self.assertRegex(h, r'<section data-uo-part="10" id="uo-part-10">\n<footer class="uo-foot">')
+        self.assertIn('<section data-uo-part="01" id="uo-part-01" class="doc-section">\n<div class="uo-status-rail">', h)
+        self.assertRegex(h, r'<section data-uo-part="10" id="uo-part-10" class="doc-section">\n<footer class="uo-foot">')
 
     def test_all_ten_parts_render_in_order(self):
         src = GUIDED
@@ -186,8 +189,9 @@ class Positives(RenderCase):
         src = mutate(src, ":::part 10\n", ":::part 09\nSynthetic response format.\n:::\n\n:::part 10\n")
         r = self.render(src)
         self.assertEqual(r["parts"], ["01", "02", "03", "04", "05", "06", "06", "07", "08", "09", "10"])
-        self.assertEqual(re.findall(r'<section data-uo-part="(\d\d)" id="uo-part-\d\d(?:-\d+)?">', r["html"]), r["parts"])
-        self.assertEqual(re.findall(r'<section data-uo-part="\d\d" id="([a-z0-9-]+)">', r["html"]),
+        self.assertEqual(re.findall(r'<section data-uo-part="(\d\d)" id="uo-part-\d\d(?:-\d+)?" class="doc-section">', r["html"]),
+                         r["parts"])
+        self.assertEqual(re.findall(r'<section data-uo-part="\d\d" id="([a-z0-9-]+)" class="doc-section">', r["html"]),
                          ["uo-part-01", "uo-part-02", "uo-part-03", "uo-part-04", "uo-part-05", "uo-part-06",
                           "uo-part-06-2", "uo-part-07", "uo-part-08", "uo-part-09", "uo-part-10"])
         self.assertEqual(r["counts"]["findings"], 2)
@@ -198,13 +202,13 @@ class Positives(RenderCase):
                      "[a link](https://example.org/x \"Synthetic title\")\n")
         h = self.render(src)["html"]
         self.assertIn('<ol start="3">', h)
-        self.assertIn('<a href="https://example.org/x" title="Synthetic title">a link</a>', h)
+        self.assertIn('<a class="surface-text-link" href="https://example.org/x" title="Synthetic title">a link</a>', h)
 
     def test_N48_roles_applied_to_every_cell(self):
         h = self.render(with_table())["html"]
         cells = re.findall(r"<(th|td)( [^>]*)?>", h)
         self.assertEqual(len(cells), 12)
-        roles = re.findall(r'<t[hd] data-uo-cell="([a-z]+)"[ >]', h)
+        roles = re.findall(r'<t[hd] class="[a-z- ]+" data-uo-cell="([a-z]+)"[ >]', h)
         self.assertEqual(roles, ["key", "text", "num", "status"] * 3)
 
     def test_N18_repeated_06_allowed(self):
@@ -216,14 +220,14 @@ class Positives(RenderCase):
         src = mutate(GUIDED, "The synthetic executive result.\n",
                      "The synthetic executive result.\n\n```text\n:::part 09\n:::\n```\n")
         h = self.render(src)["html"]
-        self.assertIn("<pre><code class=\"language-text\">:::part 09\n:::\n</code></pre>", h)
+        self.assertIn('<pre class="doc-pre">:::part 09\n:::\n</pre>', h)
 
     def test_N35_tags_in_code_pass(self):
         src = mutate(GUIDED, "The synthetic executive result.\n",
                      "The synthetic executive result, `<div>` in a span.\n\n```\n<div>x</div>\n```\n\n"
                      "Indented:\n\n    <span>y</span>\n")
         h = self.render(src)["html"]
-        self.assertIn("<code>&lt;div&gt;</code>", h)
+        self.assertIn('<code class="doc-code">&lt;div&gt;</code>', h)
         self.assertIn("&lt;div&gt;x&lt;/div&gt;", h)
         self.assertIn("&lt;span&gt;y&lt;/span&gt;", h)
 
@@ -231,40 +235,41 @@ class Positives(RenderCase):
         src = mutate(GUIDED, "The synthetic executive result.\n",
                      "The synthetic executive result: `@import` and `@@X@@` and `<link>`.\n")
         h = self.render(src)["html"]
-        self.assertIn("<code>@import</code>", h)
-        self.assertIn("<code>@@X@@</code>", h)
+        self.assertIn('<code class="doc-code">@import</code>', h)
+        self.assertIn('<code class="doc-code">@@X@@</code>', h)
 
     def test_meta_header_drives_masthead_rail_and_title(self):
         h = self.render(GUIDED)["html"]
         self.assertIn("<title>Synthetic guided review</title>", h)
-        self.assertIn('<span class="uo-status-rail__primary">synthetic fixture</span>'
-                      '<span class="uo-status-rail__sep"></span><span>renderer test</span>'
-                      '<span class="uo-status-rail__sep"></span><span>guided-review</span>'
-                      '<span class="uo-status-rail__sep"></span><span>R1</span>', h)
-        self.assertIn("<h1>Synthetic guided review</h1>", h)
-        self.assertIn("<dt>id</dt><dd>SYN-GR-001</dd><dt>kind</dt><dd>guided-review</dd><dt>round</dt><dd>R1</dd>", h)
+        self.assertIn('<span class="doc-label"><strong>synthetic fixture</strong></span>'
+                      '<span class="uo-status-rail__sep"></span><span class="doc-label">renderer test</span>'
+                      '<span class="uo-status-rail__sep"></span><span class="doc-label">guided-review</span>'
+                      '<span class="uo-status-rail__sep"></span><span class="doc-label">R1</span>', h)
+        self.assertIn('<h1 class="doc-title">Synthetic guided review</h1>', h)
+        self.assertIn('<dt class="doc-label">id</dt><dd class="doc-meta">SYN-GR-001</dd><dt class="doc-label">kind</dt>'
+                      '<dd class="doc-meta">guided-review</dd><dt class="doc-label">round</dt><dd class="doc-meta">R1</dd>', h)
         self.assertNotIn("approv", h.split("<body>")[1].lower())
 
     def test_N66_title_escaped_and_literal(self):
         src = mutate(GUIDED, "title: Synthetic guided review\n", "title: A <b> & \\1 \\g<0> title\n")
         h = self.render(src)["html"]
         self.assertIn("<title>A &lt;b&gt; &amp; \\1 \\g&lt;0&gt; title</title>", h)
-        self.assertIn("<h1>A &lt;b&gt; &amp; \\1 \\g&lt;0&gt; title</h1>", h)
+        self.assertIn('<h1 class="doc-title">A &lt;b&gt; &amp; \\1 \\g&lt;0&gt; title</h1>', h)
 
     def test_N67_seal_line_verified_and_never_unknown(self):
         r = self.render(GUIDED)
         foot = re.search(r'<footer class="uo-foot">.*?</footer>', r["html"], flags=re.S).group(0)
         self.assertNotIn("unknown", foot)
         dep = build.verify_dependencies()
-        self.assertIn("design-system-ASK tokens <code>%s</code>" % dep["commit"][:7], foot)
-        self.assertIn("urban-observatory <code>%s</code> (declared)" % UO_COMMIT[:7], foot)
+        self.assertIn('design-system-ASK tokens and document register <code class="doc-code">%s</code>' % dep["commit"][:7], foot)
+        self.assertIn('urban-observatory <code class="doc-code">%s</code> (declared)' % UO_COMMIT[:7], foot)
 
     def test_local_css_hook_and_emission(self):
         src = mutate(GUIDED, ":::finding\n", ":::finding local=ctl\n")
         css = "main.uo-md .uo-local-ctl p,\nmain.uo-md .uo-local-ctl li { color: var(--fg-2); }\n"
         r = self.render(src, local_css=css)
         h = r["html"]
-        self.assertIn('<div data-uo-role="finding" class="uo-local-ctl">', h)
+        self.assertIn('<div data-uo-role="finding" class="doc-section uo-local-ctl">', h)
         styles = re.findall(r"<style>(.*?)</style>", h, flags=re.S)
         self.assertEqual(len(styles), 3)
         self.assertEqual(styles[2], css)
@@ -286,7 +291,7 @@ class Positives(RenderCase):
     def test_local_hook_without_css_allowed(self):
         src = mutate(GUIDED, ":::part 02\n", ":::part 02 local=wide-a\n")
         h = self.render(src)["html"]
-        self.assertIn('<section data-uo-part="02" id="uo-part-02" class="uo-local-wide-a">', h)
+        self.assertIn('<section data-uo-part="02" id="uo-part-02" class="doc-section uo-local-wide-a">', h)
         self.assertEqual(len(re.findall(r"<style>", h)), 2)
 
     def test_manifest_emission(self):
@@ -622,29 +627,40 @@ class Allowlist(RenderCase):
     def test_N42b_injected_class_via_fence_attrs(self):
         self.neg("```{#x .uo-card}\ncode\n```\n", r"attribute id='x' not allowed on <pre>")
 
-    def test_N43_chrome_classes_exist_in_template_or_md_css(self):
+    def test_N43_emitted_classes_are_styled_or_declared_hooks(self):
         with open(build.TEMPLATE, encoding="utf-8") as f:
-            css = f.read().split("</head>")[0] + build.MD_CSS
+            uo_css = f.read().split("</head>")[0] + build.MD_CSS
+        register_css = ""
+        for rel in build.MODULES:
+            with open(os.path.join(HERE, "_dsa-surface", rel), encoding="utf-8") as f:
+                register_css += f.read()
 
-        def missing(table):
-            return sorted(c for classes in table.values() for c in classes
-                          if not re.search(r"\." + re.escape(c) + r"(?![A-Za-z0-9_-])", css))
-        self.assertEqual(missing(build.CHROME_CLASSES), [])
-        self.assertEqual(missing({"div": ("uo-unstyled-role",)}), ["uo-unstyled-role"])
+        def styled(c, css):
+            return re.search(r"\." + re.escape(c) + r"(?![A-Za-z0-9_-])", css) is not None
+        classes = sorted({c for sets in build.CLASS_SETS.values() for s in sets for c in s.split()})
+        uo = [c for c in classes if c.startswith("uo-")]
+        self.assertEqual(sorted(c for c in uo if not styled(c, uo_css)), sorted(build.STRUCTURAL_HOOKS))
+        self.assertEqual([c for c in classes if not c.startswith("uo-") and not styled(c, register_css)], [])
+        self.assertFalse(styled("uo-unstyled-role", uo_css))
 
     def test_allowlist_rejects_injected_output(self):
         h = self.render(GUIDED)["html"]
         bad = [
             (h.replace('<html lang="en">', '<html lang="en" data-theme="dark">'), r"<html> must be the root and carry lang only"),
             (h.replace("</head>", "<script></script></head>"), r"<script> not allowed in <head>"),
-            (h.replace('<main class="uo-md">', '<main class="uo-md" id="x">'), r"attribute id='x' not allowed on <main>"),
-            (h.replace("<p>Synthetic locator line.</p>", '<p onclick="x()">Synthetic locator line.</p>'), r"attribute onclick"),
+            (h.replace('<main class="uo-md doc-flow">', '<main class="uo-md doc-flow" id="x">'), r"attribute id='x' not allowed on <main>"),
+            (h.replace('<p class="doc-body">Synthetic locator line.</p>', '<p class="doc-body" onclick="x()">Synthetic locator line.</p>'),
+             r"attribute onclick"),
             (h.replace("</style>", "@import url(x.css);</style>", 1), r"CSS contains @import"),
             (h.replace("</style>", 'p { background-image: image-set("https://x.invalid/a.png" 1x); }</style>', 1),
              r"CSS contains image-set\(, which can load a resource"),
-            (h.replace("<p>Synthetic locator line.</p>", '<p class="caption">Synthetic locator line.</p>'),
+            (h.replace('<p class="doc-body">Synthetic locator line.</p>', '<p class="caption">Synthetic locator line.</p>'),
              r"class 'caption' not allowed on <p>"),
+            (h.replace('<p class="doc-body">Synthetic locator line.</p>', '<p>Synthetic locator line.</p>'),
+             r"an unclassed <p> is a quotation's paragraph only"),
         ]
+        for doc, _ in bad:
+            self.assertNotEqual(doc, h)
         for doc, pattern in bad:
             with self.subTest(pattern=pattern):
                 with self.assertRaises(build.BuildError) as cm:
@@ -654,7 +670,7 @@ class Allowlist(RenderCase):
 
 class Tables(RenderCase):
     def test_N44_table_without_container(self):
-        self.fails(with_table(table=TABLE.replace(":::table key text num status\n", "").replace("| closed |\n:::\n", "| closed |\n")),
+        self.fails(with_table(table=TABLE.replace(":::table dense key text num status\n", "").replace("| closed |\n:::\n", "| closed |\n")),
                    r"a pipe table must be wrapped in :::table")
 
     def test_N45_role_count_differs(self):
@@ -693,8 +709,8 @@ class Tables(RenderCase):
         src = with_table(table=TABLE.replace("| b | second claim | 3 | closed |\n",
                                              "| b | a \\| b and `x|y` | 3 | closed |\n"))
         h = self.render(src)["html"]
-        self.assertIn('<td data-uo-cell="text" data-uo-label="Claim">'
-                      '<span class="uo-cell-label">Claim</span>a | b and <code>x|y</code></td>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="text" data-uo-label="Claim">'
+                      '<span class="uo-cell-label doc-label">Claim</span>a | b and <code class="doc-code">x|y</code></td>', h)
 
 
 class LocalCss(RenderCase):
@@ -914,6 +930,54 @@ class Provenance(unittest.TestCase):
         os.unlink(os.path.join(self.owner, "_dsa-tokens", "assets", "logo-ASK.svg"))
         self.assert_fails(self.run_copy(), r"dependency file missing: _dsa-tokens/assets/logo-ASK.svg")
 
+    def test_U6_register_module_byte_changed(self):
+        with open(os.path.join(self.owner, "_dsa-surface", "surface-document.css"), "ab") as f:
+            f.write(b"\n")
+        self.assert_fails(self.run_copy(), r"dependency bytes do not match the manifest: _dsa-surface/surface-document.css")
+
+    def test_U6_register_module_missing(self):
+        os.unlink(os.path.join(self.owner, "_dsa-surface", "surface-treatments.css"))
+        self.assert_fails(self.run_copy(), r"dependency file missing: _dsa-surface/surface-treatments.css")
+
+    def test_U6_register_manifest_row_missing(self):
+        p = os.path.join(self.owner, "_dsa-surface", "MANIFEST.md")
+        with open(p, encoding="utf-8") as f:
+            text = f.read()
+        new = re.sub(r"^\| surface-panel.css sha256 .*\n", "", text, flags=re.M)
+        self.assertNotEqual(new, text)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(new)
+        self.assert_fails(self.run_copy(), r"register manifest: no sha256 row for surface-panel.css")
+
+    def test_U6_register_manifest_missing(self):
+        os.unlink(os.path.join(self.owner, "_dsa-surface", "MANIFEST.md"))
+        self.assert_fails(self.run_copy(), r"register manifest unreadable")
+
+    def test_U6_two_pins_fail(self):
+        p = os.path.join(self.owner, "_dsa-surface", "MANIFEST.md")
+        with open(p, encoding="utf-8") as f:
+            text = f.read()
+        new = re.sub(r"^(\| commit \| `)[0-9a-f]{40}(` \|)$", r"\g<1>" + "1" * 40 + r"\g<2>", text, flags=re.M)
+        new = re.sub(r"^\| short \| `[0-9a-f]{7}` \|$", "| short | `1111111` |", new, flags=re.M)
+        self.assertNotEqual(new, text)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(new)
+        self.assert_fails(self.run_copy(), r"the register manifest's commit 1{40} differs from the token manifest's")
+
+    def test_U6_modules_are_sealed_verbatim_in_order_after_the_tokens(self):
+        self.assertEqual(self.run_copy().returncode, 0)
+        with open(os.path.join(self.tmp, "doc.html"), encoding="utf-8") as f:
+            head = f.read().split("</head>")[0]
+        at = head.index("--tracking-caption")          # inside the token CSS
+        for rel in build.MODULES:
+            with open(os.path.join(self.owner, "_dsa-surface", rel), encoding="utf-8") as f:
+                module = f.read()
+            i = head.find(module)
+            self.assertGreater(i, at, rel)
+            self.assertEqual(head.count(module), 1, rel)
+            at = i
+        self.assertLess(at, head.index("urban-observatory // review-document overlay"))
+
     def test_F6_planted_pycache_fails_before_it_is_imported(self):
         real = os.path.join(self.owner, "pin_check.py")
         with open(real, encoding="utf-8") as f:
@@ -985,6 +1049,20 @@ class Atomicity(RenderCase):
         self.assertEqual(sorted(os.listdir(self.tmp)), ["neg.md"])
 
 
+def top_level_split(selectors):
+    """A selector list split at its top-level commas: a comma inside :where(), :is(), :not() or :has() stays."""
+    out, depth, cur = [], 0, []
+    for ch in selectors:
+        depth += {"(": 1, ")": -1}.get(ch, 0)
+        if ch == "," and depth == 0:
+            out.append("".join(cur))
+            cur = []
+        else:
+            cur.append(ch)
+    out.append("".join(cur))
+    return out
+
+
 def css_rules(css):
     """Parses the template's and MD_CSS's plain CSS into (media, selectors, declarations) triples.
     media is None outside @media; selectors are whitespace-normalized; declaration values too."""
@@ -998,12 +1076,12 @@ def css_rules(css):
             if j < 0:
                 return
             prelude = " ".join(text[i:j].split())
-            if prelude.startswith("@media"):
+            if prelude.startswith(("@media", "@container")):
                 depth, k = 1, j + 1
                 while depth:
                     depth += {"{": 1, "}": -1}.get(text[k], 0)
                     k += 1
-                block(text[j + 1:k - 1], prelude[len("@media"):].strip())
+                block(text[j + 1:k - 1], prelude[1:] if prelude.startswith("@container") else prelude[len("@media"):].strip())
                 i = k
                 continue
             k = text.index("}", j)
@@ -1012,7 +1090,7 @@ def css_rules(css):
                 if ":" in d:
                     name, _, value = d.partition(":")
                     decls[name.strip()] = " ".join(value.split())
-            rules.append((media, tuple(" ".join(x.split()) for x in prelude.split(",")), decls))
+            rules.append((media, tuple(" ".join(x.split()) for x in top_level_split(prelude)), decls))
             i = k + 1
     block(css, None)
     return rules
@@ -1036,7 +1114,7 @@ def rules_with(rules, selector, media=None):
     return [d for m, sels, d in rules if selector in sels and m == media]
 
 
-U2_TABLE = """:::table key text num status "A <b> & caption"
+U2_TABLE = """:::table dense key text num status "A <b> & caption"
 | Row `id` | Claim &amp; *limit* | Count | State |
 |---|---|---|---|
 | a | first claim | 12 | open |
@@ -1055,42 +1133,49 @@ LINK_HEADER_TABLE = """:::table key text
 
 
 class ProfileRoles(RenderCase):
-    """U2: the template's disclosure, numeric, key and caption roles are reachable from the renderer."""
+    """U2, as U6 carries it: the disclosure, numeric, key and caption roles are reachable from the renderer,
+    now on the design-system disclosure treatment and the register's table roles."""
 
     def test_U2_disclosure_role_emitted(self):
         src = mutate(GUIDED, ':::disclose evidence "Field-level evidence"\n', ':::disclose evidence local=ev "Field-level evidence"\n')
         h = self.render(src)["html"]
-        self.assertIn('<details data-uo-disclose="question-detail" class="uo-details"><summary>Question detail</summary>\n'
-                      '<div class="uo-details__body">\n<p>The non-central question\'s detail.</p>\n</div>\n</details>', h)
-        self.assertIn('<details data-uo-disclose="evidence" class="uo-details uo-local-ev"><summary>', h)
+        self.assertIn('<details data-uo-disclose="question-detail" class="uo-details %s"><summary>'
+                      '<span class="surface-disclosure-label">Question detail</span>'
+                      '<span class="surface-disclosure-indicator" aria-hidden="true">&#9660;</span></summary>\n'
+                      '<div class="uo-details__body surface-disclosure-body doc-section">\n<div class="doc-prose">\n'
+                      '<p class="doc-body">The non-central question\'s detail.</p>\n</div>\n</div>\n</details>' % build.DISCLOSURE, h)
+        self.assertIn('<details data-uo-disclose="evidence" class="uo-details %s uo-local-ev"><summary>' % build.DISCLOSURE, h)
         self.assertEqual(len(re.findall(r'<details [^>]*class="uo-details[ "]', h)), 3)
-        self.assertEqual(len(re.findall(r'<div class="uo-details__body">', h)), 3)
+        self.assertEqual(len(re.findall(r'<div class="uo-details__body surface-disclosure-body doc-section">', h)), 3)
 
     def test_U2_code_block_in_disclosure_emitted_in_the_body(self):
         src = mutate(GUIDED, "Field-level listing.\n", "Field-level listing.\n\n```text\nline\n```\n\n    indented line\n")
         h = self.render(src)["html"]
-        self.assertIn('<div class="uo-details__body">\n<p>Field-level listing.</p>\n'
-                      '<pre><code class="language-text">line\n</code></pre>\n<pre><code>indented line\n</code></pre>\n</div>', h)
+        self.assertIn('<div class="uo-details__body surface-disclosure-body doc-section">\n<div class="doc-prose">\n'
+                      '<p class="doc-body">Field-level listing.</p>\n'
+                      '<pre class="doc-pre">line\n</pre>\n<pre class="doc-pre">indented line\n</pre>\n</div>\n</div>', h)
 
     def test_U2_caption_emitted_and_escaped(self):
         h = self.render(with_table(table=U2_TABLE))["html"]
-        self.assertIn('<table>\n<caption>A &lt;b&gt; &amp; caption</caption>\n<thead>', h)
+        self.assertIn('<table class="doc-dense-table">\n<caption class="doc-meta">A &lt;b&gt; &amp; caption</caption>\n<thead>', h)
         h = self.render(with_table(table=U2_TABLE.replace(":::table ", ":::table local=w ")), name="local")["html"]
-        self.assertIn('<table class="uo-local-w">\n<caption>A &lt;b&gt; &amp; caption</caption>', h)
+        self.assertIn('<table class="doc-dense-table uo-local-w">\n<caption class="doc-meta">A &lt;b&gt; &amp; caption</caption>', h)
+        h = self.render(with_table(table=U2_TABLE.replace(":::table dense ", ":::table local=w ")), name="narrative")["html"]
+        self.assertIn('<table class="uo-local-w">\n<caption class="doc-meta">A &lt;b&gt; &amp; caption</caption>', h)
         h = self.render(with_table(), name="nocap")["html"]
         self.assertNotIn("<caption", h)
 
     def test_U2_every_body_cell_carries_its_header_text(self):
         h = self.render(with_table(table=U2_TABLE))["html"]
-        self.assertIn('<th data-uo-cell="key">Row <code>id</code></th>', h)
-        self.assertIn('<td data-uo-cell="key" data-uo-label="Row id">'
-                      '<span class="uo-cell-label">Row <code>id</code></span>a</td>', h)
-        self.assertIn('<td data-uo-cell="text" data-uo-label="Claim &amp; limit">'
-                      '<span class="uo-cell-label">Claim &amp; <em>limit</em></span>first claim</td>', h)
-        self.assertIn('<td data-uo-cell="num" data-uo-label="Count">'
-                      '<span class="uo-cell-label">Count</span>12</td>', h)
-        self.assertIn('<td data-uo-cell="status" data-uo-label="State">'
-                      '<span class="uo-cell-label">State</span>closed</td>', h)
+        self.assertIn('<th class="doc-label" data-uo-cell="key">Row <code class="doc-code">id</code></th>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="key" data-uo-label="Row id">'
+                      '<span class="uo-cell-label doc-label">Row <code class="doc-code">id</code></span><strong>a</strong></td>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="text" data-uo-label="Claim &amp; limit">'
+                      '<span class="uo-cell-label doc-label">Claim &amp; <em>limit</em></span>first claim</td>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="num" data-uo-label="Count">'
+                      '<span class="uo-cell-label doc-label">Count</span>12</td>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="status" data-uo-label="State">'
+                      '<span class="uo-cell-label doc-label">State</span>closed</td>', h)
         self.assertEqual(len(re.findall(r"<td [^>]*data-uo-label=", h)), 8)
         self.assertNotRegex(h, r"<th [^>]*data-uo-label=")
 
@@ -1099,10 +1184,10 @@ class ProfileRoles(RenderCase):
         # cell's own inline markup, not generated plain text, so a header's link stays an operable link
         # and its inline code stays code. One label element per body cell, each directly inside its <td>.
         h = self.render(with_table(table=LINK_HEADER_TABLE))["html"]
-        self.assertIn('<span class="uo-cell-label">Row <a href="https://example.com/spec">spec</a></span>', h)
-        self.assertIn('<span class="uo-cell-label">Claim <code>x|y</code></span>', h)
-        self.assertEqual(len(re.findall(r'<span class="uo-cell-label">', h)), 4)
-        self.assertEqual(len(re.findall(r'<td [^>]*><span class="uo-cell-label">', h)), 4)
+        self.assertIn('<span class="uo-cell-label doc-label">Row <a class="surface-text-link" href="https://example.com/spec">spec</a></span>', h)
+        self.assertIn('<span class="uo-cell-label doc-label">Claim <code class="doc-code">x|y</code></span>', h)
+        self.assertEqual(len(re.findall(r'<span class="uo-cell-label doc-label">', h)), 4)
+        self.assertEqual(len(re.findall(r'<td [^>]*><span class="uo-cell-label doc-label">', h)), 4)
         # the operable link is reproduced in the body, not only in the header row
         self.assertEqual(len(re.findall(r'href="https://example\.com/spec"', h)), 3)
         build.check_final_html(h, 2)
@@ -1113,7 +1198,7 @@ class ProfileRoles(RenderCase):
         # guarantee unenforced against the one regression that would actually remove the operation.
         h = self.render(with_table(table=LINK_HEADER_TABLE))["html"]
         build.check_final_html(h, 2)                                    # control: the real render passes
-        one = re.search(r'<span class="uo-cell-label">.*?</span>', h, re.S)
+        one = re.search(r'<span class="uo-cell-label doc-label">.*?</span>', h, re.S)
         self.assertIsNotNone(one)
         with self.assertRaises(build.BuildError) as cm:                 # the span deleted outright
             build.check_final_html(h.replace(one.group(0), "", 1), 2)
@@ -1135,31 +1220,40 @@ class ProfileRoles(RenderCase):
 
     def test_U2_allowlist_rejects_broken_role_markup(self):
         h = self.render(with_table(table=U2_TABLE))["html"]
-        one = '<td data-uo-cell="num" data-uo-label="Count"><span class="uo-cell-label">Count</span>12</td>'
+        one = ('<td class="doc-table-cell" data-uo-cell="num" data-uo-label="Count">'
+               '<span class="uo-cell-label doc-label">Count</span>12</td>')
+        p = '<p class="doc-body">Synthetic locator line.</p>'
+        qd = 'class="uo-details %s"><summary><span class="surface-disclosure-label">Question detail' % build.DISCLOSURE
         bad = [
-            (h.replace(one, '<td data-uo-cell="num"><span class="uo-cell-label">Count</span>12</td>'),
+            (h.replace(one, '<td class="doc-table-cell" data-uo-cell="num"><span class="uo-cell-label doc-label">Count</span>12</td>'),
              r"<td> without data-uo-label"),
-            (h.replace(one, '<td data-uo-cell="num" data-uo-label="State"><span class="uo-cell-label">Count</span>12</td>'),
+            (h.replace(one, one.replace('data-uo-label="Count"', 'data-uo-label="State"')),
              r"<td data-uo-label='State'> does not equal its column's header text 'Count'"),
-            (h.replace(one, '<td data-uo-cell="num" data-uo-label="Count "><span class="uo-cell-label">Count</span>12</td>'),
+            (h.replace(one, one.replace('data-uo-label="Count"', 'data-uo-label="Count "')),
              r"does not equal its column's header text"),
-            (h.replace(one, '<td data-uo-cell="num" data-uo-label="Count"><span class="uo-cell-label">State</span>12</td>'),
+            (h.replace(one, one.replace('doc-label">Count</span>', 'doc-label">State</span>')),
              r"<span class='uo-cell-label'> text 'State' does not equal its column's header text 'Count'"),
-            (h.replace('<p>Synthetic locator line.</p>', '<span class="uo-cell-label">x</span>'),
+            (h.replace(p, '<span class="uo-cell-label doc-label">x</span>'),
              r"class 'uo-cell-label' allowed only on a <span> directly inside <td>"),
-            (h.replace('<th data-uo-cell="num">', '<th data-uo-cell="num" data-uo-label="Count">'),
+            (h.replace('<th class="doc-label" data-uo-cell="num">', '<th class="doc-label" data-uo-cell="num" data-uo-label="Count">'),
              r"attribute data-uo-label='Count' not allowed on <th>"),
-            (h.replace('class="uo-details"><summary>Question detail', '><summary>Question detail'),
+            (h.replace(qd, qd.split("><summary>")[0].replace('class="uo-details %s"' % build.DISCLOSURE, "") + "><summary>"
+                       + qd.split("><summary>")[1]),
              r"<details> without class uo-details"),
-            (h.replace('<p>Synthetic locator line.</p>', '<div class="uo-details__body">x</div>'),
+            (h.replace(p, '<div class="uo-details__body surface-disclosure-body doc-section">x</div>'),
              r"class 'uo-details__body' allowed only on a <div> directly inside <details>"),
-            (h.replace('<p>Synthetic locator line.</p>', '<caption>x</caption>'), r"<caption> outside <table>"),
+            (h.replace(p, '<caption class="doc-meta">x</caption>'), r"<caption> outside <table>"),
             (h.replace('<div class="uo-shell">', '<div class="uo-shell uo-local-x">'), r"class 'uo-shell uo-local-x' not allowed on <div>"),
-            (h.replace('class="uo-details"><summary>Question detail', 'class="uo-details uo-details"><summary>Question detail'),
-             r"class 'uo-details uo-details' not allowed on <details>"),
-            (h.replace('class="uo-details"><summary>Question detail', 'class="uo-local-x uo-details"><summary>Question detail'),
-             r"class 'uo-local-x uo-details' not allowed on <details>"),
-            (h.replace('<table>', '<table class="caption">'), r"class 'caption' not allowed on <table>"),
+            (h.replace(qd, qd.replace('class="uo-details ', 'class="uo-details uo-details ')),
+             r"class 'uo-details uo-details surface-disclosure[^']*' not allowed on <details>"),
+            (h.replace(qd, qd.replace('class="uo-details ', 'class="uo-local-x uo-details ')),
+             r"class 'uo-local-x uo-details surface-disclosure[^']*' not allowed on <details>"),
+            (h.replace('<table class="doc-dense-table">', '<table class="caption">'), r"class 'caption' not allowed on <table>"),
+            (h.replace(p, '<p class="doc-body doc-body">Synthetic locator line.</p>'), r"class 'doc-body doc-body' not allowed on <p>"),
+            (h.replace(one, one.replace('class="doc-table-cell"', 'class="doc-body"')),
+             r"a dense table's cell is .doc-table-cell and a narrative table's is .doc-body"),
+            (h.replace(p, '<p class="doc-body surface-emphasis-rail doc-label">Synthetic locator line.</p>'),
+             r"class 'doc-body surface-emphasis-rail doc-label' not allowed on <p>"),
         ]
         for doc, pattern in bad:
             with self.subTest(pattern=pattern):
@@ -1170,160 +1264,257 @@ class ProfileRoles(RenderCase):
         build.check_final_html(h, 2)
 
 
+CASED_TABLE = """:::table dense key text num:authored-case status "Loads"
+| Row | Claim | Power (mW) | State |
+|---|---|---|---|
+| a | first claim | 12 | open |
+| b | second claim | 3 | closed |
+:::
+"""
+
+
+class AuthoredCase(RenderCase):
+    """R2: a header whose case carries meaning (mW is not MW). A column role may carry the one modifier
+    :authored-case; that column's header and each body cell's label keep the author's case in
+    span.uo-authored-case, declared to the rendered check as a profile with its exact count."""
+
+    def test_R2_only_the_declared_column_keeps_its_case(self):
+        r = self.render(with_table(table=CASED_TABLE))
+        h = r["html"]
+        self.assertIn('<th class="doc-label" data-uo-cell="num"><span class="uo-authored-case">Power (mW)</span></th>', h)
+        self.assertIn('<th class="doc-label" data-uo-cell="key">Row</th>', h)
+        self.assertIn('<th class="doc-label" data-uo-cell="text">Claim</th>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="num" data-uo-label="Power (mW)"><span class="uo-cell-label doc-label">'
+                      '<span class="uo-authored-case">Power (mW)</span></span>12</td>', h)
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="text" data-uo-label="Claim"><span class="uo-cell-label doc-label">'
+                      'Claim</span>first claim</td>', h)
+        self.assertEqual(h.count('<span class="uo-authored-case">'), 3)          # the header and two body labels
+        self.assertEqual(r["counts"]["authored_case"], 3)
+        self.assertIn("| authored-case spans (headers and cell labels) | `3` |", r["manifest_text"])
+        profiles = build.role_profiles(r["counts"])
+        self.assertEqual([p["name"] for p in profiles], ["authored-case disclosure summary", "authored-case table header"])
+        self.assertEqual(profiles[1]["selector"], ".uo-md .uo-authored-case")
+        self.assertEqual(profiles[1]["expected_count"], 3)
+        self.assertEqual(build.role_profiles({"disclosures": 0, "authored_case": 2})[0]["name"], "authored-case table header")
+        self.assertEqual(build.role_profiles({"disclosures": 0, "authored_case": 0}), [])
+
+    def test_R2_the_one_declaration_is_case_and_nothing_else(self):
+        rules = [(sels, d) for m, sels, d in css_rules(build.MD_CSS) + css_rules(template_css())
+                 if any("uo-authored-case" in sel for sel in sels)]
+        self.assertEqual([(list(sels), d) for sels, d in rules], [([":where(.uo-md) :where(.uo-authored-case)"], {"text-transform": "none"})])
+
+    def test_R2_emphasis_is_allowed_inside_an_authored_case_header(self):
+        h = self.render(with_table(table=CASED_TABLE.replace("| Power (mW) |", "| Power (*mW*) |")))["html"]
+        self.assertIn('<span class="uo-authored-case">Power (<em>mW</em>)</span></th>', h)
+
+    def test_R2_refusals(self):
+        for table, pattern in (
+                (CASED_TABLE.replace("num:authored-case", "num:caps"), r"table role modifier 'caps': the one modifier is 'authored-case'"),
+                (CASED_TABLE.replace("num:authored-case", "num:"), r"table role modifier '': the one modifier is 'authored-case'"),
+                (CASED_TABLE.replace("num:authored-case", "nums:authored-case"), r"table role 'nums' outside the closed set"),
+                (CASED_TABLE.replace(":::table dense ", ":::table dense:authored-case "), r"'dense' takes no modifier"),
+                (CASED_TABLE.replace("| Power (mW) |", "| Power (`mW`) |"), r"column 3's header is declared authored-case and holds text and inline emphasis only"),
+                (CASED_TABLE.replace("| Power (mW) |", "| [mW](https://example.org/) |"), r"holds text and inline emphasis only"),
+                (CASED_TABLE.replace("| Power (mW) |", "| &nbsp; |"), r"column 3's header is declared authored-case and must contain visible text")):
+            with self.subTest(pattern=pattern):
+                self.fails(with_table(table=table), pattern)
+
+    def test_R2_allowlist_places_the_span_by_column(self):
+        h = self.render(with_table(table=CASED_TABLE))["html"]
+        cased_label = '<span class="uo-cell-label doc-label"><span class="uo-authored-case">Power (mW)</span></span>12</td>'
+        plain_label = 'data-uo-label="Claim"><span class="uo-cell-label doc-label">Claim</span>first claim</td>'
+        p = '<p class="doc-body">Synthetic locator line.</p>'
+        bad = [
+            (h.replace(cased_label, '<span class="uo-cell-label doc-label">Power (mW)</span>12</td>'),
+             r"a cell label in an authored-case column lacks its authored-case span"),
+            (h.replace(plain_label, 'data-uo-label="Claim"><span class="uo-cell-label doc-label"><span class="uo-authored-case">Claim</span>'
+                                    '</span>first claim</td>'),
+             r"an authored-case cell label in a column whose header is not authored-case"),
+            (h.replace(p, '<p class="doc-body"><span class="uo-authored-case">Synthetic locator line.</span></p>'),
+             r"class 'uo-authored-case' allowed only directly in a header cell or in a cell's label"),
+            (h.replace('<span class="uo-authored-case">Power (mW)</span></th>',
+                       '<span class="uo-authored-case"><code class="doc-code">mW</code></span></th>'),
+             r"an authored-case header holds text and inline emphasis only, not <code>"),
+            (h.replace('<span class="uo-authored-case">Power (mW)</span></th>',
+                       '<span class="uo-authored-case">Power (<em><code class="doc-code">mW</code></em>)</span></th>'),
+             r"an authored-case header holds text and inline emphasis only, not <code>"),
+        ]
+        for doc, pattern in bad:
+            with self.subTest(pattern=pattern):
+                self.assertNotEqual(doc, h)
+                with self.assertRaisesRegex(build.BuildError, pattern):
+                    build.check_final_html(doc, 2)
+
+    def test_R2_local_css_may_not_reach_a_renderer_hook(self):
+        src = with_table(table=CASED_TABLE.replace(":::table dense ", ":::table local=ctl dense "))
+        hook, attr = r"names a renderer hook; it may name only its uo-local-<name> scope", r"selects by the class attribute"
+        for css, pattern in (("main.uo-md .uo-local-ctl .uo-authored-case { font-size: 30px; }\n", hook),
+                             ("main.uo-md .uo-local-ctl td .uo-cell-label { display: block; }\n", hook),
+                             ("main.uo-md .uo-local-ctl :is(.uo-authored-case) { font-size: 30px; }\n", hook),
+                             ("main.uo-md .uo-local-ctl [title~=UO-authored-case] { font-size: 30px; }\n", hook),
+                             ("main.uo-md .uo-local-ctl [class~=authored-case] { font-size: 30px; }\n", attr),
+                             ("main.uo-md .uo-local-ctl [ CLASS*=authored] { font-size: 30px; }\n", attr),
+                             ("main.uo-md .uo-local-ctl [*|class$=authored-case] { font-size: 30px; }\n", attr),
+                             ("main.uo-md .uo-local-ctl [|class*=authored] { font-size: 30px; }\n", attr),
+                             ("main.uo-md .uo-local-ctl :is([*|class^=uo]) { font-size: 30px; }\n", attr)):
+            with self.subTest(css=css):
+                self.fails(src, pattern, local_css=css)
+        ok = self.render(src, local_css="main.uo-md .uo-local-ctl td { padding: 2px; }\n", name="ok")["html"]
+        self.assertIn('<table class="doc-dense-table uo-local-ctl">', ok)          # the positive case reaches the table
+        self.assertIn("main.uo-md .uo-local-ctl td { padding: 2px; }", ok)
+
+
 class Presentation(unittest.TestCase):
-    """U2: the CSS behaviors behind the profile roles, wrapping, narrow screens, theme and print.
-    Values are not asserted beyond the behavior each rule exists for."""
+    """U6: the UO stylesheets are geometry. Every text style is a design-system register role; the checks
+    here are on the UO rules' declarations. Computed presentation is the rendered check's (README,
+    "Rendered conformance check")."""
+
+    TYPE = ("font-family", "font-size", "font-weight", "line-height", "letter-spacing", "color", "text-transform",
+            "font", "font-style", "font-variant-numeric")
+    FOUNDATION_TOKENS = re.compile(r"^--(fg|line|bg|surface|shadow|ask|fs|fw|lh|tracking|space|radius)-")
+    ROWS_CONTEXTS = ("(max-width: 960px)", "container uo-body (max-width: 1119.98px)", None)
 
     def setUp(self):
         self.md = css_rules(build.MD_CSS)
         self.tpl = css_rules(template_css())
 
-    def test_U2_role_rules_reach_the_renderer_hooks(self):
-        num = [d for m, sels, d in self.tpl if '.uo-md td[data-uo-cell="num"]' in sels]
-        self.assertEqual(num, [{"text-align": "right", "font-variant-numeric": "tabular-nums"}])
-        self.assertTrue(any('.uo-md th[data-uo-cell="num"]' in sels and ".uo-data-table td.num" in sels for m, sels, d in self.tpl))
-        key = [d for m, sels, d in self.tpl if '.uo-md td[data-uo-cell="key"]' in sels]
-        self.assertEqual(key, [{"color": "var(--fg-1)", "font-weight": "var(--fw-medium)"}])
-        self.assertTrue(any(".uo-data-table tr.uo-row-key td" in sels and '.uo-md td[data-uo-cell="key"]' in sels for m, sels, d in self.tpl))
-        cap = [(sels, d) for m, sels, d in self.tpl if ".uo-md table > caption" in sels]
-        self.assertEqual(len(cap), 1)
-        self.assertIn(".uo-data-table caption", cap[0][0])
-        self.assertTrue(any("details.uo-details > summary" in sels for m, sels, d in self.tpl))
-        self.assertTrue(any("details.uo-details > .uo-details__body" in sels for m, sels, d in self.tpl))
+    @staticmethod
+    def zero_specificity(sel):
+        return re.fullmatch(r"(?::where\((?:[^()]|\([^()]*(?:\([^()]*\))*[^()]*\))*\)\s*(?:>\s*)?)+", sel) is not None
 
-    def test_U2_R1_caption_and_summary_keep_the_authored_case(self):
-        # U2-R1: the two roles that carry authored payload text must not transform its case. The override is
-        # UO-local (the renderer's own stylesheet), it changes nothing else about either role, and the
-        # template's own carrier rules are untouched.
-        #
-        # Each override must beat its template rule ON SPECIFICITY, never on emission order. The template
-        # carries the identical selector `.uo-md table > caption`, so an equal-specificity override would win
-        # only because MD_CSS happens to be emitted second — a silent revert if that order ever changed, and
-        # nothing else in this suite pins it. `main.uo-md ...` adds a type selector and wins either way.
-        for sel in ("main.uo-md table > caption", ".uo-md details.uo-details > summary"):
-            got = [d for m, sels, d in self.md if m is None and sel in sels]
-            self.assertEqual(got, [{"text-transform": "none"}], sel)
-        for local_sel, tpl_sel in (("main.uo-md table > caption", ".uo-md table > caption"),
-                                   (".uo-md details.uo-details > summary", "details.uo-details > summary")):
-            self.assertGreater(specificity(local_sel), specificity(tpl_sel),
-                               "%s must outrank %s on specificity, not on emission order" % (local_sel, tpl_sel))
-        # the template still sets uppercase for both, so the override is doing real work
-        cap = [d for m, sels, d in self.tpl if ".uo-md table > caption" in sels]
-        self.assertEqual([d.get("text-transform") for d in cap], ["uppercase"])
-        summ = [d for m, sels, d in self.tpl if "details.uo-details > summary" in sels and "text-transform" in d]
-        self.assertEqual([d.get("text-transform") for d in summ], ["uppercase"])
-        # the other governed metrics of both roles stay with the template and are not restated locally
-        for d in cap + summ:
-            for prop in ("font-family", "font-size", "font-weight", "letter-spacing", "color"):
-                self.assertIn(prop, d)
-        local = [d for m, sels, d in self.md if m is None
-                 and ("main.uo-md table > caption" in sels or ".uo-md details.uo-details > summary" in sels)]
-        self.assertEqual(sorted({k for d in local for k in d}), ["text-transform"])
-        # the disclosure marker affordance is untouched
-        self.assertTrue(any("details.uo-details > summary::before" in sels for m, sels, d in self.tpl))
-        self.assertTrue(any("details.uo-details[open] > summary::before" in sels for m, sels, d in self.tpl))
+    def test_U6_the_uo_stylesheets_set_no_type_and_sit_at_zero_specificity(self):
+        exceptions = {
+            (None, ".uo-details > summary > .surface-disclosure-label"): {"text-transform": "none"},
+            (None, ":where(.uo-md) :where(.uo-authored-case)"): {"text-transform": "none"},
+            ("print", ".uo-md .doc-pre"): {"white-space": "pre-wrap"},
+            ("print", ".uo-md .doc-pre-part"): {"white-space": "pre-wrap"},
+            ("print", "html"): {"-webkit-print-color-adjust": "exact", "print-color-adjust": "exact"},
+        }
+        seen = set()
+        for sheet, rules in (("template", self.tpl), ("MD_CSS", self.md)):
+            for m, sels, d in rules:
+                for sel in sels:
+                    with self.subTest(sheet=sheet, media=m, selector=sel):
+                        if sel.startswith(":root") or sel == ".theme-dark":
+                            self.assertTrue(all(k.startswith("--") for k in d), "a token rule declares tokens only")
+                            continue
+                        if (m, sel) in exceptions:
+                            self.assertEqual(d, exceptions[(m, sel)])
+                            seen.add((m, sel))
+                            continue
+                        self.assertTrue(self.zero_specificity(sel), "not zero-specificity: %s" % sel)
+                        type_props = [k for k in d if k in self.TYPE and not (sel == ":where(.uo-mark)" and k == "color")]
+                        self.assertEqual(type_props, [], "a UO rule sets a type metric")
+        self.assertEqual(seen, set(exceptions))
 
-    def test_U2_text_wraps_everywhere_in_the_document(self):
-        self.assertEqual(rules_with(self.md, ".uo-md") [-1], {"overflow-wrap": "anywhere"})
-        self.assertIn({"overflow-wrap": "anywhere"}, rules_with(self.md, ".uo-md td"))
-
-    def test_U2_table_cells_fit_first_headers_included(self):
-        # U1's fit-first wrap governs every cell. Checked in two stylesheets: no MD_CSS rule outside the narrow
-        # block, and no template rule that can select the renderer's cells (every class its selector names is
-        # one the renderer emits), gives a header or body cell another wrap, a white-space, a word-break, a
-        # hyphens or a width setting. Other stylesheets (local CSS) and computed layout are not checked here.
-        self.assertIn({"overflow-wrap": "anywhere"}, rules_with(self.md, ".uo-md th"))
-        cell = re.compile(r"(^|[\s>+~])(th|td|thead|tbody|tr)([\s.:\[>+~]|$)")
-        emitted = {c for classes in build.CHROME_CLASSES.values() for c in classes}
-
-        def reachable(selector):
-            return bool(cell.search(selector)) and set(re.findall(r"\.([\w-]+)", selector)) <= emitted
-
-        matched = [("MD_CSS", sels, d) for m, sels, d in self.md if m is None and any(cell.search(s) for s in sels)]
-        self.assertGreaterEqual(len(matched), 3)          # the MD_CSS check is not vacuous
-        in_template = [("template", sels, d) for m, sels, d in self.tpl if any(reachable(s) for s in sels)]
-        self.assertGreaterEqual(len(in_template), 2)      # the num and key role rules: the template check is not vacuous
-        for sheet, sels, d in matched + in_template:
-            with self.subTest(stylesheet=sheet, selectors=sels):
-                self.assertEqual(d.get("overflow-wrap", "anywhere"), "anywhere")
-                for prop in ("white-space", "word-break", "hyphens", "min-width", "width"):
-                    self.assertNotIn(prop, d)
-        # the template's own data-table header rule is left as it is; the renderer never emits its class
-        self.assertEqual([d.get("white-space") for d in rules_with(self.tpl, ".uo-data-table th")], [None, "nowrap"])
-        self.assertFalse(any("uo-data-table" in classes for classes in build.CHROME_CLASSES.values()))
-
-    def test_U2_stacked_labels_align_left_in_every_column(self):
-        before = [d for m, sels, d in self.md if m == "(max-width: 960px)" and ".uo-md .uo-cell-label" in sels]
-        self.assertEqual(len(before), 1)
-        self.assertEqual(before[0].get("text-align"), "left")
-        # without it the label would inherit the num role's right alignment
-        self.assertIn("right", [d.get("text-align") for m, sels, d in self.tpl if '.uo-md td[data-uo-cell="num"]' in sels])
-
-    def test_U2_code_block_in_disclosure_renders_as_outside(self):
-        body_code = [sels for m, sels, d in self.tpl for s in sels
-                     if ".uo-details__body" in s and re.search(r"\bcode$", s)]
-        self.assertEqual(body_code, [("details.uo-details > .uo-details__body :not(pre) > code",)])
-        md_line_height = [d["line-height"] for m, sels, d in self.md if m is None and sels == (".uo-md",) and "line-height" in d]
-        self.assertEqual(len(md_line_height), 1)
-        self.assertEqual(rules_with(self.md, ".uo-md .uo-details__body pre"), [{"line-height": md_line_height[0]}])
-
-    def test_U2_narrow_screens_stack_rows_without_display_none_visibility_or_font_size(self):
-        # Checks the narrow block's declarations only: the stacked parts, the label rule, the header-row rules, and
-        # no display: none, visibility or font-size in the block. It cannot tell whether content is visually
-        # hidden: the header row is moved out of view with a clip, and the reader sees the header as the per-cell
-        # label element instead. U2-R2 adds the focus reveal, checked by its own test below.
-        media = "(max-width: 960px)"
-        self.assertIn(media, [m for m, s, d in self.tpl if m])   # the template's existing threshold, same media
-        narrow = [(sels, d) for m, sels, d in self.md if m == media]
-        blocks = [s for sels, d in narrow if d.get("display") == "block" and "content" not in d for s in sels]
-        self.assertEqual(sorted(blocks), sorted([".uo-md table", ".uo-md caption", ".uo-md tbody", ".uo-md tr", ".uo-md td",
-                                                 ".uo-md .uo-cell-label",
-                                                 ".uo-md thead:focus-within tr", ".uo-md thead:focus-within th"]))
-        self.assertIn({"display": "block", "font-weight": "var(--fw-medium)", "text-align": "left"},
-                      [d for sels, d in narrow if ".uo-md .uo-cell-label" in sels])
-        head = [d for sels, d in narrow if ".uo-md thead" in sels]
-        self.assertEqual(len(head), 1)
-        for sels, d in narrow:
-            self.assertNotIn(d.get("display"), ("none",))
-            self.assertNotIn("visibility", d)
-            self.assertNotIn("font-size", d)
-        # no narrow-block rule uses generated content to carry payload text
-        self.assertEqual([d for sels, d in narrow if "content" in d], [])
-        self.assertNotIn(".uo-md th", [s for sels, d in narrow for s in sels])
-
-    def test_U2_R2_focused_header_row_returns_to_view(self):
-        # U2-R2: a link inside the out-of-view header row must not be focusable while invisible. The reveal
-        # undoes every declaration that takes the row out of view, and stacks it so revealing cannot widen
-        # the page. Checked as declarations; the browser measurement is the check for the effect.
-        narrow = [(sels, d) for m, sels, d in self.md if m == "(max-width: 960px)"]
-        hidden = [d for sels, d in narrow if sels == (".uo-md thead",)]
-        self.assertEqual(len(hidden), 1)
-        shown = [d for sels, d in narrow if sels == (".uo-md thead:focus-within",)]
-        self.assertEqual(len(shown), 1)
-        # every property that hides the row is reset by the reveal
-        self.assertEqual(sorted(hidden[0]), sorted(shown[0]))
-        self.assertEqual(shown[0], {"position": "static", "width": "auto", "height": "auto",
-                                    "overflow": "visible", "clip-path": "none", "white-space": "normal"})
-        self.assertIn({"display": "block"},
-                      [d for sels, d in narrow if ".uo-md thead:focus-within th" in sels])
+    def test_U6_no_foundation_token_is_redeclared(self):
+        for sheet, rules in (("template", self.tpl), ("MD_CSS", self.md)):
+            for m, sels, d in rules:
+                for k in d:
+                    with self.subTest(sheet=sheet, selectors=sels, token=k):
+                        self.assertIsNone(self.FOUNDATION_TOKENS.match(k))
 
     def test_U2_theme_dark_resolves_the_template_tokens(self):
         dark = [(sels, d) for m, sels, d in self.tpl if m is None and ':root[data-theme="dark"]' in sels]
-        declared = sorted(k for sels, d in dark for k in d)
-        self.assertEqual(declared, ["--artifact-line", "--artifact-line-soft", "--uo-code-bg", "--uo-mark", "--uo-soft-bg"])
+        self.assertEqual(sorted(k for sels, d in dark for k in d), ["--artifact-line", "--artifact-line-soft", "--uo-mark"])
         for sels, d in dark:
             self.assertEqual(sels, (':root[data-theme="dark"]', ".theme-dark"))
+        auto = [d for m, sels, d in self.tpl if m == "(prefers-color-scheme: dark)"]
+        self.assertEqual(auto, [dark[0][1]])
         with open(os.path.join(HERE, "_dsa-tokens", "colors_and_type.css"), encoding="utf-8") as f:
             foundation = css_rules(f.read())
         self.assertTrue(any(sels == (':root[data-theme="dark"]', ".theme-dark") for m, sels, d in foundation))
+        self.assertTrue(any(m == "(prefers-color-scheme: dark)" for m, sels, d in foundation))
+
+    def test_U6_caption_and_summary_keep_the_authored_case(self):
+        # The caption takes the register's metadata role, which sets no case. The disclosure summary keeps the
+        # author's case through one UO value on the treatment, and the package MANIFEST declares it as a profile
+        # over exactly that selector.
+        with open(os.path.join(HERE, "_dsa-surface", "surface-document.css"), encoding="utf-8") as f:
+            reg = css_rules(f.read())
+        meta = [d for m, sels, d in reg if ".doc-meta" in sels and "font-family" in d]
+        self.assertEqual(len(meta), 1)
+        self.assertNotIn("text-transform", meta[0])
+        summary = [d for m, sels, d in self.md if ".uo-details > summary > .surface-disclosure-label" in sels]
+        self.assertEqual(summary, [{"text-transform": "none"}])
+        prof = build.role_profiles({"disclosures": 3})
+        self.assertEqual([x["selector"] for x in prof], [".uo-details > summary > .surface-disclosure-label"])
+        self.assertEqual(prof[0]["expected_count"], 3)
+        self.assertEqual(sorted(prof[0]), ["expected_count", "name", "owner", "reason", "selector"])
+        self.assertEqual(build.role_profiles({"disclosures": 0}), [])
+
+    def test_U2_text_wraps_everywhere_in_the_document(self):
+        self.assertIn("anywhere", [d.get("overflow-wrap") for m, sels, d in self.md if m is None and ":where(.uo-md)" in sels])
+
+    def test_U6_cells_keep_words_and_values_whole(self):
+        cells = [d for m, sels, d in self.md if m is None and ":where(.uo-md) :where(th, td)" in sels]
+        self.assertEqual([d.get("overflow-wrap") for d in cells], ["break-word"])
+        for m, sels, d in self.md + self.tpl:
+            self.assertNotIn("hyphens", d)
+        atomic = ':where(.uo-md) :where(td[data-uo-cell="key"], td[data-uo-cell="num"], td[data-uo-cell="status"])'
+        self.assertEqual([d for m, sels, d in self.md if m is None and atomic in sels], [{"white-space": "nowrap"}])
+        long = [d for m, sels, d in self.md if m is None and ":where(.uo-md) :where(th, td) :where(code, a)" in sels]
+        self.assertEqual(long, [{"overflow-wrap": "anywhere"}])
+        num = [d for m, sels, d in self.md if m is None
+               and ':where(.uo-md) :where(th[data-uo-cell="num"], td[data-uo-cell="num"])' in sels]
+        self.assertEqual(num, [{"text-align": "right"}])
+
+    def rows_rules(self, ctx):
+        """The rows-view rules of one context, found by the table selector each rule opens with."""
+        table = {self.ROWS_CONTEXTS[0]: "table", self.ROWS_CONTEXTS[1]: build.WIDE_BELOW_CAP,
+                 self.ROWS_CONTEXTS[2]: build.WIDE_ALWAYS}[ctx]
+        prefix = ":where(.uo-md) :where(%s)" % table
+        return [(sels, d) for m, sels, d in self.md if m == ctx and sels[0].startswith(prefix)]
+
+    def test_U6_rows_view_applies_in_three_contexts_alike(self):
+        per = {ctx: [d for sels, d in self.rows_rules(ctx)] for ctx in self.ROWS_CONTEXTS}
+        self.assertEqual(len(per[self.ROWS_CONTEXTS[0]]), len(build.ROWS_VIEW))
+        for ctx in self.ROWS_CONTEXTS[1:]:
+            self.assertEqual(per[ctx], per[self.ROWS_CONTEXTS[0]], ctx)
+        self.assertIn("th:nth-child(7)", build.WIDE_BELOW_CAP)
+        self.assertIn("th:nth-child(6)", build.WIDE_BELOW_CAP)
+        self.assertIn("th:nth-child(9)", build.WIDE_ALWAYS)
+        self.assertIn("th:nth-child(8)", build.WIDE_ALWAYS)
+
+    def test_U2_stacked_labels_align_left_in_every_column(self):
+        for ctx in self.ROWS_CONTEXTS:
+            labels = [d for sels, d in self.rows_rules(ctx) if sels[0].endswith(":where(.uo-cell-label)")]
+            self.assertEqual(labels, [{"display": "block", "text-align": "left"}], ctx)
+        grid = [d for m, sels, d in self.md if m is None and ":where(.uo-md) :where(.uo-cell-label)" in sels]
+        self.assertEqual(grid, [{"display": "none"}])
+
+    def test_U2_narrow_screens_stack_rows_without_display_none_visibility_or_font_size(self):
+        for ctx in self.ROWS_CONTEXTS:
+            for sels, d in self.rows_rules(ctx):
+                with self.subTest(context=ctx, selectors=sels):
+                    self.assertNotEqual(d.get("display"), "none")
+                    self.assertNotIn("visibility", d)
+                    self.assertNotIn("font-size", d)
+                    self.assertNotIn("content", d)
+
+    def test_U2_R2_focused_header_row_returns_to_view(self):
+        for ctx in self.ROWS_CONTEXTS:
+            narrow = self.rows_rules(ctx)
+            hidden = [d for sels, d in narrow if sels[0].endswith("> :where(thead)")]
+            shown = [d for sels, d in narrow if sels[0].endswith("> :where(thead:focus-within)")]
+            self.assertEqual(len(hidden), 1, ctx)
+            self.assertEqual(len(shown), 1, ctx)
+            self.assertEqual(sorted(hidden[0]), sorted(shown[0]))
+            self.assertEqual(shown[0], {"position": "static", "width": "auto", "height": "auto",
+                                        "overflow": "visible", "clip-path": "none", "white-space": "normal"})
+
+    def test_U6_code_block_in_disclosure_renders_as_outside(self):
+        # A preformatted block is the register's .doc-pre wherever it sits; no UO rule reaches inside a disclosure body.
+        for m, sels, d in self.md + self.tpl:
+            for sel in sels:
+                self.assertNotIn("uo-details__body", sel)
 
     def test_U2_print_keeps_the_theme_ground_and_rebinds_no_token(self):
         self.assertIn({"-webkit-print-color-adjust": "exact", "print-color-adjust": "exact"}, rules_with(self.tpl, "html", "print"))
-        self.assertIn({"white-space": "pre-wrap"}, rules_with(self.md, ".uo-md pre", "print"))
+        self.assertIn({"white-space": "pre-wrap"}, rules_with(self.md, ".uo-md .doc-pre", "print"))
         for m, sels, d in self.tpl + self.md:
             if m and "print" in m:
                 self.assertEqual([k for k in d if k.startswith("--")], [])
-
 
 
 BANNERS_01 = """:::part 01
@@ -1377,14 +1568,17 @@ class Identity(RenderCase):
 
     def test_U3_masthead_order_mark_slot_and_index(self):
         h = self.render(GUIDED)["html"]
-        head = re.search(r'<section data-uo-part="01" id="uo-part-01">\n(.*?)\n</section>', h, flags=re.S).group(1)
-        self.assertRegex(head, r'^<div class="uo-status-rail">.*</div>\n<header class="uo-head">\n'
-                               r'<details class="uo-index"><summary class="uo-index__mark"><svg class="uo-mark" [^>]*>.*</svg>'
-                               r'<span class="uo-index__label">sections</span></summary>\n'
-                               r'<nav class="uo-index__list" aria-label="Sections"><ol>.*</ol></nav>\n</details>\n'
-                               r'<h1>Synthetic guided review</h1>\n<dl class="uo-head__meta">.*</dl>\n</header>\n'
-                               r'<p>Synthetic locator line.</p>$')
-        links = re.findall(r'<li><a href="#([a-z0-9-]+)">([^<]+)</a></li>', h)
+        head = re.search(r'<section data-uo-part="01" id="uo-part-01" class="doc-section">\n(.*?)\n</section>', h, flags=re.S).group(1)
+        self.assertRegex(head, r'^<div class="uo-status-rail">.*</div>\n<header class="uo-head doc-titled">\n'
+                               r'<details class="uo-index surface-disclosure surface-material-panel surface-attach-free '
+                               r'surface-elevation-flush"><summary class="uo-index__mark"><span class="surface-disclosure-label">'
+                               r'<svg class="uo-mark" [^>]*>.*</svg>sections</span><span class="surface-disclosure-indicator" '
+                               r'aria-hidden="true">&#9660;</span></summary>\n'
+                               r'<nav class="uo-index__list surface-disclosure-body" aria-label="Sections"><ol class="doc-toc-list">'
+                               r'.*</ol></nav>\n</details>\n'
+                               r'<h1 class="doc-title">Synthetic guided review</h1>\n<dl class="uo-head__meta">.*</dl>\n</header>\n'
+                               r'<div class="doc-prose">\n<p class="doc-body">Synthetic locator line.</p>\n</div>$')
+        links = re.findall(r'<li><a class="doc-toc-link surface-text-link" href="#([a-z0-9-]+)">([^<]+)</a></li>', h)
         self.assertEqual(links, [("uo-part-01", "01 locator + masthead"), ("uo-part-02", "02 reviewer brief"),
                                  ("uo-part-03", "03 decision request"), ("uo-part-04", "04 executive result"),
                                  ("uo-part-06", "06 finding unit"), ("uo-part-08", "08 unresolved + later-check register"),
@@ -1393,7 +1587,8 @@ class Identity(RenderCase):
 
     def test_U3_index_lists_only_the_sections_present(self):
         h = self.render(CONFIRMATION)["html"]
-        self.assertEqual(re.findall(r'<li><a href="#([a-z0-9-]+)">', h), ["uo-part-01", "uo-part-02", "uo-part-07", "uo-part-10"])
+        self.assertEqual(re.findall(r'<li><a class="doc-toc-link surface-text-link" href="#([a-z0-9-]+)">', h),
+                         ["uo-part-01", "uo-part-02", "uo-part-07", "uo-part-10"])
 
     def test_U3_wordmark_carries_the_vendored_geometry(self):
         h = self.render(GUIDED)["html"]
@@ -1412,8 +1607,8 @@ class Identity(RenderCase):
         h = self.render(src)["html"]
         self.assertEqual(re.findall(r'<section data-uo-part="06" id="([a-z0-9-]+)"', h),
                          ["uo-part-06", "uo-part-06-2", "uo-part-06-3"])
-        self.assertIn('<li><a href="#uo-part-06-2">06 finding unit 2</a></li>', h)
-        self.assertIn('<li><a href="#uo-part-06-3">06 finding unit 3</a></li>', h)
+        self.assertIn('<li><a class="doc-toc-link surface-text-link" href="#uo-part-06-2">06 finding unit 2</a></li>', h)
+        self.assertIn('<li><a class="doc-toc-link surface-text-link" href="#uo-part-06-3">06 finding unit 3</a></li>', h)
 
     def test_U3_authored_section_links_fail(self):
         """Only the renderer's section index links inside the document; a source link is http(s) only."""
@@ -1439,24 +1634,26 @@ class Identity(RenderCase):
 
     def test_U3_banners_render_with_generated_flags(self):
         h = self.render(with_part_01())["html"]
-        self.assertIn('</header>\n<div class="uo-reviewer-status">\n<p class="uo-reviewer-status__flag">review status</p>\n'
-                      '<div class="uo-reviewer-status__body">\n<p>Synthetic status line.</p>\n</div>\n</div>\n'
-                      '<div class="uo-proof">\n<p class="uo-proof__flag">proof of assembly</p>\n'
-                      '<p class="uo-proof__title">Synthetic proof title</p>\n'
-                      '<div class="uo-proof__body">\n<p>Synthetic proof line.</p>\n</div>\n</div>\n</section>', h)
+        self.assertIn('</header>\n<div class="uo-reviewer-status %s">\n'
+                      '<p class="uo-reviewer-status__flag surface-emphasis-chip">review status</p>\n'
+                      '<div class="uo-reviewer-status__body doc-prose">\n<p class="doc-body">Synthetic status line.</p>\n</div>\n</div>\n'
+                      '<div class="uo-proof %s">\n<p class="uo-proof__flag surface-emphasis-chip">proof of assembly</p>\n'
+                      '<p class="uo-proof__title doc-subsection-title">Synthetic proof title</p>\n'
+                      '<div class="uo-proof__body doc-prose">\n<p class="doc-body">Synthetic proof line.</p>\n</div>\n</div>\n</section>'
+                      % (build.EMPHASIS_PANEL % "cyan", build.EMPHASIS_PANEL % "violet"), h)
 
     def test_U3_banners_keep_source_order(self):
         h = self.render(with_part_01(part=":::part 01\nA locator line.\n\n:::banner proof\nP.\n:::\n\n"
                                           ":::banner review-status\nR.\n:::\n:::\n\n"))["html"]
-        self.assertLess(h.index("<p>A locator line.</p>"), h.index('<div class="uo-proof">'))
-        self.assertLess(h.index('<div class="uo-proof">'), h.index('<div class="uo-reviewer-status">'))
+        self.assertLess(h.index('<p class="doc-body">A locator line.</p>'), h.index('<div class="uo-proof '))
+        self.assertLess(h.index('<div class="uo-proof '), h.index('<div class="uo-reviewer-status '))
 
     def test_U3_proof_without_title_and_title_escaped(self):
         h = self.render(with_part_01(part=':::part 01\n:::banner proof\nA line.\n:::\n:::\n\n'))["html"]
         self.assertNotIn('class="uo-proof__title"', h)
         self.reset_tmp()
         h = self.render(with_part_01(part=':::part 01\n:::banner proof "A <b> & title"\nA line.\n:::\n:::\n\n'))["html"]
-        self.assertIn('<p class="uo-proof__title">A &lt;b&gt; &amp; title</p>', h)
+        self.assertIn('<p class="uo-proof__title doc-subsection-title">A &lt;b&gt; &amp; title</p>', h)
 
     def test_U3_banner_outside_part_01_fails(self):
         self.fails(mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n",
@@ -1538,8 +1735,10 @@ class Identity(RenderCase):
     def test_U3_allowlist_rejects_misplaced_identity_chrome(self):
         h = self.render(with_part_01())["html"]
         svg = re.search(r'<svg class="uo-mark".*?</svg>', h, flags=re.S).group(0)
-        nav = re.search(r'<nav class="uo-index__list".*?</nav>', h, flags=re.S).group(0)
-        brief = "<p>What this synthetic document tests, and what not to judge.</p>"
+        nav = re.search(r'<nav class="uo-index__list surface-disclosure-body".*?</nav>', h, flags=re.S).group(0)
+        brief = '<p class="doc-body">What this synthetic document tests, and what not to judge.</p>'
+        index = '<details class="uo-index %s">' % build.DISCLOSURE
+        toc = '<li><a class="doc-toc-link surface-text-link" href="#%s">%s</a></li>'
         bad = [
             (h.replace(' id="uo-part-03"', ''), r"<section> without its id"),
             (h.replace(' id="uo-part-03"', ' id="uo-part-05"'), r"<section id='uo-part-05'> does not name its part '03'"),
@@ -1550,7 +1749,8 @@ class Identity(RenderCase):
             (h.replace('href="#uo-part-01"', 'href="#UO-PART-01"'), r"a section-index link names a section id, #uo-part-NN"),
             (h.replace(' id="uo-part-03"', ' id="uo-part-03-1"'), r"<section id='uo-part-03-1'> does not name its part '03'"),
             (h.replace(' id="uo-part-03"', ' id="uo-part-3"'), r"<section id='uo-part-3'> does not name its part '03'"),
-            (h.replace(brief, brief + '<p><a href="#uo-part-08">x</a></p>'), r"only https:// and http:// links are allowed"),
+            (h.replace(brief, brief + '<p class="doc-body"><a class="surface-text-link" href="#uo-part-08">x</a></p>'),
+             r"only https:// and http:// links are allowed"),
             (h.replace(brief, brief + svg), r"<svg> is the masthead's wordmark only, in the mark slot"),
             (h.replace(svg, svg + svg), r"exactly one <svg>, the masthead's wordmark, required \(found 2\)"),
             (h.replace(svg, ""), r"exactly one <svg>, the masthead's wordmark, required \(found 0\)"),
@@ -1558,28 +1758,33 @@ class Identity(RenderCase):
             (h.replace('role="img" aria-label="ASK">', 'role="img" aria-label="ASK">text'), r"text inside the wordmark"),
             (h.replace('role="img" aria-label="ASK">', 'role="img" aria-label="ASK"><span>x</span>'),
              r"the wordmark holds path elements only"),
-            (h.replace(brief, brief + '<p><path d="M0"></path></p>'), r"<path> outside the wordmark"),
+            (h.replace(brief, brief + '<p class="doc-body"><path d="M0"></path></p>'), r"<path> outside the wordmark"),
             (h.replace(brief, brief + nav), r"<nav> is the section index's list only"),
             (h.replace('aria-label="Sections"', 'aria-label="Parts"'), r"<nav> carries aria-label Sections"),
-            (h.replace('<details class="uo-index">', '<details class="uo-index" data-uo-disclose="evidence">'),
+            (h.replace(index, index[:-1] + ' data-uo-disclose="evidence">'),
              r"the section index is not an authored disclosure"),
-            (h.replace(brief, brief + '<details class="uo-index"><summary>x</summary></details>'),
+            (h.replace(brief, brief + index + '<summary class="uo-index__mark">x</summary></details>'),
              r"<details class='uo-index'> is the masthead's section index only"),
-            (h.replace(brief, brief + '<div class="uo-proof"><p class="uo-proof__flag">x</p></div>'),
+            (h.replace(brief, brief + '<div class="uo-proof %s"><p class="uo-proof__flag surface-emphasis-chip">x</p></div>'
+                       % (build.EMPHASIS_PANEL % "violet")),
              r"<div class='uo-proof'> sits only directly in part 01"),
-            (h.replace(brief, brief + '<p class="uo-reviewer-status__flag">x</p>'),
+            (h.replace(brief, brief + '<p class="uo-reviewer-status__flag surface-emphasis-chip">x</p>'),
              r"class 'uo-reviewer-status__flag' sits only directly in its <div class='uo-reviewer-status'>"),
-            (h.replace('<p class="uo-proof__title">', '<p class="uo-reviewer-status__flag">'),
+            (h.replace('<p class="uo-proof__title doc-subsection-title">', '<p class="uo-reviewer-status__flag surface-emphasis-chip">'),
              r"class 'uo-reviewer-status__flag' sits only directly in its <div class='uo-reviewer-status'>"),
-            (h.replace('<li><a href="#uo-part-08">08 unresolved + later-check register</a></li>', ''),
+            (h.replace(toc % ("uo-part-08", "08 unresolved + later-check register"), ''),
              r"the section index must link every section, in order"),
-            (h.replace('<li><a href="#uo-part-02">02 reviewer brief</a></li><li><a href="#uo-part-03">03 decision request</a></li>',
-                       '<li><a href="#uo-part-03">03 decision request</a></li><li><a href="#uo-part-02">02 reviewer brief</a></li>'),
+            (h.replace(toc % ("uo-part-02", "02 reviewer brief") + toc % ("uo-part-03", "03 decision request"),
+                       toc % ("uo-part-03", "03 decision request") + toc % ("uo-part-02", "02 reviewer brief")),
              r"the section index must link every section, in order"),
-            (h.replace(nav, '<nav class="uo-index__list" aria-label="Sections"><ol></ol></nav>'),
+            (h.replace(nav, '<nav class="uo-index__list surface-disclosure-body" aria-label="Sections"><ol class="doc-toc-list"></ol></nav>'),
              r"the section index must link every section, in order"),
-            (h.replace('<h1>', '<details class="uo-index"><summary>x</summary></details>\n<h1>'),
+            (h.replace('<h1 class="doc-title">', index + '<summary class="uo-index__mark">x</summary></details>\n<h1 class="doc-title">'),
              r"exactly one section index, <details class='uo-index'>, required \(found 2\)"),
+            (h.replace(toc % ("uo-part-02", "02 reviewer brief"), '<li><a class="surface-text-link" href="#uo-part-02">02 reviewer brief</a></li>'),
+             r"every link in the contents list is a contents link"),
+            (h.replace(toc % ("uo-part-02", "02 reviewer brief"), '<li class="doc-body">' + toc[4:] % ("uo-part-02", "02 reviewer brief")),
+             r"a contents entry is an unclassed <li> in the contents list"),
             (h.replace('</summary>\n<nav', '</summary><summary class="uo-index__mark">y</summary>\n<nav'),
              r"exactly one mark slot, <summary class='uo-index__mark'>, required \(found 2\)"),
         ]
@@ -1606,31 +1811,42 @@ class Identity(RenderCase):
             ("(prefers-color-scheme: dark)", (':root:not([data-theme="light"]):not([data-theme="dark"])',)):
                 "var(--ask-lavender-ask)",
         })
-        self.assertEqual(rules_with(tpl, ".uo-md .uo-mark")[0]["color"], "var(--uo-mark)")
+        self.assertEqual(rules_with(tpl, ":where(.uo-mark)")[0]["color"], "var(--uo-mark)")
 
-    def test_U3_banner_and_index_rules_outrank_the_prose_rules(self):
-        """The banners and the index sit inside main.uo-md, where MD_CSS's element rules also match them."""
-        tpl, md = css_rules(template_css()), css_rules(build.MD_CSS)
-        pairs = [(".uo-md .uo-reviewer-status__flag", ".uo-md p"), (".uo-md .uo-proof__flag", ".uo-md p"),
-                 (".uo-md .uo-proof__title", ".uo-md p"), (".uo-md .uo-reviewer-status__body p", ".uo-md p"),
-                 (".uo-md .uo-proof__body p", ".uo-md p"), (".uo-md .uo-reviewer-status__body strong", ".uo-md strong"),
-                 (".uo-md .uo-proof__body strong", ".uo-md strong"), (".uo-md .uo-proof__body em", ".uo-md em"),
-                 (".uo-md .uo-index__list ol", ".uo-md ol"), (".uo-md .uo-index__list li", ".uo-md li"),
-                 (".uo-md .uo-index__list a", ".uo-md a")]
-        for ours, prose in pairs:
-            with self.subTest(selector=ours):
-                self.assertTrue(rules_with(tpl, ours), ours)
-                self.assertTrue(rules_with(md, prose), prose)
-                self.assertGreater(specificity(ours), specificity(prose))
+    def test_U6_no_uo_element_rule_competes_with_a_role(self):
+        """U3's banner and index rules had to outrank MD_CSS's prose rules. U6 retired both: the banners, the
+        index and every text element take register roles, and no UO rule names a text element at all."""
+        text = re.compile(r"(?:^|[\s>+~(])(p|li|h[1-6]|blockquote|code|pre|a|strong|em|th|td|caption|dt|dd|summary)(?=$|[\s.:\[>+~,)])")
+        for sheet, rules in (("template", css_rules(template_css())), ("MD_CSS", css_rules(build.MD_CSS))):
+            for m, sels, d in rules:
+                for sel in sels:
+                    if sel == ".uo-details > summary > .surface-disclosure-label":
+                        self.assertEqual(d, {"text-transform": "none"})     # the one declared profile value
+                        continue
+                    if text.search(sel):
+                        with self.subTest(sheet=sheet, selector=sel):
+                            self.assertFalse([k for k in d if k in Presentation.TYPE], "a text-element rule sets type")
 
-    def test_U3_no_rule_hides_or_clips_the_focus_ring(self):
-        """The mark slot and the index links keep the browser's own focus ring, measured in U3. No stylesheet
-        here declares an outline or `all`, and none clips the index or its ancestors; a change to either
-        reopens that measurement."""
+    def test_U6_focus_is_the_design_systems_and_nothing_here_clips_it(self):
+        """U3's native ring was provisional. At U6 the mark slot is a design-system disclosure trigger, whose
+        keyboard focus is the treatment's: a 2px --fg-1 outline around the trigger, --space-1 out, with the
+        summary at --fg-1 and its indicator in the magenta. Every index link is a surface-text-link, whose
+        focus is that module's own underline. No UO stylesheet declares an outline or `all`, and none clips the
+        index or its ancestors; the rendered check (C9) and the keyboard measurement prove the effect."""
         with open(os.path.join(HERE, "_dsa-tokens", "colors_and_type.css"), encoding="utf-8") as f:
             foundation = f.read()
         self.assertEqual(focus_ring_hazards(template_css()) + focus_ring_hazards(build.MD_CSS)
                          + focus_ring_hazards(foundation), [])
+        self.assertNotIn("outline", build.MD_CSS + template_css())
+        with open(os.path.join(HERE, "_dsa-surface", "surface-treatments.css"), encoding="utf-8") as f:
+            treat = css_rules(f.read())
+        self.assertIn({"color": "var(--fg-1)", "outline": "2px solid var(--fg-1)", "outline-offset": "var(--space-1)"},
+                      rules_with(treat, ".surface-disclosure > summary:focus-visible"))
+        self.assertIn({"color": "var(--ask-emphasis-magenta)"},
+                      rules_with(treat, ".surface-disclosure > summary:focus-visible .surface-disclosure-indicator"))
+        with open(os.path.join(HERE, "_dsa-surface", "surface-text-link.css"), encoding="utf-8") as f:
+            link = f.read()
+        self.assertRegex(link, r"\.surface-text-link:focus-visible")
         for extra in (".uo-md .uo-index__list a:focus-visible { outline: 2px solid transparent; }",
                       "summary { all: unset; }",
                       ".uo-md .uo-index__mark { outline-color: rgba(0,0,0,0); }",
@@ -1640,14 +1856,261 @@ class Identity(RenderCase):
                       ".uo-md .uo-index__mark:focus { outline: none; }"):
             with self.subTest(extra=extra):
                 self.assertEqual(len(focus_ring_hazards(extra)), 1)
-        self.assertEqual(focus_ring_hazards(".uo-md pre { overflow-x: auto; } .uo-md { overflow-wrap: anywhere; }"), [])
 
     def test_U3_manifest_states_the_wordmark_embedding(self):
         m = " ".join(self.render(GUIDED)["manifest_text"].split())
         self.assertIn("The wordmark is embedded as the masthead's inline svg, carrying the file's viewBox and path data "
                       "unchanged, so its embedded text is not byte-equal to the hashed file either.", m)
         dep = build.verify_dependencies()
-        self.assertEqual(dep["files"][-1]["path"], "_dsa-tokens/" + build.WORDMARK)
+        self.assertEqual(build.dependency(dep, "_dsa-tokens/" + build.WORDMARK)["path"], "_dsa-tokens/" + build.WORDMARK)
+        self.assertEqual([f["path"] for f in dep["files"]][-len(build.MODULES):], ["_dsa-surface/" + x for x in build.MODULES])
+        self.assertIn("The four register modules are embedded byte for byte, in the order listed, after the token CSS.", m)
+
+
+U6_SRC = mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n", """## Reviewer brief
+
+What this synthetic document tests, and what not to judge.
+
+:::framing thesis
+The part's thesis, framed before its sections.
+:::
+
+### What to judge
+
+A paragraph with `code` and a [link](https://example.org/a).
+
+- one item
+- two items
+
+#### A deep heading
+
+> Someone's words.
+>
+>     quoted code
+
+:::quote "A public source, page 2"
+A quotation with its attribution.
+:::
+
+:::callout
+A posed question of the document's own?
+:::
+
+:::callout
+A lead-in to the structure below.
+
+:::structure
+:::group
+LABEL
+  a line beneath
+:::
+:::group
+SECOND
+  another line
+:::
+:::
+:::
+
+```
+a fenced block
+```
+
+:::synthesis
+What the part comes to.
+:::
+""")
+
+
+class Register(RenderCase):
+    """U6: every element takes a design-system document-register role, and the containers U6 adds."""
+
+    def test_U6_roles_on_every_markdown_element(self):
+        h = self.render(U6_SRC)["html"]
+        body = h.split("<body>")[1]
+        for fragment in ('<h2 class="doc-section-title">Reviewer brief</h2>',
+                         '<h3 class="doc-subsection-title">What to judge</h3>',
+                         '<h4 class="doc-deep-title">A deep heading</h4>',
+                         '<p class="doc-body">A paragraph with <code class="doc-code">code</code> and a '
+                         '<a class="surface-text-link" href="https://example.org/a">link</a>.</p>',
+                         '<li class="doc-body">one item</li>',
+                         '<blockquote class="doc-quote">\n<p>Someone\'s words.</p>\n<pre class="doc-pre">quoted code\n</pre>\n</blockquote>',
+                         '<pre class="doc-pre">a fenced block\n</pre>'):
+            with self.subTest(fragment=fragment):
+                self.assertIn(fragment, body)
+        self.assertNotIn("<pre><code", body)
+        self.assertEqual(len(re.findall(r"<p>", body)), 2)                     # the two quotations' own paragraphs
+        self.assertEqual(len(re.findall(r'<blockquote class="doc-quote">\n<p>', body)), 2)
+
+    def test_U6_headings_nest_sections(self):
+        h = self.render(U6_SRC)["html"]
+        part = re.search(r'<section data-uo-part="02" id="uo-part-02" class="doc-section">\n(.*?)\n</section>', h, re.S).group(1)
+        self.assertTrue(part.startswith('<h2 class="doc-section-title">Reviewer brief</h2>'))
+        self.assertIn('<div class="doc-section">\n<h3 class="doc-subsection-title">What to judge</h3>', part)
+        self.assertIn('<div class="doc-section">\n<h4 class="doc-deep-title">A deep heading</h4>', part)
+        self.assertLess(part.index('<h3 '), part.index('<h4 '))
+        # the synthesis closes the part: it sits directly in the part's section, after every nested section
+        self.assertTrue(part.endswith('<p class="doc-body">What the part comes to.</p>\n</div>'))
+        self.assertIn('</div>\n</div>\n<div data-uo-role="synthesis"', part)
+
+    def test_U6_every_heading_container_is_a_section_and_every_run_is_prose(self):
+        # The register leads a section nested in a section (.doc-section > .doc-section). A container that
+        # holds headings is therefore itself a section -- a part, a question, a finding, a disclosure's body --
+        # so its first subsection is set apart as in a part; and a section's run of blocks is always a
+        # .doc-prose, the last section's included.
+        src = mutate(GUIDED, "**Status:** open. Finding, significance and limit.\n",
+                     "**Status:** open. Finding, significance and limit.\n\n### First\n\nOne.\n\nTwo.\n\n#### Deep\n\nThree.\n\n"
+                     "### Second\n\nFour.\n\n:::disclose evidence \"Heads\"\n#### Inside\n\nFive.\n\n#### Again\n\nSix.\n:::\n")
+        h = self.render(src)["html"]
+        self.assertIn('<div data-uo-role="finding" class="doc-section">', h)
+        finding = h[h.index('<div data-uo-role="finding" class="doc-section">'):]
+        self.assertTrue(finding.startswith('<div data-uo-role="finding" class="doc-section">\n<div class="doc-prose">\n'
+                                           '<p class="doc-body"><strong>Status:</strong> open.'))
+        self.assertIn('<div class="doc-section">\n<h3 class="doc-subsection-title">First</h3>\n<div class="doc-prose">\n'
+                      '<p class="doc-body">One.</p>\n<p class="doc-body">Two.</p>\n</div>\n<div class="doc-section">\n'
+                      '<h4 class="doc-deep-title">Deep</h4>\n<div class="doc-prose">\n<p class="doc-body">Three.</p>\n</div>\n</div>\n</div>',
+                      finding)
+        self.assertIn('<div class="uo-details__body surface-disclosure-body doc-section">\n<div class="doc-section">\n'
+                      '<h4 class="doc-deep-title">Inside</h4>\n<div class="doc-prose">\n<p class="doc-body">Five.</p>\n</div>\n</div>\n'
+                      '<div class="doc-section">\n<h4 class="doc-deep-title">Again</h4>\n<div class="doc-prose">\n'
+                      '<p class="doc-body">Six.</p>\n</div>\n</div>\n</div>', h)
+        # no heading is followed directly by a bare block, and no .doc-group or .doc-prose holds a heading
+        self.assertIsNone(re.search(r'</h[2-4]>\n<(p|ul|ol|pre|table|blockquote|details)\b', h))
+        for m in re.finditer(r'<div class="doc-(?:group|prose)">\n<h[2-4]\b', h):
+            self.fail("a heading directly inside a group or prose run: %r" % m.group(0))
+        self.assertNotIn('class="doc-group"', h)
+
+    def test_U6_framing_synthesis_callout_quote_and_structure_markup(self):
+        r = self.render(U6_SRC)
+        h = r["html"]
+        self.assertIn('<div data-uo-role="framing" class="%s">\n<p class="surface-emphasis-chip surface-emphasis--magenta">thesis</p>\n'
+                      '<p class="doc-body">The part\'s thesis, framed before its sections.</p>\n</div>' % build.FLAT_PANEL, h)
+        self.assertIn('<div data-uo-role="synthesis" class="%s">\n<p class="surface-emphasis-chip surface-emphasis--magenta">compression</p>'
+                      % build.FLAT_PANEL, h)
+        self.assertIn('<p class="doc-body surface-emphasis-rail" data-uo-role="callout">A posed question of the document\'s own?</p>', h)
+        self.assertIn('<div data-uo-role="callout" class="surface-emphasis-rail doc-group">\n<p class="doc-body">A lead-in', h)
+        self.assertIn('<blockquote class="doc-quote">\n<p>A quotation with its attribution.</p>\n<footer>A public source, page 2</footer>\n'
+                      '</blockquote>', h)
+        self.assertIn('<div class="doc-pre doc-pre--structured"><div class="doc-pre-group"><pre class="doc-pre-part">LABEL</pre>'
+                      '<div class="doc-hierarchy"><pre class="doc-pre-part">a line beneath</pre></div></div>', h)
+        self.assertEqual({k: r["counts"][k] for k in ("quotations", "callouts", "framing", "synthesis", "structures")},
+                         {"quotations": 1, "callouts": 2, "framing": 1, "synthesis": 1, "structures": 1})
+        build.check_final_html(h, 2)
+
+    def test_U6_structure_levels_and_lead_lines(self):
+        src = mutate(GUIDED, "The whole synthetic register.\n", "The whole synthetic register.\n\n:::structure\nA\n  b\n    c\n  d\n\n\nE\n:::\n")
+        h = self.render(src)["html"]
+        self.assertIn('<div class="doc-pre doc-pre--structured"><pre class="doc-pre-part">A</pre><div class="doc-hierarchy">'
+                      '<pre class="doc-pre-part">b</pre><div class="doc-hierarchy"><pre class="doc-pre-part">c</pre></div>'
+                      '<pre class="doc-pre-part">d</pre></div><pre class="doc-pre-part" data-lead-lines="2">E</pre></div>', h)
+
+    def test_U6_container_refusals(self):
+        at = "The whole synthetic register.\n"
+        reg = lambda text: mutate(GUIDED, at, at + "\n" + text)
+        cases = [
+            (reg(":::structure\nA\n\tb\n:::\n"), r"never a tab"),
+            (reg(":::structure\nA\n   b\n:::\n"), r"two spaces per level \(found 3\)"),
+            (reg(":::structure\nA\n    b\n:::\n"), r"more than one level beneath"),
+            (reg(":::structure\n  A\n:::\n"), r"first line sits at the first level"),
+            (reg(":::structure\nA\n\n\n\n\nB\n:::\n"), r"4 blank lines before a structure line; at most 3"),
+            (reg(":::structure\n:::group\nA\n\n  b\n:::\n:::\n"), r"a blank line inside a :::group"),
+            (reg(":::structure\nloose\n:::group\nA\n:::\n:::\n"), r"holds only :::group containers"),
+            (reg(":::group\nA\n:::\n"), r":::group is allowed inside :::structure only"),
+            (reg(":::structure\n:::group\n​\n:::\n:::\n"), r":::group \(line \d+\) is empty"),
+            (reg(":::structure local=x\n:::group local=y\nA\n:::\n:::\n"), r":::group takes no local= hook"),
+            (reg(":::quote\n## A heading\n:::\n"), r"a quotation holds no heading"),
+            (reg("> quoted\n>\n> ### heading\n"), r"a quotation holds no heading"),
+            (reg(":::quote\n:::callout\nx\n:::\n:::\n"), r":::callout is allowed inside :::part, :::question, :::finding, :::disclose only"),
+            (reg(":::quote word\nx\n:::\n"), r":::quote takes at most one quoted attribution"),
+            (reg(':::quote "​"\nx\n:::\n'), r"attribution must contain visible text"),
+            (reg(":::callout\n#### A heading\n:::\n"), r"holds a heading"),
+            (reg(":::callout\n:::callout\nx\n:::\n:::\n"), r":::callout is allowed inside"),
+            (reg(":::framing verdict\nx\n:::\n"), r":::framing takes one of thesis, question"),
+            (reg(":::synthesis\nWhat it comes to.\n:::\n\nA line after.\n"), r"a :::synthesis closes its part"),
+            (reg(":::synthesis\n> quoted\n:::\n"), r"holds a <blockquote> block; it holds p, ul, ol only"),
+            (reg(":::synthesis\nOne.\n:::\n:::synthesis\nTwo.\n:::\n"), r"part 08 carries at most one :::synthesis"),
+            (reg(":::table dense key text dense\n| a | b |\n|---|---|\n| 1 | 2 |\n:::\n"), r"'dense' comes first on :::table, once"),
+            (reg(":::structure\n:::table key\n| a |\n|---|\n| 1 |\n:::\n:::\n"), r":::table is allowed inside"),
+            (mutate(GUIDED, ":::part 10\n", ":::part 10\n:::framing thesis\nx\n:::\n"),
+             r":::framing is not allowed in part 10, which carries generated chrome"),
+            (mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n",
+                    "What this synthetic document tests.\n\n### A section\n\nText.\n\n:::framing question\nx\n:::\n"),
+             r"a :::framing opens its part, before the part's first ### or #### section"),
+            (mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n",
+                    "What this synthetic document tests.\n\n:::synthesis\nx\n:::\n:::framing thesis\ny\n:::\n"),
+             r"a :::framing opens a part and comes before its :::synthesis"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_U6_allowlist_places_the_register(self):
+        h = self.render(U6_SRC)["html"]
+        para = '<p class="doc-body">A paragraph with'
+        bad = [
+            (h.replace(para, '<pre class="doc-pre-part">x</pre>' + para, 1), r"a structured line sits only in a structured block"),
+            (h.replace(para, '<div class="doc-pre-group"><pre class="doc-pre">x</pre></div>' + para, 1),
+             r"a hierarchy rail or peer group sits only in a structured block"),
+            (h.replace('<pre class="doc-pre">a fenced block\n</pre>', '<pre class="doc-pre"><code class="doc-code">x</code></pre>', 1),
+             r"a preformatted block carries its text directly"),
+            (h.replace('<p class="surface-emphasis-chip surface-emphasis--magenta">thesis</p>', '', 1).replace(
+                para, '<p class="surface-emphasis-chip surface-emphasis--magenta">thesis</p>' + para, 1),
+             r"a framing or synthesis chip sits only in its panel"),
+            (h.replace('<li class="doc-body">one item</li>', '<li>one item</li>', 1),
+             r"a contents entry is an unclassed <li> in the contents list; every other <li> is document body"),
+            (h.replace('<footer>A public source, page 2</footer>', '<footer class="uo-foot">A public source, page 2</footer>', 1),
+             r"the seal line sits only in part 10"),
+        ]
+        for doc, pattern in bad:
+            with self.subTest(pattern=pattern):
+                self.assertNotEqual(doc, h)
+                with self.assertRaises(build.BuildError) as cm:
+                    build.check_final_html(doc, 2)
+                self.assertRegex(str(cm.exception), pattern)
+
+    def test_U6_every_text_element_carries_a_role(self):
+        """A static mirror of the rendered check's unmapped list: every element that holds text directly sits
+        inside an element carrying a register role, a design-system treatment's text class or the quotation's
+        own paragraph or attribution."""
+        from html.parser import HTMLParser
+        roles = {"doc-title", "doc-section-title", "doc-subsection-title", "doc-deep-title", "doc-body", "doc-lede",
+                 "doc-label", "doc-meta", "doc-code", "doc-quote", "doc-pre", "doc-pre-part", "doc-toc-link",
+                 "doc-table-cell", "doc-entry-title", "surface-emphasis-chip", "surface-disclosure-label",
+                 "surface-disclosure-indicator"}
+        h = self.render(mutate(U6_SRC, "The synthetic executive result.\n", "The synthetic executive result.\n\n" + TABLE))["html"]
+        unmapped = []
+
+        class P(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.stack, self.body = [], False
+
+            def handle_starttag(self, tag, attrs):
+                if tag == "body":
+                    self.body = True
+                if tag not in ("br", "hr", "meta", "path"):
+                    self.stack.append((tag, set((dict(attrs).get("class") or "").split())))
+
+            def handle_endtag(self, tag):
+                if self.stack and self.stack[-1][0] == tag:
+                    self.stack.pop()
+
+            def handle_data(self, data):
+                if not self.body or not data.strip() or any(t in ("style", "svg") for t, _ in self.stack):
+                    return
+                covered = any(c & roles for t, c in self.stack) or (
+                    len(self.stack) > 1 and self.stack[-2][0] == "blockquote" and self.stack[-1][0] in ("p", "footer"))
+                if not covered:
+                    unmapped.append((self.stack[-1][0], data.strip()[:30]))
+        P().feed(h)
+        self.assertEqual(unmapped, [])
+
+    def test_U6_manifest_declares_the_rendered_check_profiles(self):
+        r = self.render(U6_SRC)
+        block = re.search(r"## Rendered-check profiles\n.*?```json\n(.*?)\n```", r["manifest_text"], re.S)
+        import json as _json
+        self.assertEqual(_json.loads(block.group(1)), build.role_profiles(r["counts"]))
+        self.assertEqual(_json.loads(block.group(1))[0]["expected_count"], 3)
 
 
 def readme_profiles(readme):
@@ -1663,17 +2126,18 @@ def readme_profiles(readme):
     return table
 
 
-def readme_chrome_classes(readme):
-    block = re.search(r"```text\nelement +renderer chrome classes\n(.*?)```", readme, flags=re.S)
+def readme_class_sets(readme):
+    """README's "Emitted classes" table: one line per element and emitted class set, in order."""
+    block = re.search(r"```text\nelement +emitted class set\n(.*?)```", readme, flags=re.S)
     if block is None:
         return None
     table = {}
     for line in block.group(1).strip().splitlines():
-        m = re.match(r"^([a-z0-9]+) +([a-z_-]+(?: · [a-z_-]+)*)$", line)
+        m = re.match(r"^([a-z0-9]+) +([a-z_-]+(?: [a-z_-]+)*)$", line)
         if m is None:
             return None
-        table[m.group(1)] = tuple(m.group(2).split(" · "))
-    return table
+        table.setdefault(m.group(1), []).append(m.group(2))
+    return {k: tuple(v) for k, v in table.items()}
 
 
 class Consistency(unittest.TestCase):
@@ -1694,15 +2158,22 @@ class Consistency(unittest.TestCase):
         self.assertNotEqual(drifted, readme)
         self.assertNotEqual(readme_profiles(drifted), build.KIND_PROFILES)
 
-    def test_U2_chrome_class_table_equals_readme(self):
+    def test_U6_emitted_class_table_equals_readme(self):
         readme = self.readme()
-        self.assertEqual(readme_chrome_classes(readme), {k: tuple(v) for k, v in build.CHROME_CLASSES.items()})
+        self.assertEqual(readme_class_sets(readme), {k: tuple(v) for k, v in build.CLASS_SETS.items()})
 
-    def test_U2_drifted_chrome_class_table_detected(self):
+    def test_U6_drifted_emitted_class_table_detected(self):
         readme = self.readme()
-        drifted = readme.replace("details   uo-details · uo-index\n", "details   uo-details · uo-index · uo-card\n")
+        drifted = readme.replace("\nsummary   uo-index__mark\n", "\nsummary   uo-index__mark\nsummary   uo-card\n")
         self.assertNotEqual(drifted, readme)
-        self.assertNotEqual(readme_chrome_classes(drifted), build.CHROME_CLASSES)
+        self.assertNotEqual(readme_class_sets(drifted), {k: tuple(v) for k, v in build.CLASS_SETS.items()})
+
+    def test_U6_readme_states_the_rows_view_thresholds(self):
+        readme = " ".join(self.readme().split())
+        self.assertIn("a dense table of 7 or more columns or a narrative table of 6 or more while the column is below "
+                      "its full 1120px, and a dense table of 9 or more or a narrative table of 8 or more at any width", readme)
+        self.assertIn("th:nth-child(7)", build.WIDE_BELOW_CAP)
+        self.assertIn("th:nth-child(9)", build.WIDE_ALWAYS)
 
     def test_N75_requirements_pin_equals_constant(self):
         with open(os.path.join(HERE, "requirements.txt"), encoding="utf-8") as f:
