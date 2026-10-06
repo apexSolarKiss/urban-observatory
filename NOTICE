@@ -9,9 +9,9 @@ This product also includes unmodified components from design-system-ASK
 (github.com/apexSolarKiss/design-system-ASK), including the vendored Tier 1 +
 Tier 2 foundations, the Spectral State profile, and design-system-owned static
 and interactive diagram render support under docs/diagrams/, the surface-shell
-pattern, the surface-panel and surface-action visual rules, the ASK
-wordmark pair used by docs/diagrams/index.html, and, vendored under
-tools/artifact-template/ for the review documents it renders, the ASK
+pattern, the surface-panel, surface-action and surface-treatments visual
+rules, the ASK wordmark pair used by docs/diagrams/index.html, and, vendored
+under tools/artifact-template/ for the review documents it renders, the ASK
 wordmark and the surface-panel, surface-text-link, surface-document and
 surface-treatments visual rules.
 

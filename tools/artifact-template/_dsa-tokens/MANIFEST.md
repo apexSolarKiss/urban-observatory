@@ -6,11 +6,11 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `d374ea45270055dacf6815e527a4ae7cbe2862da` |
-| short | `d374ea4` |
-| commit date | `2026-09-26 22:16:42 -0700` |
-| commit subject | `surfaces: main + inspector, document locators and end-anchored action rows (PRG-019) (#164)` |
-| synced at | `2026-09-27` |
+| commit | `53fa86e5b191371242e74ce31b3c1963abee5e00` |
+| short | `53fa86e` |
+| commit date | `2026-09-28 17:48:16 -0700` |
+| commit subject | `diagrams: responsive chrome for the static family, and a controlled disclosure trigger (PRG-019) (#169)` |
+| synced at | `2026-10-06` |
 | consuming project | `urban-observatory` |
 | files copied | `colors_and_type.css`, `fonts/InterVariable.woff2`, `fonts/InterVariable-Italic.woff2`, `fonts/JetBrainsMono.woff2`, `fonts/JetBrainsMono-Italic.woff2`, `assets/logo-ASK.svg` |
 | colors_and_type.css sha256 | `4fed9d796a0d51072802f430b9528459a5cbb9c709fa1964bf5b13f18464122a` |
@@ -20,7 +20,9 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | fonts/JetBrainsMono-Italic.woff2 sha256 | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 | assets/logo-ASK.svg sha256 | `76babfb09522a9236f8ec43e7d72ce4c3f32be41982962cd14505493b7664e69` |
 
-**Re-sync 2026-09-27 (`c5f5f6e` → `d374ea4`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; that snapshot's `surface-document.css` changed at **#164** (`d374ea4`). Commits after `c5f5f6e` up to `d374ea4` change neither `colors_and_type.css`, `fonts/` nor `assets/logo-ASK.svg`: every file here is **byte-identical** (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+**Re-sync 2026-10-06 (`d374ea4` → `53fa86e`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; that snapshot's `surface-treatments.css` changed at **#169** (`53fa86e`). Commits after `d374ea4` up to `53fa86e` change neither `colors_and_type.css`, `fonts/` nor `assets/logo-ASK.svg`: every file here is **byte-identical** (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-09-27 (`c5f5f6e` → `d374ea4`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; that snapshot's `surface-document.css` changed at **#164** (`d374ea4`). Commits after `c5f5f6e` up to `d374ea4` change neither `colors_and_type.css`, `fonts/` nor `assets/logo-ASK.svg`: every file here is **byte-identical** (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
 **Prior re-sync 2026-09-26 (`c7de5ff` → `c5f5f6e`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; that snapshot's `surface-document.css` changed at **#163** (`c5f5f6e`). Commits after `c7de5ff` up to `c5f5f6e` change neither `colors_and_type.css`, `fonts/` nor `assets/logo-ASK.svg`: every file here is **byte-identical** (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
