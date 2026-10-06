@@ -38,12 +38,15 @@ axis) and *structure or state*.
 ```text
 docs/diagrams/
 ├── README.md                                      this file
+├── _dsa-surface/                                  VENDORED, PINNED design-system-ASK surface carriers (full set below)
+│   ├── surface-panel.css                          panel material (verbatim) — index.html + interactive spine
+│   └── surface-treatments.css                     disclosure grammar (verbatim) — interactive spine only
 ├── _dsa-tokens/                                   VENDORED, PINNED design-system-ASK mirror
 │   ├── MANIFEST.md                                upstream commit + per-file sha256
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
 │   ├── spectral-state.css                         Spectral State v1.1 (verbatim) — interactive spine only
 │   └── fonts/                                      Inter + JetBrains Mono (+ OFL licenses)
-├── diagrams-fit.js                                upstream fit contract (#77-#80) — loaded BEFORE the engine, verbatim, DO NOT EDIT
+├── diagrams-fit.js                                upstream fit contract (#77-#80, #169) — loaded BEFORE the engine, verbatim, DO NOT EDIT
 ├── diagrams-static-H-engine.js                    upstream engine — consumed verbatim, DO NOT EDIT
 ├── diagrams.css                                   upstream style layer — consumed verbatim, DO NOT EDIT
 ├── export-png.js                                  upstream PNG export (static) — consumed verbatim, DO NOT EDIT
@@ -54,6 +57,7 @@ docs/diagrams/
 └── interactive/                                    Class A INTERACTIVE (diagram-interactive-spine)
     ├── diagrams-interactive-spine-engine.js        upstream engine — consumed verbatim, DO NOT EDIT
     ├── diagrams-interactive-spine.css              upstream style layer — consumed verbatim, DO NOT EDIT
+    ├── diagrams-pointer.js                         upstream shared pointer controller — loaded BEFORE the fit contract and engine, verbatim, DO NOT EDIT
     ├── export-png.js                               upstream PNG export (interactive) — verbatim, DO NOT EDIT
     ├── urban-observatory_ia-state-spine.html       UO chrome (loads ../_dsa-tokens/)
     └── urban-observatory_ia-state-spine.data.js    UO data (window.IA_STATE_SPINE)
@@ -62,15 +66,20 @@ docs/diagrams/
 All three diagrams share one pinned `_dsa-tokens/` mirror. The two **static**
 diagrams (architecture tree, ontology) sit at top level and load
 `colors_and_type.css` + `diagrams.css`. The **interactive** IA spine sits in
-`interactive/` and additionally loads `spectral-state.css` (load order:
-`colors_and_type.css → spectral-state.css → diagrams-interactive-spine.css`); it
-references the shared mirror one level up at `../_dsa-tokens/`. The interactive
-surface is the only one that consumes Spectral State; **color encodes state only**.
+`interactive/` and additionally loads `spectral-state.css` and, for the About,
+Legend and Inspector disclosure triggers its engine adds on a narrow or short
+canvas, `surface-panel.css` + `surface-treatments.css` (load order:
+`colors_and_type.css → spectral-state.css → diagrams-interactive-spine.css`,
+then `surface-panel.css → surface-treatments.css`); it references the shared
+mirrors one level up at `../_dsa-tokens/` and `../_dsa-surface/`, and loads
+`diagrams-pointer.js`, the shared pointer controller, before `../diagrams-fit.js`
+and its engine. The interactive surface is the only one that consumes Spectral
+State; **color encodes state only**.
 
 ### Live navigation surface
 
 - `index.html` — ASK-branded live navigation surface for this folder's three diagram pages. It consumes the local Tier 1 + Tier 2 mirror and vendored `_dsa-surface/` carriers; its locally assigned Tier 3 does not propagate into any of the three diagrams.
-- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel` and `surface-action` carriers, the optional `surface-shell.js` navigation runtime, and the mode-aware ASK wordmark pair, all used only by `index.html`. `surface-shell.js` is vendored because that surface **adopts** the shell's responsive navigation; the three diagram pages adopt none of it and load none of these files.
+- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, `surface-action` and `surface-treatments` carriers, the optional `surface-shell.js` navigation runtime, and the mode-aware ASK wordmark pair. `index.html` uses all of them except `surface-treatments`. `surface-shell.js` is vendored because that surface **adopts** the shell's responsive navigation; the three diagram pages adopt none of it. Of the diagram pages, only the interactive IA spine loads any of these files — `surface-panel` and `surface-treatments`, for its disclosure triggers; the two static pages load none of them.
 
 ## Consumption discipline
 
@@ -97,10 +106,12 @@ surface is the only one that consumes Spectral State; **color encodes state only
 - **Light + dark both work** (verified for the architecture tree, both themes).
 - **Pin:** see [`_dsa-tokens/MANIFEST.md`](_dsa-tokens/MANIFEST.md) for the current
   upstream pin (single source of truth — this README does not duplicate fast-aging pin state).
-- **Renderer generation.** The current diagram renderer contract combines the DS panel-aware
-  fit helper (#77/#79), the dynamic interaction floor in the H and interactive-spine engines
-  (#78), and the static page exporter through #80. Exact owner pins and propagation state live
-  in the operator consumer ledger.
+- **Renderer generation.** The current diagram renderer contract runs through design-system #169
+  for the fit helper, the H engine and the static page exporter (building on the panel-aware fit
+  of #77/#79, the dynamic interaction floor of #78 and the exporter through #80), and through #173
+  for the interactive spine's engine, its stylesheet and the shared pointer controller it loads.
+  `diagrams-chrome.js`, the optional responsive chrome #169 adds, is not vendored: no page here adopts it.
+  Exact owner pins and propagation state live in the operator consumer ledger.
 
 ## Theme by embedding surface
 

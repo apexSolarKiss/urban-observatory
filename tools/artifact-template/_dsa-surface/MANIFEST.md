@@ -6,23 +6,32 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `d374ea45270055dacf6815e527a4ae7cbe2862da` |
-| short | `d374ea4` |
-| commit date | `2026-09-26 22:16:42 -0700` |
-| commit subject | `surfaces: main + inspector, document locators and end-anchored action rows (PRG-019) (#164)` |
-| synced at | `2026-09-27` |
+| commit | `53fa86e5b191371242e74ce31b3c1963abee5e00` |
+| short | `53fa86e` |
+| commit date | `2026-09-28 17:48:16 -0700` |
+| commit subject | `diagrams: responsive chrome for the static family, and a controlled disclosure trigger (PRG-019) (#169)` |
+| synced at | `2026-10-06` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `cf3d6061c885df9d48fcd8e92b3d4b5f02f3a07ac0ef3057b29885b5931e7d82` |
 | surface-document.css sha256 | `e6999aba3697865049854288e3bdb1efcb50a166258261e05e199ebc9474eb70` |
-| surface-treatments.css sha256 | `d0bd9918f7f2276446c28023d6501b77dad6a902bc787c235852527fd35e136b` |
+| surface-treatments.css sha256 | `484e8134b2552aebda98988b7196b917dd69c71820533df10cbba00f83bd15db` |
 
 **Created 2026-09-25 at U6.** The design-system-ASK document register: the four modules the owner's sealed-use rule inlines after the
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-09-27 (`c5f5f6e` → `d374ea4`, `surface-document.css` only):** crosses one carrier-changing owner event, **#164**
+**Re-sync 2026-10-06 (`d374ea4` → `53fa86e`, `surface-treatments.css` only):** crosses one carrier-changing owner event, **#169**
+(`53fa86e`). It adds a controlled trigger to the disclosure grammar, `.surface-disclosure-trigger` on a `button`, which this
+renderer does not adopt: it emits no `button`, and the final-HTML allowlist refuses both the element and the class. The rules for
+the details disclosure this renderer emits keep their declarations; the summary's are split between a rule it now shares with the
+controlled trigger and its own. The rest of the change is comment text, with no render effect.
+`surface-document-overflow.js` is still not copied. The other three modules are byte-identical at both commits (same hashes).
+`surface-treatments.css` sha256 `d0bd9918…` → `484e8134…`, 18,276 → 20,556 B. **No frozen/sealed artifact regenerated**; renders
+made after this re-sync use the new pin.
+
+**Prior re-sync 2026-09-27 (`c5f5f6e` → `d374ea4`, `surface-document.css` only):** crosses one carrier-changing owner event, **#164**
 (`d374ea4`). It adds one opt-in rule, `.doc-actions--end`, which this renderer does not adopt: it emits no `.doc-actions`, and the
 final-HTML allowlist refuses both classes. The rest of the change is comment text (catalog entries, the load-order note and rule
 comments), with no render effect.
