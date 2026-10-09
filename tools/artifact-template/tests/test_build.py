@@ -305,7 +305,7 @@ class Positives(RenderCase):
             self.assertIn("| `%s` | %d | `%s` |" % (entry["path"], entry["bytes"], entry["sha256"]), m)
         self.assertIn("| sha256 | `%s` |" % hashlib.sha256(out_bytes).hexdigest(), m)
         self.assertIn("| content sha256 | `%s` |" % r["content_sha256"], m)
-        self.assertIn("| markdown | `3.4.1` |", m)
+        self.assertIn("| markdown | `3.8.2` |", m)
         self.assertIn("| commit (declared, not verified by the renderer) | `%s` |" % UO_COMMIT, m)
         self.assertIn("| extracted tree digest | `%s` |" % build.tree_digest(HERE), m)
         self.assertIn("| parts, in order | `01 02 03 04 06 08 10` |", m)
@@ -1027,7 +1027,7 @@ class Provenance(unittest.TestCase):
 class Atomicity(RenderCase):
     def test_N62_markdown_version_not_pin(self):
         with mock.patch.object(build.markdown, "__version__", "3.5.0"):
-            self.fails(GUIDED, r"markdown 3.5.0 is installed; this renderer is pinned to markdown==3.4.1")
+            self.fails(GUIDED, r"markdown 3.5.0 is installed; this renderer is pinned to markdown==3.8.2")
 
     def test_N65_no_partial_output_after_failure(self):
         real_link = os.link

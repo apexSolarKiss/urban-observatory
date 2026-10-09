@@ -73,7 +73,7 @@ SURFACE_MANIFEST = os.path.join(HERE, "_dsa-surface", "MANIFEST.md")
 MODULES = ["surface-panel.css", "surface-text-link.css", "surface-document.css", "surface-treatments.css"]
 BUILD_PY = os.path.abspath(__file__)
 
-MARKDOWN_PIN = "3.4.1"
+MARKDOWN_PIN = "3.8.2"
 
 FONTS = [
     "InterVariable.woff2", "InterVariable-Italic.woff2",
@@ -366,8 +366,10 @@ def _probe_markdown():
 # ---------------------------------------------------------------------------
 # Source model: one meta block plus a container tree
 
-# The opening-fence shape python-markdown's fenced_code accepts (3.4.1), so a
-# ":::" line is code text exactly where python-markdown renders code.
+# The opening-fence shape python-markdown's fenced_code accepted at 3.4.1. The pinned
+# version opens a fence on every line this matches, and also on an {attrs} block that
+# holds a quoted "}", which this refuses as a malformed opening line: a ":::" line is
+# code text exactly where python-markdown renders code, or the build fails.
 FENCE_OPEN = re.compile(r"""^(?P<fence>~{3,}|`{3,})[ ]*((\{[^\}\n]*\})|(\.?[\w#.+-]*[ ]*)?(hl_lines=("|').*?\6[ ]*)?)$""")
 FENCE_START = re.compile(r"^(~{3,}|`{3,})")
 TOKEN_RE = re.compile(r'\s*(?:"([^"]*)"|([^\s"]+))')
