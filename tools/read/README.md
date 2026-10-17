@@ -15,7 +15,7 @@ GitHub stays the source of record. Every reading page and source view links its 
 
 ## Provenance
 
-`read_gen.py`, `vercel-build.sh` and `requirements.txt` are adapted from [`apexSolarKiss/method-ASK`](https://github.com/apexSolarKiss/method-ASK) at `5e3a332164b2973d9eea2337ddeed825ae56ad4d` (`tools/read/`). The renderer, the gates and the page markup are method-ASK's. What differed by repository is declared in `declared.json` instead of written into the code: the repository's name and index copy, the stylesheet, script and wordmark paths, the site directory, the home page, the front doors, the document collections and their output names, and default holds. Two behaviours were added: a link to a directory inside the site with no `index.html` of its own opens on GitHub, and hidden files are not copied into the site. `requirements.txt` is method-ASK's, unchanged.
+`read_gen.py`, `vercel-build.sh` and `requirements.txt` are adapted from [`apexSolarKiss/method-ASK`](https://github.com/apexSolarKiss/method-ASK) at `5e3a332164b2973d9eea2337ddeed825ae56ad4d` (`tools/read/`). The renderer, the gates and the page markup are method-ASK's. What differed by repository is declared in `declared.json` instead of written into the code: the repository's name and index copy, the stylesheet, script and wordmark paths, the site directory, the home page, the front doors, the document collections and their output names, and default holds. Three behaviours were added: a link to a directory inside the site with no `index.html` of its own, or to a Markdown file in the site that is not rendered, opens on GitHub rather than as a raw file or a missing listing; hidden files are not copied into the site; and a word too long for its line breaks rather than widen the page at narrow widths. `requirements.txt` is method-ASK's, unchanged.
 
 ## The front door
 
@@ -138,7 +138,8 @@ Successive groups sit one line apart. A shape is never inferred from blank lines
 | --- | --- |
 | a rendered document, collection entry or record, with or without `#fragment` | its page, fragment kept |
 | a `#fragment` into a Markdown file that is not rendered | the file on GitHub at `main`, with the anchor |
-| another file in the site (a figure, a raster, a raw file) | a relative link to that file |
+| a Markdown file in the site that is not rendered | the file on GitHub at `main`; its raw route stays served |
+| another file in the site (a figure, a raster, a source file) | a relative link to that file |
 | a directory in the site with no `index.html` | the directory on GitHub at `main` |
 | a repository file or directory outside the site that is not rendered | the file or directory on GitHub at `main` |
 | an external URL | unchanged |

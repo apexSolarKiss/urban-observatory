@@ -9,7 +9,8 @@ site directory (docs/ or the repository root), an authored home page in place
 of a generated one, several front doors, document collections outside the
 site, an explicit output name per entry, and a declared default hold for the
 Markdown under a directory. A link to a directory inside the site with no
-index.html opens on GitHub. Hidden files are not copied into the site.
+index.html, or to a Markdown file in the site that is not rendered, opens on
+GitHub. Hidden files are not copied into the site.
 
 The deployed site is the declared site directory as authored, plus a home page
 at its root (index.html: generated from the declaration's home block, or the
@@ -528,6 +529,8 @@ def rewrite(tree, from_path, page, href):
             return href, "UNRESOLVED-ANCHOR (%s has no heading #%s)" % (target, frag)
         return tree.github(target, hash_part), "raw-markdown-fragment-to-github"
     site = tree.site_path(target)
+    if site is not None and not is_dir and target.endswith(".md"):
+        return tree.github(target), "unrendered-markdown-to-github"    # its rendered view, not raw text
     if site is not None and not tree.is_excluded(target) and not (is_dir and tree.is_excluded(target + "/")):
         if not is_dir or os.path.isfile(os.path.join(tree.abspath(target), "index.html")):
             return tree.rel(page, site) + ("/" if is_dir else "") + query, "hosted-file"
