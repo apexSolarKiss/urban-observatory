@@ -25,8 +25,8 @@
   "front_doors": ["docs/diagrams/index.html"],
   "site_exclude": ["docs/vercel.json"],
   "home": {
-    "description": "urban-observatory // an open-source civic implementation observatory: a public-data method, with its scope, methodology and diagrams.",
-    "lede": "An open-source civic implementation observatory: a public-data method for reconstructing how public plans, policies, capital programs, and other civic commitments move from decision into delivery. This site is built from the repository, which stays the source of record.",
+    "description": "urban-observatory // an open-source civic implementation observatory: a public-data method and a partial, contestable account of how civic commitments move into delivery.",
+    "lede": "An open-source civic implementation observatory: a public-data method for reconstructing how public plans, policies, capital programs, and other civic commitments move from decision into delivery, and for maintaining a partial, public, provenance-preserving, contestable account of what the evidence shows, and cannot show, about that delivery as conditions change. This site is built from the repository, which stays the source of record.",
     "routes": [
       {"label": "project scope", "href": "read/project-scope.html", "support": "What is in and out of scope for the observatory."},
       {"label": "documents", "href": "read/index.html", "support": "The scope, method and architecture documents and the worked-pattern appendix, rendered from this repository. Each page links GitHub and its raw file."},

@@ -88,7 +88,7 @@ State; **color encodes state only**.
 ### Live navigation surface
 
 - `index.html` — ASK-branded live navigation surface for this folder's three diagram pages. It consumes the local Tier 1 + Tier 2 mirror and vendored `_dsa-surface/` carriers; its locally assigned Tier 3 does not propagate into any of the three diagrams. Opened from a clone, its source, data, architecture, object-model and README links open the raw files they name. The site build (`tools/read/`) serves a composed copy, in which those links open the reading pages and source views generated from the same files, a documents route is added, and the breadcrumb's `urban-observatory` links the site's home page.
-- **Reading pages.** The site build's pages, the home page at the site root and the reading pages under `/read/` (`tools/read/`), also load `surface-shell.css`, `surface-shell.js`, `surface-panel.css`, `surface-action.css`, the wordmark pair and the `_dsa-tokens/` mirror from this folder. They take their own document-register carriers from `tools/read/carriers/`, and never this folder's `surface-treatments.css`. `tools/read/declared.json` records the sha256 of each stylesheet and script they load, and the build stops when one of them moves without it.
+- **Reading pages.** The site build's pages, the home page at the site root and the reading pages under `/read/` (`tools/read/`), also load `surface-shell.css`, `surface-shell.js`, `surface-panel.css`, `surface-action.css`, the wordmark pair and the `_dsa-tokens/` foundation stylesheet, `colors_and_type.css`, with its fonts, from this folder. They take their own document-register carriers from `tools/read/carriers/`, and never this folder's `surface-treatments.css`. `tools/read/declared.json` records the sha256 of each stylesheet and script they load, and the build stops when one of them moves without it.
 - `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, `surface-action` and `surface-treatments` carriers, the optional `surface-shell.js` navigation runtime, and the mode-aware ASK wordmark pair. `index.html` uses all of them except `surface-treatments`. `surface-shell.js` is vendored because that surface **adopts** the shell's responsive navigation; the three diagram pages adopt none of it. Of the diagram pages, the two static pages and the interactive IA spine load `surface-panel` and `surface-treatments`, for their disclosure triggers, and nothing else here.
 
 ## Consumption discipline
@@ -164,5 +164,10 @@ is wanted, re-sync the vendored carriers from the new commit and regenerate
 `source-vN` // `render-vN` contract: advance `source-vN` only for a
 source-generation change, and advance `render-vN` and regenerate any committed
 raster only for a rendered-output change. A pin advance alone does neither.
+The site build's reading pages record the sha256 of the token, panel, action and
+shell carriers they load in `tools/read/declared.json`: a re-vendor that moves
+any of them updates those hashes, and re-vendors the register files under
+`tools/read/carriers/` from the same commit, in the same change, or the site
+build fails and nothing deploys (`tools/read/README.md` §Carriers).
 Propose changes to the tokens themselves upstream at the [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) control surface —
 never edit the vendored mirror or the upstream engine/CSS here.

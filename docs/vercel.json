@@ -3,6 +3,9 @@
   "installCommand": "",
   "buildCommand": "sh ../tools/read/vercel-build.sh",
   "outputDirectory": "../_site",
+  "redirects": [
+    { "source": "/read", "destination": "/read/", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",

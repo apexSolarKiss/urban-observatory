@@ -1,6 +1,6 @@
 # tools/read
 
-`read_gen.py` builds the site. It copies `docs/` as authored, except `docs/vercel.json` and hidden files and directories, and adds the pages it generates:
+`read_gen.py` builds the site. It copies `docs/` as authored, except `docs/vercel.json`, hidden files, and hidden and symlinked directories, and adds the pages it generates:
 
 - the urban-observatory home page at the site root, `index.html`, with its text and destinations from the `home` block of `declared.json`;
 - under `read/`, the reading pages generated from the repository's Markdown: one page per declared document and record, one read-only source view per declared source or data file, and a documents index.
@@ -15,7 +15,7 @@ GitHub stays the source of record. Every reading page and source view links its 
 
 ## Provenance
 
-`read_gen.py`, `vercel-build.sh` and `requirements.txt` are adapted from [`apexSolarKiss/method-ASK`](https://github.com/apexSolarKiss/method-ASK) at `5e3a332164b2973d9eea2337ddeed825ae56ad4d` (`tools/read/`). The renderer, the gates and the page markup are method-ASK's. What differed by repository is declared in `declared.json` instead of written into the code: the repository's name and index copy, the stylesheet, script and wordmark paths, the site directory, the home page, the front doors, the document collections and their output names, and default holds. Three behaviours were added: a link to a directory inside the site with no `index.html` of its own, or to a Markdown file in the site that is not rendered, opens on GitHub rather than as a raw file or a missing listing; hidden files are not copied into the site; and a word too long for its line breaks rather than widen the page at narrow widths. `requirements.txt` is method-ASK's, unchanged.
+`read_gen.py`, `vercel-build.sh` and `requirements.txt` are adapted from [`apexSolarKiss/method-ASK`](https://github.com/apexSolarKiss/method-ASK) at `5e3a332164b2973d9eea2337ddeed825ae56ad4d` (`tools/read/`). The renderer, the gates and the page markup are method-ASK's. What differed by repository is declared in `declared.json` instead of written into the code: the repository's name and index copy, the stylesheet, script and wordmark paths, the site directory, the home page, the front doors, the document collections and their output names, default holds, and directory exclusions (`site_exclude` entries ending in `/`), inside which the build's output and report may land. Five behaviors were added: a link to a directory inside the site with no `index.html` of its own, to a Markdown file in the site that is not rendered, or to a hidden file opens on GitHub rather than as a raw file, a missing listing or a file the site does not serve; hidden files are not copied into the site; an authored home page is link-checked like a generated one; a word too long for its line breaks rather than widen the page at narrow widths; and the build's output may sit inside the site only within a directory the declaration excludes, matched case-exactly even before that directory exists, where method-ASK's refused any output inside the site. `requirements.txt` is method-ASK's, unchanged. The same `read_gen.py` runs on every PRG-023 site, so it reads declaration keys a site may not use — `home_page`, `held_under`, `collections` or a repository-root `site` — and a key absent from `declared.json` has no effect.
 
 ## The front door
 
@@ -35,7 +35,7 @@ Apart from the mapped `href` values and those template tags, the composed copy i
 2. installs the exact renderer pin into a temporary virtual environment, by hash, from wheels only;
 3. runs `read_gen.py build --out _site` at the repository root.
 
-A failed gate fails the build, so a broken document is never deployed. `docs/vercel.json` also carries the site's headers; the build changes neither. The site root serves the generated home page; it no longer redirects to `/diagrams/`.
+A failed gate fails the build, so a broken document is never deployed. `docs/vercel.json` also carries the site's headers, and redirects `/read` to `/read/` so the documents index, served from a directory, keeps its relative links; the build changes neither. The site root serves the generated home page; it no longer redirects to `/diagrams/`.
 
 ## Setup
 
@@ -141,6 +141,7 @@ Successive groups sit one line apart. A shape is never inferred from blank lines
 | a Markdown file in the site that is not rendered | the file on GitHub at `main`; its raw route stays served |
 | another file in the site (a figure, a raster, a source file) | a relative link to that file |
 | a directory in the site with no `index.html` | the directory on GitHub at `main` |
+| a hidden file, or a file the declaration excludes from the site | the file on GitHub at `main` |
 | a repository file or directory outside the site that is not rendered | the file or directory on GitHub at `main` |
 | an external URL | unchanged |
 
