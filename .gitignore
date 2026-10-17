@@ -1,2 +1,5 @@
 # Local Claude Code harness state (not project content)
 .claude/
+
+# site build output (tools/read/vercel-build.sh)
+/_site/
