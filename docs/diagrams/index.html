@@ -24,9 +24,10 @@
      the reading page or source view generated from the same file, and renders
      the build-only <template data-read-build> fragments, whose destinations
      exist only in a built site: the breadcrumb's link from urban-observatory
-     to the site's home page, and the documents route below. Apart from those
-     links and the templates' tags, the page is served as written here, and the
-     figures and diagram files are the same in both.
+     to the site's home page, the documents route below, and the navigation
+     panel's documents action. Apart from those links and the templates' tags,
+     the page is served as written here, and the figures and diagram files are
+     the same in both.
 
      This page is URBAN-OBSERVATORY-OWNED composition over vendored
      design-system-ASK carriers. The carriers under _dsa-surface/ are pinned
@@ -186,7 +187,7 @@
       <span class="name surface-panel-title">repository</span>
       <span class="what surface-panel-support">github.com/apexSolarKiss/urban-observatory</span>
     </a>
-    <a class="route surface-panel" href="https://github.com/apexSolarKiss/urban-observatory/blob/main/README.md" target="_blank" rel="noopener">
+    <a class="route surface-panel" href="https://urban-observatory.a-s-k.studio/">
       <span class="name surface-panel-title">urban-observatory</span>
       <span class="what surface-panel-support">What the observatory is for, what it reads, and the scope and method documents that carry it.</span>
     </a>
@@ -196,11 +197,11 @@
       <span class="what surface-panel-support">The scope, method and architecture documents and the worked-pattern appendix, rendered from this repository. Each page links GitHub and its raw file.</span>
     </a>
     </template>
-    <a class="route surface-panel" href="https://github.com/apexSolarKiss/method-ASK" target="_blank" rel="noopener">
+    <a class="route surface-panel" href="https://method.a-s-k.studio/" target="_blank" rel="noopener">
       <span class="name surface-panel-title">method-ASK</span>
       <span class="what surface-panel-support">The upstream methodology layer this project's working practice draws on.</span>
     </a>
-    <a class="route surface-panel" href="https://github.com/apexSolarKiss/design-system-ASK" target="_blank" rel="noopener">
+    <a class="route surface-panel" href="https://design-system.a-s-k.studio/" target="_blank" rel="noopener">
       <span class="name surface-panel-title">design-system-ASK</span>
       <span class="what surface-panel-support">The visual authority. This surface vendors its carriers; it defines none of them.</span>
     </a>
@@ -239,7 +240,9 @@
        once, in the visible breadcrumb above — `data-surface-nav-current` is an
        inert position marker the runtime fills. `diagrams` is deliberately not
        repeated as an "overview" child, because two rows reaching one destination
-       is the defect this IA removes. -->
+       is the defect this IA removes. The documents are this page's peer, not its
+       child: they sit among the utilities, in a build-only fragment, as the
+       generated pages list the diagrams among theirs. -->
   <template class="surface-nav-source">
     <ul class="surface-nav-local">
       <li data-surface-nav-current>
@@ -251,6 +254,9 @@
       </li>
     </ul>
     <p class="surface-nav-utilities">
+      <template data-read-build>
+      <a class="surface-action surface-action--secondary" href="../read/index.html">documents</a>
+      </template>
       <a class="surface-action surface-action--secondary" href="https://github.com/apexSolarKiss/urban-observatory" target="_blank" rel="noopener">repository</a>
     </p>
   </template>

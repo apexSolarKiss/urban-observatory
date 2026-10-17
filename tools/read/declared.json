@@ -33,7 +33,7 @@
       {"label": "diagrams", "href": "diagrams/index.html", "support": "Three figures for the civic implementation observatory: two structural, one operational state. Orientation aids, not source of truth."},
       {"label": "repository", "href": "https://github.com/apexSolarKiss/urban-observatory", "support": "github.com/apexSolarKiss/urban-observatory"},
       {"label": "method-ASK", "href": "https://method.a-s-k.studio/", "support": "The upstream methodology layer this project's working practice draws on."},
-      {"label": "design-system-ASK", "href": "https://github.com/apexSolarKiss/design-system-ASK", "support": "The visual authority. This surface vendors its carriers; it defines none of them."},
+      {"label": "design-system-ASK", "href": "https://design-system.a-s-k.studio/", "support": "The visual authority. This surface vendors its carriers; it defines none of them."},
       {"label": "A-S-K.studio", "href": "https://a-s-k.studio/", "support": "The ASK meta-brand front door."}
     ]
   },
