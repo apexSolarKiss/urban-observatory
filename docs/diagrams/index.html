@@ -18,6 +18,16 @@
      to this file. Repo-root owner documents outside that root, and fleet routes
      to other repos or surfaces, use canonical external locators.
 
+     In a clone, the source, data, architecture, object-model and README links
+     open the raw files they name. The site build (tools/read/) composes the
+     deployed copy of this page from this file: it maps each of those links to
+     the reading page or source view generated from the same file, and renders
+     the build-only <template data-read-build> fragments, whose destinations
+     exist only in a built site: the breadcrumb's link from urban-observatory
+     to the site's home page, and the documents route below. Apart from those
+     links and the templates' tags, the page is served as written here, and the
+     figures and diagram files are the same in both.
+
      This page is URBAN-OBSERVATORY-OWNED composition over vendored
      design-system-ASK carriers. The carriers under _dsa-surface/ are pinned
      byte-identical copies and are never hand-edited here; the tokens and fonts
@@ -113,11 +123,15 @@
            it — which is why no data-nav-root-* configuration appears below.
            Segments carry the human-facing name of the place they go, not a
            repository namespace, so the former `apexSolarKiss` reads `ASK` and
-           `apex solar kiss`. `urban-observatory` is static: it is real structural
-           context with no public page of its own, and inventing a destination to
-           manufacture a link is the failure the ancestry rule guards against. -->
+           `apex solar kiss`. `urban-observatory` links the urban-observatory
+           home page, which the site build generates at the site root. A clone has
+           no such page, and inventing a destination to manufacture a link is the
+           failure the ancestry rule guards against, so the link's opening and
+           closing tags each sit in a build-only fragment: a clone keeps both inert
+           and shows the segment as static text, and the build removes the four
+           template tags, leaving an ordinary link. -->
       <nav class="surface-breadcrumb" aria-label="Breadcrumb">
-        <h1 class="surface-title"><a class="org" href="https://a-s-k.studio/">ASK</a> <span class="sep" aria-hidden="true">//</span> <a href="https://a-s-k.studio/apex-solar-kiss">apex solar kiss</a> <span class="sep" aria-hidden="true">//</span> urban-observatory <span class="sep" aria-hidden="true">//</span> <span class="page" aria-current="page">diagrams</span></h1>
+        <h1 class="surface-title"><a class="org" href="https://a-s-k.studio/">ASK</a> <span class="sep" aria-hidden="true">//</span> <a href="https://a-s-k.studio/apex-solar-kiss">apex solar kiss</a> <span class="sep" aria-hidden="true">//</span> <template data-read-build><a href="../index.html"></template>urban-observatory<template data-read-build></a></template> <span class="sep" aria-hidden="true">//</span> <span class="page" aria-current="page">diagrams</span></h1>
       </nav>
       <p class="surface-lede">Three figures for the civic implementation observatory — two structural, one operational
         state. Diagrams are orientation aids and age; the repo prose is source of truth, and each figure below
@@ -175,6 +189,12 @@
       <span class="name surface-panel-title">urban-observatory</span>
       <span class="what surface-panel-support">What the observatory is for, what it reads, and the scope and method documents that carry it.</span>
     </a>
+    <template data-read-build>
+    <a class="route surface-panel" href="../read/index.html">
+      <span class="name surface-panel-title">documents</span>
+      <span class="what surface-panel-support">The scope, method and architecture documents and the worked-pattern appendix, rendered from this repository. Each page links GitHub and its raw file.</span>
+    </a>
+    </template>
     <a class="route surface-panel" href="https://github.com/apexSolarKiss/method-ASK" target="_blank" rel="noopener">
       <span class="name surface-panel-title">method-ASK</span>
       <span class="what surface-panel-support">The upstream methodology layer this project's working practice draws on.</span>
