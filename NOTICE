@@ -17,6 +17,9 @@ surface-treatments visual rules, and, vendored under tools/read/carriers/ for
 the site's reading pages, the surface-text-link, surface-document and
 surface-treatments visual rules and the surface-document overflow helper.
 
+This product also includes the ASK social card, docs/og-image.png, copied
+unmodified from the ASK site (github.com/apexSolarKiss/ASK).
+
 design-system-ASK
 Copyright 2026 Andrew S Klug // ASK
 
