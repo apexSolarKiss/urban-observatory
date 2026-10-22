@@ -11,8 +11,10 @@
 /* =========================================================================
    urban-observatory // review-document overlay (Class B output-artifact v3)
    Sealed render: design-system-ASK tokens + base64 fonts, then the document
-   register's four modules verbatim, then this overlay, then the renderer's
-   geometry stylesheet (MD_CSS in build.py).
+   register's four modules verbatim, then, in a document that annotates, the
+   three semantic-state modules verbatim (spectral-state, evidence-state,
+   review-semantics), then this overlay, then the renderer's geometry
+   stylesheet (MD_CSS in build.py).
    Type: every text style is a design-system-ASK document-register role the
    renderer emits; this overlay sets no family, size, weight, leading,
    tracking or text foreground.
@@ -97,8 +99,9 @@
 <!--
   TEMPLATE BODY PLACEHOLDER.
   build.py uses only the <head> above (the /*@@SEALED_TOKENS@@*/ marker, which
-  it replaces with the token CSS, the embedded fonts and the document
-  register's four modules, then this overlay). It appends its geometry
+  it replaces with the token CSS, the embedded fonts, the document register's
+  four modules and, in a document that annotates, the three semantic-state
+  modules, then this overlay). It appends its geometry
   stylesheet and generates the <body> itself: a .uo-shell > main.uo-md
   wrapper around the rendered parts, the masthead and the seal line. The
   markup below is a minimal example of that shape; it is NOT consumed by the

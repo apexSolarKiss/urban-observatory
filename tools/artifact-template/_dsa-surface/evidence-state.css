@@ -1,0 +1,82 @@
+/* =========================================================================
+   evidence-state.css — Evidence State
+
+   A semantic state-color PROFILE under the Spectral State family. Where
+   Spectral State (`spectral-state.css`) encodes the state of architectural
+   elements, Evidence State encodes epistemic EVIDENCE state — what current
+   evidence shows about an assumption (supported / partially supported /
+   unresolved / weakened / not yet testable).
+
+   It is a SANCTIONED PROFILE, not a separate palette and not a change to
+   Spectral State. Spectral State's eight-role architectural-element vocabulary
+   is unchanged. This profile:
+     - REUSES three Spectral State values by reference (see below), and
+     - ADDS two evidence-specific roles (weakened, not-yet-testable).
+
+   Load order (each layers on the previous):
+     colors_and_type.css  →  spectral-state.css  →  evidence-state.css
+
+   Offline; no CDN. Theme-aware via the foundation's `[data-theme]` +
+   `prefers-color-scheme` model.
+
+   STATUS: v0.1 — first generalized profile. Authorized by ASK source-of-intent
+   (2026-06-18) as a reusable profile; first consumer is urban-observatory
+   (a domain-partner consumer, by reference). Provisional-but-reusable: the
+   role list may firm up as the profile sees more use; the two new values are
+   the stable, portable part.
+
+   ---------------------------------------------------------------------------
+   ROLE MAP
+   ---------------------------------------------------------------------------
+   Evidence meaning        Visual implementation              Relationship
+     supported             value of --state-earned            visual-role mapping
+     partially-supported   value of --state-partial           visual-role mapping
+     unresolved            value of --state-held              exact mapping
+     weakened              new — muted/darkened 30° brown     new Evidence role
+     not-yet-testable      new — neutral lavender-gray        new Evidence role
+
+   The three reused values are VISUAL-ROLE mappings (and one exact mapping,
+   `unresolved → held`); they are NOT semantic aliases. A consuming surface
+   keeps the evidence LABELS — Supported / Partially supported / Unresolved —
+   and must never relabel them earned / partial / held just because the color
+   value is shared.
+
+   `weakened` is a tonal derivative of `partial`: the same 30° hue family, lower
+   saturation and lightness — a muted, darkened orange ("brown"). It reads as a
+   degraded `partial` (viable but credibility lost), distinct from neon
+   `partial` and from red `deflated`. It is NOT a new wheel position and is NOT
+   added to the Spectral State health ramp.
+
+   `not-yet-testable` is OFF the chromatic arc entirely — a neutral lavender-gray
+   for "evidence cannot exist yet at this stage". Color alone is NOT sufficient
+   to express it. Its presentation contract on a consuming surface is:
+       neutral lavender-gray  +  dashed rail  +  hollow marker  +  visible label
+   ========================================================================= */
+
+/* ---------- Light (default) ---------- */
+:root {
+  /* reused Spectral State values (resolve + theme-flip via --state-*) */
+  --evidence-supported:           var(--state-earned);   /* visual-role mapping */
+  --evidence-partially-supported: var(--state-partial);  /* visual-role mapping */
+  --evidence-unresolved:          var(--state-held);     /* exact mapping */
+
+  /* new Evidence State roles — theme-calibrated */
+  --evidence-weakened:            hsl( 30, 55%, 32%);    /* muted/darkened 30° — brown */
+  --evidence-not-yet-testable:    hsl(264,  8%, 53%);    /* neutral lavender-gray (see contract above) */
+}
+
+/* ---------- Dark — on the dark ink field ----------
+   The three reused values need no redefinition here: they reference --state-*,
+   which spectral-state.css already re-resolves per theme. Only the two new
+   roles carry explicit dark values (lifted for the dark field). */
+:root[data-theme="dark"] {
+  --evidence-weakened:            hsl( 30, 45%, 48%);
+  --evidence-not-yet-testable:    hsl(264, 12%, 64%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --evidence-weakened:          hsl( 30, 45%, 48%);
+    --evidence-not-yet-testable:  hsl(264, 12%, 64%);
+  }
+}

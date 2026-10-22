@@ -11,7 +11,8 @@ held operator-side.
 
 Turn a canonical Markdown source into one **self-contained HTML file**:
 [design-system-ASK](https://github.com/apexSolarKiss/design-system-ASK) token CSS + the design-system document register (four
-modules, verbatim) + the UO overlay and geometry stylesheet + base64-embedded
+modules, verbatim) + in a document that annotates, the three semantic-state
+modules (verbatim) + the UO overlay and geometry stylesheet + base64-embedded
 fonts + the assigned wordmark as inline svg, all inlined. The output has no
 external dependencies — it opens with full styling from any location (local
 file, email attachment, copied folder), no network, no sidecar. That portability
@@ -38,10 +39,15 @@ tools/artifact-template/
 │   ├── colors_and_type.css foundational tokens (used verbatim; never edited here)
 │   ├── assets/logo-ASK.svg the assigned ASK wordmark (the masthead's mark; see "Inheritance")
 │   └── fonts/*.woff2        Inter + JetBrains Mono (embedded at build)
-└── _dsa-surface/           VENDORED, PINNED design-system-ASK document register (build input)
+└── _dsa-surface/           VENDORED, PINNED design-system-ASK document register and
+                            semantic-state modules (build input)
     ├── MANIFEST.md         the same commit as _dsa-tokens/, + per-file sha256
-    └── surface-panel.css · surface-text-link.css · surface-document.css · surface-treatments.css
-                            inlined verbatim, in that order, after the token CSS
+    ├── surface-panel.css · surface-text-link.css · surface-document.css · surface-treatments.css
+    │                       inlined verbatim, in that order, after the token CSS
+    └── spectral-state.css · evidence-state.css · review-semantics.css
+                            the semantic-state modules (the last carries the Review Semantics
+                            composition): inlined verbatim, in that order, after the register,
+                            only in a document that annotates
 ```
 
 ## Usage
@@ -109,26 +115,57 @@ container                          allowed position                         emit
 :::disclose question-detail "S"    inside a non-central :::question,        details.uo-details in the disclosure
                                    after its prompt                         treatment[data-uo-disclose]: summary S,
 :::disclose evidence "S"           inside :::finding, after visible lines   then its content in
-:::disclose provenance "S"         directly inside :::part 10, at most once div.uo-details__body
-:::table [dense] <role per column> inside a part, :::question, :::finding   data-uo-cell on every th and td;
-         ["C"]                     or :::disclose, around exactly one pipe  data-uo-label + label element per td;
-  (a role may add :authored-case)  table                                    caption C; dense: table.doc-dense-table;
+:::disclose detail "S"             directly inside :::part 04 of a          div.uo-details__body
+                                   guided-review document, after a visible
+                                   block in its own section
+:::disclose provenance "S"         directly inside :::part 10, at most once
+:::table [dense] <role per column> inside a part, :::question, :::finding,  data-uo-cell on every th and td;
+         ["C"]                     :::disclose or :::range, around exactly  data-uo-label + label element per td;
+  (a role may add :authored-case)  one pipe table                           caption C; dense: table.doc-dense-table;
                                                                             authored-case: span.uo-authored-case
 :::banner review-status            directly inside :::part 01, at most      a cyan emphasis panel: its chip, then
                                    once                                     its body in div.uo-reviewer-status__body
 :::banner proof ["T"]              directly inside :::part 01, at most      a violet emphasis panel: its chip, title
                                    once                                     T if given, its body in div.uo-proof__body
 :::quote ["A"]                     inside a part, :::question, :::finding,  blockquote.doc-quote; attribution A in
-                                   :::disclose or :::callout                its footer
-:::callout                         inside a part, :::question, :::finding   p.doc-body.surface-emphasis-rail for one
-                                   or :::disclose                           paragraph, else div.surface-emphasis-rail
-:::framing thesis|question         directly inside a part 02 to 09, at      the flat panel, chipped "thesis" or
-                                   most once, before its first ### or ####  "question space"
-:::synthesis                       directly inside a part 02 to 09, at      the flat panel, chipped "compression"
-                                   most once, as the part's last content
+                                   :::disclose, :::callout or :::range      its footer
+:::callout                         inside a part, :::question, :::finding,  p.doc-body.surface-emphasis-rail for one
+                                   :::disclose or :::range                  paragraph, else div.surface-emphasis-rail
+:::framing thesis|question         directly inside a part 02 to 09, or in   the flat panel, chipped "thesis" or
+                                   a :::range directly inside one, at most  "question space"
+                                   once, before its first ### or ####
+:::synthesis                       directly inside a part 02 to 09, or in   the flat panel, chipped "compression"
+                                   a :::range directly inside one, at most
+                                   once, as the part's last content; only
+                                   notes, and rows or lists without a
+                                   review item, follow it
 :::structure                       inside a part, :::question, :::finding,  div.doc-pre.doc-pre--structured
-                                   :::disclose or :::callout
+                                   :::disclose, :::callout or :::range
 :::group                           directly inside :::structure             div.doc-pre-group, a declared peer group
+:::range                           directly inside a part 02 to 09,         div.doc-group.doc-annotation-range
+                                   :::question, :::finding or :::disclose   .surface-labeled-range: its row first,
+                                   (not provenance); never nested           then the blocks it covers
+:::annotate                        where :::range sits: first in a          div.doc-annotations, an annotation row:
+                                   :::range; holding a review item, as an   its items, in order
+                                   explicit-target prompt immediately
+                                   before a :::range; holding none, after
+                                   a heading or a block. Or first in a
+                                   :::note
+:::annotate list                   as :::annotate without a review item,    dl.doc-annotation-list: its Item line,
+                                   never in a :::note or a :::range         then per axis a dt.doc-label key and a dd
+:::annotate document               at top level, between :::meta and the    div.doc-annotations under the masthead
+                                   first :::part, at most once              title in part 01
+:::note <name>                     directly inside a part 02 to 09,         div.doc-hierarchy.doc-group
+                                   :::question, :::finding or :::disclose   .doc-annotation-note, id uo-note-<name>;
+                                   (not provenance), after the block or     in a plain list item, inside that item
+                                   range holding a passage mark naming it,  after its text
+                                   with only notes and rows or lists
+                                   without a review item between
+:::note not-yet-testable           directly inside a part 02 to 09,         div.doc-group.doc-annotation-note
+                                   :::question, :::finding or :::disclose   [data-evidence="not-yet-testable"]
+                                   (not provenance), after a heading, a
+                                   block or a range, or after a row, list
+                                   or another note
 ```
 
 - Parts 01 and 10 are generated even when the source omits them. The meta
@@ -171,8 +208,10 @@ container                          allowed position                         emit
   rail.
 - `:::framing thesis` or `:::framing question` frames a whole part before its
   sections: it comes after the part's introduction and before its first `###`
-  or `####` heading. `:::synthesis` closes a part: nothing follows it there.
-  Both take the design-system flat panel, chipped "thesis", "question space"
+  or `####` heading. `:::synthesis` closes a part: after it come only notes,
+  and rows or lists without a review item, outside its panel; a review
+  judgment on it is a `:::range` around it, which then closes the part in its
+  place. Both take the design-system flat panel, chipped "thesis", "question space"
   or "compression" in magenta, and hold paragraphs and lists only. A thesis or
   question inside the argument is a callout, not a framing.
 - `:::structure` is a structured block: its lines are text, not Markdown, and
@@ -242,10 +281,11 @@ container                          allowed position                         emit
   its own box.
 - In a table cell, the header row included, a word moves to the next line
   whole and breaks inside itself only when it is wider than its column. A
-  `key`, `num` or `status` value never breaks. Code and links may break
-  anywhere: they are the long unbroken tokens. A column never narrows below
-  its longest word, so a table whose values cannot fit shows as rows instead
-  (below).
+  `key`, `num` or `status` value never breaks, except an annotation row: a
+  status cell's annotation row wraps its metadata, each mark staying whole,
+  rather than widen the column. Code and links may break anywhere: they are
+  the long unbroken tokens. A column never narrows below its longest word, so
+  a table whose values cannot fit shows as rows instead (below).
 - Every table shows one row at a time at widths of 960px and below (a screen,
   or a print page that narrow), and so does a table with more columns than the
   reading column can hold: a dense table of 7 or more columns or a narrative
@@ -279,6 +319,19 @@ container                          allowed position                         emit
   the caption above: a UO value on the treatment, declared to the rendered
   check as a profile. Its content sits in `div.uo-details__body`, a section
   whose runs of blocks are prose runs.
+- `:::disclose detail` is a guided review's optional closed detail ("What
+  stays visible"): directly in part 04, never in 08. The build requires a
+  visible block before it in its own section, the one its last heading opens
+  (or part 04 itself before any heading): a paragraph, list, code block,
+  table, quotation, callout, structure, range or panel. A heading alone, a
+  rule, an annotation row, list or note, or another disclosure is not one. The
+  build cannot check that this block is the reading the detail details, or
+  that it states every claim and qualification: that stays a package-review
+  check. Its body is a section, so `###` and `####` headings compose inside
+  it, and it may hold tables, quotations, callouts, structures, ranges,
+  annotation rows and lists, notes and Markdown blocks, but no request for a
+  judgment ("Disclosures and the synthesis", below). In a document of another
+  kind, or anywhere else, it fails the build.
 - Keyboard focus on a disclosure's summary, the mark slot's included, is the
   design system's: the treatment draws a 2px outline around the trigger and
   turns its indicator magenta. A link's focus is also the design system's:
@@ -289,10 +342,310 @@ container                          allowed position                         emit
   point (zero-width space, Hangul filler and the like), U+2800 BRAILLE PATTERN
   BLANK or a combining mark on its own. Other glyph-blank characters are
   checked at package review.
-- **Raw HTML in the source fails the build**, including comments. Put literal
-  tags in a code span or write `&lt;`; `\<` is not an escape.
+- `:::range`, `:::annotate`, `:::annotate list`, `:::annotate document`,
+  `:::note` and the inline `{{...}}` forms carry review annotations ("Review
+  annotations", below). Any other `{{`
+  fails the build, in Markdown text, a container token or a meta value: a
+  literal `{{` belongs in a code span. Code, preformatted and structured
+  blocks keep their text as written.
+- **Raw HTML in the source fails the build**, including comments, in Markdown
+  text and in structure lines. Put literal tags in a code span or write
+  `&lt;`; `\<` is not an escape. Plain-text carriers are escaped instead and
+  show their text as written: meta values, quoted container tokens (a
+  caption, a summary, an attribution, a banner title), annotation item text
+  and passage-mark words (which may also hold a link).
 - Links are `https://` or `http://` only. Images are not accepted: an image is
   a relative dependency.
+
+### Review annotations
+
+A review document may show review state, evidence state, architectural state,
+basis and checks beside the content they concern, through `design-system-ASK`'s
+opt-in Review Semantics composition (`review-semantics.md`), adopted for
+presentation. UO's review anatomy (its parts, banners, table roles and domain
+vocabulary) stays `urban-observatory`'s own; annotation presentation and the
+scopes it draws are `design-system-ASK`'s. The renderer follows the composition
+as of `design-system-ASK` `705a195` (#185), the commit both snapshot manifests
+pin. The re-sync that adopted it moved this repo's pin from `53fa86e` (#169)
+and crosses the owner's events #170 to #185, which `_dsa-surface/MANIFEST.md`
+records file by file: #170 to #177 change no vendored file; #178 added the
+composition; #179 and #180 change no vendored file, and #181 only comment
+text; #182 to #185 replaced the composition's first model, so this repo
+adopts it only in its #185 form. A review mark is the shared bordered label
+(#182); a judgment on whole blocks opens a labeled range with a scope rail
+(#183, #184); exact words take the scope underline, pending or decided, and a
+whole list item can be its own range (#185). The three semantic-state modules,
+`spectral-state.css`, `evidence-state.css` and `review-semantics.css` (the
+last carries the composition), are inlined verbatim after the register, in
+that order, only in a document that holds at least one annotation; the
+package MANIFEST's row "modules inlined, in order" records what a render
+embedded, and the seal line names the semantic-state modules when they are
+sealed. A document without annotations inlines the four register modules
+alone. The owner's decision-record and composition rules bind authors as
+written there (`review-semantics.md`, "The decision record" and "Composition
+rules"): a shown decision names what, who and scope; a note quotes the words
+it concerns; No decision recorded appears only where its absence matters;
+origin survives adoption.
+
+```text
+item line                    renders
+item: <name>                 the key Item, then the name (an annotation list's first line)
+state <role>[: <meta>]       a state mark (a square), then its metadata
+basis: <value>               the key Basis, then its value
+evidence <role>[: <meta>]    an evidence mark (a dot), then its metadata
+review <word>[: <meta>]      a review mark (a bordered label), then its metadata
+check: <value>               the key Check, then its value
+
+review     proposed (Proposed) · correction-requested (Correction requested,
+           shown as proposed) · open (Open question) · accepted (Accepted) ·
+           declined (Declined) · none (No decision recorded)
+evidence   supported · partially-supported · unresolved · weakened ·
+           not-yet-testable
+state      earned · structural · partial · deflated · held · external ·
+           proposed · neutral
+```
+
+- Items read in one fixed order: state, basis, evidence, review, then check;
+  repeats of one axis sit together. A row that opens a range or stands as a
+  prompt leads with its one review item, and its other items follow in that
+  order: review, state, basis, evidence, check. A note's row and the
+  document's record keep the fixed order. An item out of order, an unknown
+  axis or word, or a value with no visible text fails the build with its line.
+- `<meta>` and `<value>` are plain text, shown as written: no Markdown, and
+  markup characters are escaped, as in a title or a caption. `basis` and
+  `check` need a value. `review accepted` and `review declined` show a
+  decision and need its record (what, who, scope). `review
+  correction-requested` names a pending request for existing words to change
+  and needs its record (on what, who asked). The review item that opens a
+  range or an item host, and a prompt's, need their record too, whatever
+  their word. The build can only require that something is written.
+- `state proposed` and `review proposed` on one item share a word and a
+  value, so the keyed list carries them, one key each: a row, a note's row or
+  a table cell holding both fails. The document's record is a row and never a
+  list, so it cannot carry the pair either: a UO capability limit for now.
+  `review correction-requested` beside `state proposed` is not that pair.
+
+**Whole blocks: a range.** A review judgment on one or more whole blocks
+opens a range, even over one paragraph: a row placed after a block can be read
+as introducing what follows it.
+
+```text
+:::range
+:::annotate
+review open: <what it concerns · its scope · who decides>
+basis: <value>
+:::
+<the blocks it covers>
+:::
+```
+
+- `:::range` emits `div.doc-group.doc-annotation-range.surface-labeled-range`.
+  Its first child is one `:::annotate` row, which names exactly one review
+  judgment, first, with its record after `:`; the blocks it covers follow,
+  runs of blocks in a prose run. It covers at least one block. It takes no
+  token and no `local=` hook.
+- A range covers paragraphs, plain lists, quotations, callouts, structures and
+  a whole `:::table`; a range sitting directly in a part may also cover that
+  part's `:::framing` or `:::synthesis`, whose own position rules still hold.
+  A quotation or callout inside a range keeps its own rail, a panel its own
+  perimeter: the range's scope rail sits outside the content edge.
+- One judgment per range. Inside a range the build refuses, naming the line:
+  another range (ranges never nest; blocks judged otherwise are a sibling
+  range), another row or list after its first row, a note, a heading (a range
+  over a heading alone is a UO capability limit for now), a list item that
+  opens as an item host, and a `:::table` whose cells carry review items.
+- Words inside a range judged on their own take a passage mark, and their note
+  follows the range.
+- Two ranges in a row keep the owner's 24px passage buffer, so their rails
+  never read as one. The owner composes it between siblings, and for a list
+  that opens or closes on an item host one wrapper deep. UO's own wrappers (a
+  heading's section, a question, a finding and a prose run) can hold a range
+  or a host list as their last or first block; and a range around a panel
+  follows them in its part after the sections close. So the renderer's
+  stylesheet composes the same buffer across them: where one block ends on a
+  scope rail through its last children and the next starts on one through its
+  first, the next block takes `--space-5` as its top margin. It adds a block
+  margin only, never an inline margin, padding, border or rail on a range;
+  only a document that annotates carries it, as only it inlines the
+  semantic-state modules. The rendered check's buffer rule counts siblings
+  only, so it does not see through these wrappers; the renderer's tests check
+  which block pairs the rule's selectors reach, and no maintained check
+  measures the rendered gap.
+- A range sits directly in a part 02 to 09, a `:::question`, a `:::finding` or
+  a question-detail, evidence or detail disclosure; never in part 01 or 10 or
+  the provenance disclosure.
+
+**A separate question: a prompt.** A row holding a review item outside a
+range stands only as an explicit-target prompt: its own row, review item
+first, immediately before the `:::range` whose content it asks about, or
+before another prompt to that range. Its record names the content below as its
+target, the scope of its question and who decides; a bare label that names no
+target is no prompt, so a prompt without a record fails. Anywhere else, after
+a block included, a review row fails: a whole-block judgment opens a range.
+
+**Rows without a review item.** A row holding only state, basis, evidence or
+check items opens no range and follows the heading or block it qualifies (a
+range included), outside any prose run; as its parent's first child, or right
+after another row, list or note, it fails. The owner also lets such a row
+follow the text of a plain list item; UO cannot express that yet, a UO
+capability limit for now: a row sits only between blocks, and a list item
+that opens with items other than a review item fails as an item host. Raise
+it with the owner.
+
+**An item: an annotation list.** `:::annotate list` is one item answering
+several questions: a `dl.doc-annotation-list` with one key per axis present,
+in the fixed order. It names its item first, in an `item: <name>` line of its
+own, rendered as the key Item; the line is required whenever the list holds a
+review line, and its review lines judge that item, never the blocks beside the
+list. A list answers each question once: a second judgment at another scope
+is its own `:::annotate list`, naming its item in its own `item:` line, and a
+second record of one non-review axis at another scope goes with the first in
+one row, which may repeat that axis. It sits where a row without a review
+item sits, and never in a note or a range. `list` and `document` are the only
+tokens `:::annotate` takes; it takes no `local=` hook.
+
+**The whole document: its record.** `:::annotate document` holds the record
+that names the document, under its title: at top level, between `:::meta` and
+the first `:::part`, at most once. It renders as a plain row in part 01's
+masthead, directly under the title and before its identity list: no range, no
+rail. Its items keep the fixed order, and a review item is optional. Its
+record names the document (for example its id and version).
+
+**A whole list item: an item host.** A list item whose text opens with
+items, the first a review item, is its own range:
+
+```text
+- {{review accepted: <record>}}{{basis: <value>}} The item's words…
+```
+
+- It emits `li.doc-annotation-range.surface-labeled-range`, the item's row
+  first, then its words in a `p.doc-body` of their own (the item itself takes
+  no content role); a loose item keeps its further paragraphs, and a tight one
+  its nested list, after them.
+- Item hosts may follow one another, and plain items may sit between them.
+  UO's lists keep the owner's default 24px indentation, so no
+  `--surface-labeled-range-indent` is set.
+- One review item per host, first, with its record after `:`, before any of
+  the item's words; the build refuses a bare review item (whatever its word),
+  a second review item, words before the row, an item host in a nested list,
+  and one inside a range, a note, a quotation or a callout. A table's cells
+  hold no list, and a structure's lines are text, shown as written. A passage
+  mark in a host's words has its note after the list.
+
+**Exact words: a passage mark.** `{{mark <role> <note>: exact words}}`, with
+role `proposed`, `open`, `accepted` or `declined`, marks the words a judgment
+concerns, pending or decided. It emits
+`mark.doc-passage-mark.surface-scope-underline`, the shared scope underline:
+one solid line under words that keep their own color, never a tint. It names
+its note through `aria-describedby`. No decision recorded marks no words:
+`none` fails.
+
+- It sits in a paragraph or list item directly inside a part 02 to 09, a
+  `:::question`, a `:::finding`, a `:::range` or a question-detail, evidence
+  or detail disclosure; never in a heading, link text, a quotation, a
+  callout, a banner, a framing or synthesis panel, a table, a structure, a
+  note or the provenance disclosure.
+- The marked words are plain text and may hold a link written `[text](url)`,
+  which keeps its own `a.surface-text-link` treatment inside the mark; the
+  link's text is plain text too. Inside `{{...}}` (a cell item or passage-mark
+  words) a backslash escape or a code span fails the build, and so does a link
+  anywhere but in passage-mark words; in an `:::annotate` row the same
+  characters show as written.
+
+**Notes.** `:::note <name>` is the record a passage mark points to: `<name>`
+matches `[a-z][a-z0-9-]{0,31}` and is unique in the document, and the note's id
+is `uo-note-<name>`. It holds one `:::annotate` row first, then paragraphs and
+lists only. Its row records the judgment its marks show: a proposed mark needs
+a `review proposed` or `review correction-requested` item, an open mark
+`review open`, an accepted mark `review accepted` and a declined mark `review
+declined`. It holds no other review item: one whose role no mark naming the
+note shows, `review none` included, fails, since it would judge the blocks
+before the note from a row placed after them. Its other items (state, basis,
+evidence, check) may sit beside them.
+
+- The author writes a note after the block holding the mark, or after the
+  range that holds it, in the same container, with only notes and rows or
+  lists without a review item between: another block, a container or a
+  heading before it fails, a heading inside a container included. So a mark
+  inside a disclosure has its note inside that disclosure, and a mark outside
+  one never names a note inside it.
+- For words in a plain list item, one that is neither an item host nor held
+  by a range, the author writes the note after the list, and the renderer
+  places it inside that list item, after the item's text, where it takes the
+  owner's 12px attachment. For words in an item host, the note stays after the
+  list; for words in a list a range holds, it follows the range.
+- A note records the words of one list item, as it records those of one
+  block: marks naming one note in two items of a list, an item and its nested
+  item, or a plain item and an item host, fail the build.
+- `:::note not-yet-testable` is Evidence State's not-yet-testable note: its
+  row carries an `evidence not-yet-testable` item and no review item, it draws
+  that role's dashed rail instead of the hierarchy rail, and no passage mark
+  names it.
+
+**Tables.** UO's tables keep their own grid and rows view; every field stays
+visible, and UO does not adopt `.doc-table-scroll` or its range lane.
+
+- In a `:::table` body cell of a `text` or `status` column, `{{<item line>}}`
+  is an item, for example `{{review accepted: v3 · owner · this copy}}`. A
+  cell holding items holds them only, in the fixed order; they emit the
+  cell's annotation row, `span.doc-annotations`, on its first baseline, and
+  judge that cell, or its row where the table makes the association
+  unambiguous. An item is never in a header, a `key` or a `num` column.
+- A judgment on a whole table is a `:::range` around the `:::table`. A table
+  whose cells carry review items cannot sit in a range: the owner raises that
+  composition rather than drawing it.
+- A per-cell block range is a UO capability limit: UO's cells hold inline
+  text, so a `:::range` inside a `:::table`, and `{{range` in a cell, fail the
+  build with that diagnostic. Raise it with the owner.
+
+**Disclosures and the synthesis.**
+
+- Inside a question-detail, evidence or detail disclosure, rows, lists,
+  ranges, notes, passage marks and cell items are scoped as anywhere else, and
+  a mark and its note stay in one disclosure. They never carry what "What
+  stays visible" keeps ALWAYS VISIBLE: an evidence row's assessed state, a
+  live constraint, a finding's limit or a qualification a short-reading claim
+  needs stays in the visible lines. Nor do they stand in for a record about
+  the question, finding or claim itself. A closed disclosure hides its
+  annotations with its content.
+- A guided review's detail disclosure holds no request for a judgment: an
+  Open question, Proposed or Correction requested item there, in a row, list,
+  range, note, cell, item host or passage mark, fails the build, since what
+  the reviewer is asked to judge stays visible. Its review items record
+  judgments: Accepted, Declined or No decision recorded.
+- A synthesis, or the range around it, is its part's last substantive
+  content; only notes, and rows or lists without a review item, follow it, and
+  a review row after it fails: a judgment on the synthesis is a range around
+  it.
+- No annotation sits in part 01 or 10 or in a provenance disclosure, a table
+  cell's included, but the document's record under the masthead title; none
+  sits inside a callout, quotation, banner or panel.
+
+Boundaries:
+
+- The shared composition supplies presentation only. It never replaces UO's
+  review anatomy, its banners, its table roles or its domain vocabulary, and
+  UO mints no review palette of its own: a role's value appears only on a
+  mark's geometry, a range's scope rail, a passage mark's line and the
+  not-yet-testable rail, each with its visible words.
+- Map by meaning, not color. The cyan review-status banner is not an Open
+  question, though both are the emphasis cyan, and the violet proof banner is
+  not an evidence judgment; neither banner is recolored. A status column stays
+  a status column unless its author chooses marks.
+- A displayed decision reports an authority relation and creates none. Color
+  confers no evidence and no authority.
+- Proof status: the unit suite exercises this grammar, the guided-review
+  detail disclosure and the final-HTML allowlist on synthetic sources only.
+  The build checks structure and placement. The rendered check checks
+  presentation on the sealed file it is run on: its rule C13 applies to every
+  bordered label and emphasis chip in every document, and wherever a document
+  annotates, its rules C12, C14 and C15 also apply, judging a mark inside a
+  closed disclosure once its runner has opened the disclosure. A pass shows
+  that a range or a passage mark is drawn as the composition says, not that
+  it covers the right content.
+  Neither establishes that a judgment's scope is the right one; that stays
+  with the author and the reviewer. Neither lifts a kind profile's
+  PROVISIONAL status; only a reviewed change to "Kinds" does.
 
 ### Emitted classes
 
@@ -301,8 +654,8 @@ final-HTML allowlist compares each element's class tokens with them. A
 `uo-*` class is a UO chrome or geometry hook, styled by
 `artifact.template.html` or the renderer's geometry stylesheet, or a
 structural hook the allowlist places. Every other class is design-system-ASK's:
-a document-register role or composition, a treatment or a panel axis, styled
-by the vendored `_dsa-surface/` modules.
+a document-register role or composition, a treatment, a panel axis or a
+Review Semantics composition, styled by the vendored `_dsa-surface/` modules.
 
 ```text
 element   emitted class set
@@ -322,8 +675,13 @@ div       surface-emphasis-rail doc-group
 div       surface-separate surface-material-panel surface-attach-free surface-elevation-flush doc-group
 div       doc-pre doc-pre--structured
 div       doc-pre-group
+div       doc-annotations
+div       doc-hierarchy doc-group doc-annotation-note
+div       doc-group doc-annotation-note
+div       doc-group doc-annotation-range surface-labeled-range
 header    uo-head doc-titled
 dl        uo-head__meta
+dl        doc-annotation-list
 dt        doc-label
 dd        doc-meta
 details   uo-index surface-disclosure surface-material-panel surface-attach-free surface-elevation-flush
@@ -337,6 +695,11 @@ span      surface-disclosure-label
 span      surface-disclosure-indicator
 span      uo-cell-label doc-label
 span      uo-authored-case
+span      doc-annotations
+span      doc-annotation-item
+span      doc-mark doc-label
+span      doc-mark doc-label surface-bordered-label
+span      doc-meta
 footer    uo-foot
 p         doc-body
 p         doc-body surface-emphasis-rail
@@ -350,6 +713,7 @@ h2        doc-section-title
 h3        doc-subsection-title
 h4        doc-deep-title
 li        doc-body
+li        doc-annotation-range surface-labeled-range
 ol        doc-toc-list
 blockquote doc-quote
 pre       doc-pre
@@ -362,26 +726,41 @@ caption   doc-meta
 th        doc-label
 td        doc-table-cell
 td        doc-body
+mark      doc-passage-mark surface-scope-underline
 ```
 
-These elements may also carry no class, each only where named: a quotation's
-own `p` and its attribution `footer`; a contents entry's `li`; an authored
-disclosure's `summary`; a narrative `table`; and `ul`, `ol`, `strong`, `em`,
-`br`, `hr`, `thead`, `tbody` and `tr`. A container's element may add its
-`uo-local-<name>` class (below) to the set it emits: a part's section, a
-question's or finding's section, an authored disclosure, a table, a quotation,
-a callout group, a framing or synthesis panel and a structured block. The
-allowlist also places each set: the wordmark's `svg` only in the mark slot's
-label, a structured line only inside a structured block, a peer group only
-directly in its block, a dense table's cells as `.doc-table-cell` and a
-narrative table's as `.doc-body`, and so on. Any other class or placement
-fails the build.
+These elements may also carry no class, each only where named: a quotation's own
+`p` and its attribution `footer`; a contents entry's `li`; an authored
+disclosure's `summary`; a narrative `table`; an annotation list's `dd`; and
+`ul`, `ol`, `strong`, `em`, `br`, `hr`, `thead`, `tbody` and `tr`. A container's
+element may add its `uo-local-<name>` class (below) to the set it emits: a
+part's section, a question's or finding's section, an authored disclosure, a
+table, a quotation, a callout group, a framing or synthesis panel and a
+structured block. The allowlist also places each set: the wordmark's `svg` only
+in the mark slot's label, a structured line only inside a structured block, a
+peer group only directly in its block, a dense table's cells as
+`.doc-table-cell` and a narrative table's as `.doc-body`, an annotation range
+directly in a section and never inside another, its row first naming one review
+judgment first and no other review mark inside it, an item host only as an item
+of a top-level list with its row and then its words, a review row outside a
+range only immediately before a range or another such row, an annotation item
+only in an annotation row, a review mark only as the bordered label and an
+evidence or state mark never one, a mark or its metadata only in an item or a
+list's value, a list's Item line first wherever it holds a Review line, a
+passage mark only in document body text holding its words and any link inside
+them, a facet attribute only on a mark, a passage mark or the not-yet-testable
+note, each note's row as its first child, a note directly in a section or in a
+plain list item and never in a range, a not-yet-testable note's row carrying
+that evidence mark, each note's id named by a passage mark whose role the note's
+first row records, no annotation in part 01 or 10 (a provenance disclosure
+included) but the document's record directly under the masthead title, and so
+on. Any other class or placement fails the build.
 
 ### Payload-local CSS
 
 Any container except `:::part 01` and `:::part 10`, which carry the generated
-masthead and seal line, `:::banner` and `:::group` may carry one
-`local=<name>` token, where `<name>` matches `[a-z][a-z0-9-]{0,31}`. It emits
+masthead and seal line, `:::banner`, `:::group` and the annotation containers
+(`:::range`, `:::annotate`, `:::note`) may carry one `local=<name>` token, where `<name>` matches `[a-z][a-z0-9-]{0,31}`. It emits
 `class="uo-local-<name>"` on that container's element only (a callout with a
 hook renders as a railed group, never as one paragraph). `--local-css` adds a third `<style>` block holding
 the file's bytes unchanged; the package MANIFEST records their sha256. The file:
@@ -445,8 +824,9 @@ reference**, following the family tier model:
   wordmark heads each such document's masthead and opens its section index.
   It is an assignment, not inheritance, and it does not make
   urban-observatory ASK-the-entity. No other design-system identity is
-  carried: no "ASK Design System" chrome. The review semantics — the anatomy,
-  the banners, the table roles — are urban-observatory's own. The token CSS
+  carried: no "ASK Design System" chrome. UO's review anatomy — the anatomy,
+  the banners, the table roles — is `urban-observatory`'s own; annotation
+  presentation is `design-system-ASK`'s Review Semantics. The token CSS
   header's "TIER 3 — ASK instance identity (NOT inherited by children)" stays
   true under an assignment.
 - **The document register, adopted.** The design-system document register
@@ -456,6 +836,12 @@ reference**, following the family tier model:
   renderer emits takes one of its roles, and the Class B `output-artifact` v3
   contract applies: the UO stylesheets set no type metric and no text
   foreground, and write their geometry at zero specificity.
+- **The semantic-state modules, adopted for annotation.** `spectral-state.css`,
+  `evidence-state.css` and `review-semantics.css` (which carries the Review
+  Semantics composition) are consumed **verbatim**
+  and inlined after the register, in that order, only in a document that
+  annotates ("Review annotations"). They supply the marks' presentation; UO
+  supplies which content carries which mark and the records' values.
 - **No fork.** `diagrams.css` is not vendored, imported, or forked, and the
   register's modules are never edited here: a change to a role is a
   design-system change.
@@ -464,8 +850,9 @@ reference**, following the family tier model:
 
 `_dsa-tokens/` is a **pinned snapshot** of the design-system tokens + fonts and
 the assigned wordmark, and `_dsa-surface/` of the document register's four
-modules, vendored so artifact builds are **reproducible without a sibling
-checkout** of `design-system-ASK`. They are explicitly:
+modules and the three semantic-state modules, vendored so artifact builds are
+**reproducible without a sibling checkout** of `design-system-ASK`. They are
+explicitly:
 
 - **build dependency snapshots, not forks** and not second sources of truth;
 - **pinned, at one commit** — each `MANIFEST.md` records the exact upstream
@@ -479,8 +866,9 @@ checkout** of `design-system-ASK`. They are explicitly:
 - **updated only by explicit re-sync** from upstream (a deliberate operator
   action), never silently, and always together.
 
-`design-system-ASK` remains the upstream source of truth for the tokens and the
-register. This repo holds frozen copies for reproducible rendering.
+`design-system-ASK` remains the upstream source of truth for the tokens, the
+register and the semantic-state modules. This repo holds frozen copies for
+reproducible rendering.
 
 ## Light / dark contract (Class B v3)
 
@@ -566,6 +954,16 @@ summary, present when the document has an authored disclosure, and the
 authored-case table header, present when a column is declared
 `:authored-case`. The rendered check does not compare letter case; the build
 places the authored-case span and the unit suite checks its one declaration.
+The check's rule C13 applies to every bordered label and emphasis chip, in
+every document: the framing, synthesis and banner chips, and review marks; it
+checks the label's box and edge. Wherever a document annotates, its rules C12,
+C14 and C15 also apply: C12 checks the annotation composition's classes,
+attributes and vocabulary and its computed outlines, markers, scope rails,
+passage lines and note attachment; C14 a range's scope rail, lane, host and
+buffer between siblings; C15 a passage mark's line and unchanged words. None
+judges whether an item's role is the right one, or whether a range holds the
+right blocks. A mark inside a closed disclosure has its words checked at rest
+and its presentation once the runner has opened every disclosure.
 The build checks structure; only the rendered check proves computed
 presentation.
 
@@ -634,7 +1032,7 @@ executive result.
 
 ```text
 kind            requires, beyond 01 · 02 · 10   status
-guided-review   04 · 06 · 08                    PROVISIONAL
+guided-review   04 · 08                         PROVISIONAL
 confirmation    07                              PROVISIONAL
 ```
 
@@ -642,6 +1040,18 @@ A profile stays provisional until a declared proof document of its kind has
 been rendered and reviewed against it. Only a reviewed change to this section
 lifts that status. A kind without a profile must not be rendered through this
 template until one is added here.
+
+A guided review's short reading, its 04, is required, and its detail is
+optional: closed detail after the visible reading it details ("What stays
+visible"). The build places the detail after a visible block in its own
+section; whether the visible reading states every claim and the
+qualifications each needs is a package-review check, which no build makes.
+A guided review's dates stay visible in 02: when the sources it reports were
+observed, and when this copy was rendered, which re-checks nothing. A guided
+review requires no 06: a finding unit's significance field would have the
+author pre-answer the judgment the reviewer is asked to make. The
+guided-review profile stays PROVISIONAL until fixture review
+earns a reviewed status change; a build that passes does not lift it.
 
 **A contract failure is a finding about the contract, never a reason to change
 the content.** When a real document cannot satisfy the contract, the profile or
@@ -657,20 +1067,31 @@ no script.
 ```text
 ALWAYS VISIBLE, including
   03   every question's prompt; the central question's prompt and its detail
+  04   every claim of the short reading and each qualification it needs
   06   each unit's status or identifier, finding, significance and limit;
        each evidence surface's title, summary lines, and what it does and
        does not mean; each evidence row's labels, claim and assessed state;
        any quoted source passage the finding relies on; any live constraint,
        confidence cap or other uncertainty on the evidence
   08   the whole register, never reduced to the limits each finding unit states
+       (except as below for a guided review)
   10   the seal line
 
 MAY DISCLOSE
   03   a non-central question's detail
+  04   (guided-review only) per-finding detail, quoted passages and locators,
+       and supporting records, as closed detail after the visible reading; a
+       disclosed finding or claim keeps its own status, limit and
+       qualifications inside the same detail
   06   field-level evidence listings and finding metadata, beneath visible
        summary lines
   10   the provenance table, as one block
 ```
+
+In a guided review, unresolved items already stated visibly beside their claims
+in 04 are not repeated in 08, and 08 carries the document-level non-claims. In
+a guided review, the detail disclosure holds no request for a judgment
+("Review annotations").
 
 ### Approval before a reviewer sees a document
 
@@ -691,8 +1112,10 @@ A document fails the contract when:
 
 `build.py` enforces these checks when it renders, fail-closed, through the
 source grammar in "Usage". The build cannot see which sentences an author
-placed inside an allowed disclosure; package review checks that nothing this
-section keeps ALWAYS VISIBLE sits inside one.
+placed inside an allowed disclosure, an annotation's included; package review
+checks that nothing this section keeps ALWAYS VISIBLE sits inside one, and
+that a guided review's visible reading states every claim and qualification
+its detail relies on.
 
 A document sealed before this contract keeps its bytes and its structure. This
 contract gives no reason to regenerate one.
@@ -741,6 +1164,11 @@ added this paragraph. Check it with `--descends-from <that commit>`. A commit
 cannot name its own merge, so the operator render workflow records that
 commit when U6 lands; no TMK-facing artifact is sealed through this path
 before it.
+A source that uses review annotations must likewise be sealed from a renderer
+commit that descends from the commit that landed them on `main`, checked with
+`--descends-from <that commit>`: an older renderer renders `{{...}}` literally,
+without an error. The operator render workflow records that commit when the
+change lands.
 The renderer does not enforce audience. The checker runs from the clone's
 mutable working tree: the git objects vouch, not the checker's bytes.
 
@@ -762,10 +1190,12 @@ Steps 2 and 3 are this template's job. Steps 1, 4, 5 and 6 are operator-side.
 
 ## Re-syncing the token snapshot
 
-When the design-system tokens or the document register change upstream and a
-refresh is wanted (a deliberate operator decision), re-copy, from one target
+When the design-system tokens, the document register or the semantic-state
+modules change upstream and a refresh is wanted (a deliberate operator
+decision), re-copy, from one target
 [`design-system-ASK`](https://github.com/apexSolarKiss/design-system-ASK) commit, `colors_and_type.css`, `fonts/*.woff2` and
-`assets/logo-ASK.svg` into `_dsa-tokens/` and the four register modules into
+`assets/logo-ASK.svg` into `_dsa-tokens/`, and the four register modules and
+`spectral-state.css`, `evidence-state.css` and `review-semantics.css` into
 `_dsa-surface/`; regenerate both `MANIFEST.md` files with that commit SHA and
 the per-file hashes; and render new artifacts at the new pin. The two
 snapshots are always re-synced together: the build refuses two commits. A
