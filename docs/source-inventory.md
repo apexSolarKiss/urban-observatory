@@ -74,7 +74,7 @@ Each entry below belongs to the housing / planning subset of the Tier-A **signal
 | `source_classification` | raw evidence |
 | `tier` | A |
 | `v0_status` | pinned |
-| `url_or_identifier` | `https://sfplanning.org/sites/default/files/documents/housing-for-all/Appendix_B4.xlsx` |
+| `url_or_identifier` | [`https://sfplanning.org/sites/default/files/documents/housing-for-all/Appendix_B4.xlsx`](https://sfplanning.org/sites/default/files/documents/housing-for-all/Appendix_B4.xlsx) |
 | `platform` | static `.xlsx` on SF Planning site |
 | `access_type` | direct download |
 | `format` | XLSX (HCD-standard multi-sheet template) |
@@ -100,7 +100,7 @@ Each entry below belongs to the housing / planning subset of the Tier-A **signal
 | `source_classification` | raw evidence |
 | `tier` | A |
 | `v0_status` | pinned |
-| `url_or_identifier` | `https://www.hcd.ca.gov/planning-and-community-development/annual-progress-reports` |
+| `url_or_identifier` | [`https://www.hcd.ca.gov/planning-and-community-development/annual-progress-reports`](https://www.hcd.ca.gov/planning-and-community-development/annual-progress-reports) |
 | `platform` | HCD web portal + California Open Data Portal |
 | `access_type` | landing page + downloadable raw datasets + APR Dashboard |
 | `format` | CSV (raw); interactive dashboard |
@@ -350,7 +350,7 @@ These are navigation / interpretive entry points, not raw Tier A evidence. They 
 | `source_name` | SF Planning Property Information Map |
 | `source_owner` | SF Planning Department |
 | `source_classification` | meta-source / discovery (site-level lookup tool) |
-| `url_or_identifier` | `https://sfplanninggis.org/pim/` |
+| `url_or_identifier` | [`https://sfplanninggis.org/pim/`](https://sfplanninggis.org/pim/) |
 | `platform` | ArcGIS-based GIS viewer; underlying ArcGIS REST endpoints not pinned in v0; bulk substrate lives in the Tier A datasets above |
 | `access_type` | interactive web viewer (site-level by address / parcel / planning application number) |
 | `primary_keys` | BLKLOT; address; planning application number |
@@ -367,7 +367,7 @@ These are navigation / interpretive entry points, not raw Tier A evidence. They 
 | `source_name` | San Francisco Housing Dashboard |
 | `source_owner` | SF Planning Department |
 | `source_classification` | meta-source / discovery (aggregated reporting + discovery hub) |
-| `url_or_identifier` | `https://sfplanning.org/san-francisco-housing-dashboard` |
+| `url_or_identifier` | [`https://sfplanning.org/san-francisco-housing-dashboard`](https://sfplanning.org/san-francisco-housing-dashboard) |
 | `platform` | SF Planning web portal (interactive dashboard) |
 | `access_type` | web UI; references underlying DataSF datasets via data-source links |
 | `chain_relevance` | aggregated reporting only; raw chain support routes through `xdht-4php` (A.3.b) and `6jgi-cpb4` (A.3) |
@@ -380,10 +380,10 @@ These are navigation / interpretive entry points, not raw Tier A evidence. They 
 
 | `source_id` | URL | Role |
 |---|---|---|
-| `mohcd_dashboards_data` | `https://sfmohcd.org/dashboards-and-data` | MOHCD Dashboards and Data hub |
-| `mohcd_bmr_listings` | `https://housing.sfgov.org/listings/for-sale` | First Come First Served BMR Listings |
-| `mohcd_plans_reports` | `https://www.sf.gov/mohcd-plans-and-reports` | MOHCD Plans and Reports |
-| `mohcd_department_landing` | `https://sf.gov/departments/mayors-office-housing-and-community-development` | MOHCD main department landing |
+| `mohcd_dashboards_data` | [`https://sfmohcd.org/dashboards-and-data`](https://sfmohcd.org/dashboards-and-data) | MOHCD Dashboards and Data hub |
+| `mohcd_bmr_listings` | [`https://housing.sfgov.org/listings/for-sale`](https://housing.sfgov.org/listings/for-sale) | First Come First Served BMR Listings |
+| `mohcd_plans_reports` | [`https://www.sf.gov/mohcd-plans-and-reports`](https://www.sf.gov/mohcd-plans-and-reports) | MOHCD Plans and Reports |
+| `mohcd_department_landing` | [`https://sf.gov/departments/mayors-office-housing-and-community-development`](https://sf.gov/departments/mayors-office-housing-and-community-development) | MOHCD main department landing |
 
 Common fields: `source_classification: meta-source / discovery`; `chain_relevance: aggregated reporting / navigation only`; `v0_status: pinned (as meta-source)`. Raw MOHCD evidence routes through the Tier B B.3 candidate datasets below.
 
