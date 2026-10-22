@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from html.parser import HTMLParser
 from unittest import mock
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -172,7 +173,9 @@ class Positives(RenderCase):
                           % (cls, build.DISCLOSURE), h)
         self.assertEqual(r["counts"], {"questions": 2, "findings": 1, "disclosures": 3, "tables": 1, "quotations": 0,
                                        "callouts": 0, "framing": 0, "synthesis": 0, "structures": 0,
-                                       "authored_case": 0})
+                                       "authored_case": 0, "annotation_rows": 0, "annotation_lists": 0,
+                                       "annotation_notes": 0, "passage_marks": 0, "cell_items": 0,
+                                       "annotation_ranges": 0, "item_hosts": 0, "document_records": 0})
 
     def test_confirmation_baseline_generates_01_and_10(self):
         r = self.render(CONFIRMATION)
@@ -422,7 +425,7 @@ class Parts(RenderCase):
         self.fails(mutate(GUIDED, "kind: guided-review\n", "kind: blind-baseline\n"), r"K1: kind 'blind-baseline' has no profile")
 
     def test_N14_required_part_missing_guided_review(self):
-        for number in ("02", "04", "06", "08"):
+        for number in ("02", "04", "08"):
             with self.subTest(part=number):
                 start = GUIDED.index(":::part %s\n" % number)
                 end = GUIDED.index(":::part ", start + 1)
@@ -568,6 +571,165 @@ class Roles(RenderCase):
                    r"part 10 carries at most one provenance disclosure")
 
 
+DETAIL = (':::disclose detail "Optional detail"\n### A detail heading\n\nA detail paragraph.\n\n' + TABLE
+          + "\n> A quoted passage.\n:::\n")
+
+
+def without_part(src, number):
+    start = src.index(":::part %s\n" % number)
+    return src[:start] + src[src.index(":::part ", start + 1):]
+
+
+class GuidedReviewDetail(RenderCase):
+    """The guided-review profile, revised in place (README, "Kinds" and "What stays visible"): it requires 04 and 08,
+    and its 04 may close per-claim detail after the visible reading. Synthetic sources only."""
+
+    def test_GR1_profile_requires_04_and_08_only(self):
+        self.assertEqual(build.KIND_PROFILES["guided-review"], ("04", "08"))
+        r = self.render(without_part(without_part(GUIDED, "03"), "06"))
+        self.assertEqual(r["parts"], ["01", "02", "04", "08", "10"])
+
+    def test_GR2_detail_allowed_in_04_of_a_guided_review(self):
+        src = in_04("## A short claim\n\nThe claim and the qualification it needs.\n\n" + DETAIL
+                    + "\n## A second claim\n\n- The second claim, with its limit.\n\n"
+                    + DETAIL.replace("Optional detail", "More detail"))
+        r = self.render(src)
+        h = r["html"]
+        for summary in ("Optional detail", "More detail"):
+            self.assertIn('<details data-uo-disclose="detail" class="uo-details %s"><summary><span '
+                          'class="surface-disclosure-label">%s</span>' % (build.DISCLOSURE, summary), h)
+        self.assertEqual(h.count('data-uo-disclose="detail"'), 2)
+        self.assertNotRegex(h, r"<details[^>]* open")
+        part = h[h.index('id="uo-part-04"'):h.index('id="uo-part-06"')]
+        # the visible reading precedes its detail in the claim's own section; the detail's body is a section
+        self.assertLess(part.index("The claim and the qualification it needs."), part.index('data-uo-disclose="detail"'))
+        body = part[part.index('<div class="uo-details__body surface-disclosure-body doc-section">'):]
+        self.assertIn('<div class="doc-section">\n<h3 class="doc-subsection-title">A detail heading</h3>', body)
+        self.assertIn('<table class="doc-dense-table">', body)
+        self.assertIn('<blockquote class="doc-quote">', body)
+        self.assertEqual(r["counts"]["disclosures"], 5)
+        build.check_final_html(h, 2)
+
+    def test_GR2b_detail_after_its_sections_visible_block_and_without_finding_units(self):
+        src = without_part(without_part(GUIDED, "03"), "06")
+        for reading in ("The claim, as read.\n\n", TABLE + "\n", "> A quoted passage.\n\n",
+                        ranged("review accepted: v1 · owner · this claim", "The claim, as read.") + "\n"):
+            with self.subTest(reading=reading[:24]):
+                self.reset_tmp()
+                r = self.render(mutate(src, "The synthetic executive result.\n",
+                                       "The synthetic executive result.\n\n## A claim\n\n" + reading + DETAIL))
+                self.assertEqual(r["html"].count('data-uo-disclose="detail"'), 1)
+
+    def test_GR2c_detail_takes_annotations(self):
+        src = in_04("A claim.\n\n:::disclose detail \"Optional detail\"\nA record.\n\n:::annotate\nbasis: two copies\n:::\n\n"
+                    + ranged("review declined: which reading · this record · owner", "A line {{mark accepted dn: as quoted}}.")
+                    + "\n:::note dn\n:::annotate\nreview accepted: on “as quoted” · owner\n:::\n:::\n:::\n")
+        r = self.render(src)
+        detail = r["html"][r["html"].index('<details data-uo-disclose="detail"'):]
+        detail = detail[:detail.index("</details>")]
+        for piece in (RANGE_OPEN, passage("accepted", "dn", "as quoted"), 'id="uo-note-dn"', key_item("Basis", "two copies")):
+            self.assertIn(piece, detail)
+
+    def test_GR3_detail_refused_in_04_of_other_kinds(self):
+        src = mutate(CONFIRMATION, ":::part 07\n", ":::part 04\nA result.\n\n" + DETAIL + ":::\n\n:::part 07\n")
+        self.fails(src, r"line %d: :::disclose detail belongs to a guided-review document only; this document's kind "
+                        r"is confirmation" % row_of(src, ":::disclose detail"))
+        src = mutate(CONFIRMATION, "What changed against the synthetic earlier position.\n",
+                     "What changed against the synthetic earlier position.\n\n" + DETAIL)
+        self.fails(src, r"belongs to a guided-review document only; this document's kind is confirmation")
+
+    def test_GR4_detail_refused_before_visible_content(self):
+        for before in ("", "[r]: https://a.example\n\n", "\u200b\n\n"):
+            with self.subTest(before=repr(before)):
+                self.reset_tmp()
+                src = mutate(GUIDED, "The synthetic executive result.\n", before + DETAIL)
+                self.fails(src, r"K7: :::disclose at line %d is the first child of :::part 04 \(line \d+\); the visible "
+                                r"reading it details must precede it" % row_of(src, ":::disclose detail"))
+
+    def test_GR4b_detail_refused_after_a_heading_alone(self):
+        # A heading is not the reading: the detail's own section, from its last heading, holds a visible block first.
+        pattern = (r"K7: :::disclose at line %d follows no visible block in its own section of :::part 04 \(line \d+\); "
+                   r"the visible reading it details, a paragraph, list, code block, table, quotation, callout, structure, "
+                   r"range or panel after the section's heading, must precede it")
+        part04 = ":::part 04\nThe synthetic executive result.\n"
+        cases = [
+            mutate(GUIDED, part04, ":::part 04\n## A claim\n\n" + DETAIL),
+            in_04("## A claim\n\n" + DETAIL),
+            in_04("## A claim\n\nThe claim, as read.\n\n### Its limit\n\n" + DETAIL),
+            in_04("## A claim\n\n:::annotate\nbasis: owner-stated\n:::\n\n" + DETAIL),
+            in_04("## A claim\n\n---\n\n" + DETAIL),
+            in_04("## A claim\n\n" + DETAIL + "\n" + DETAIL.replace("Optional detail", "More detail")),
+        ]
+        for src in cases:
+            with self.subTest(src=src[src.index(":::part 04"):][:90]):
+                self.reset_tmp()
+                self.fails(src, pattern % row_of(src, ":::disclose detail"))
+
+    def test_GR8_detail_holds_no_request_for_a_judgment(self):
+        # What the reviewer is asked to judge stays visible: Open question, Proposed and Correction requested never sit
+        # in a guided review's closed detail, in a range, a prompt, a list, a note, a cell, an item host or a mark.
+        def detail(body):
+            return in_04("A claim.\n\n:::disclose detail \"Optional detail\"\nA record.\n\n" + body + ":::\n")
+        cases = [
+            (ranged("review open: which reading · this record · owner", "The record."), 2),
+            (ranged("review proposed: a reading · this record · editor", "The record."), 2),
+            (":::annotate\nreview open: the record below · owner\n:::\n\n"
+             + ranged("review accepted: v1 · owner · this record", "The record."), 1),
+            (":::annotate list\nitem: the record\nreview correction-requested: on its total · owner\n:::\n", 2),
+            ("Words {{mark open dn: as quoted}}.\n\n:::note dn\n:::annotate\nreview open: whose copy · owner\n:::\n:::\n", 0),
+            ("Words {{mark proposed dn: as quoted}}.\n\n:::note dn\n:::annotate\nreview proposed: a phrase · editor\n"
+             ":::\n:::\n", 0),
+            (CELL % "{{review open: carried · owner}}", 3),
+            ("- {{review proposed: editor · this item}} A disclosed item.\n", 0),
+        ]
+        for body, k in cases:             # k: the asking line within body
+            with self.subTest(body=body[:50]):
+                self.reset_tmp()
+                self.fails(detail(body), r"%s: an Open question, Proposed or Correction requested review item sits inside "
+                                         r":::disclose detail \(%s\), which is closed" % (at(5 + k), at(2)))
+        # Recorded judgments may sit there, and a request may sit in the visible reading before it.
+        self.reset_tmp()
+        h = self.render(in_04(ranged("review open: whether the record holds · the claim · owner", "A claim.")
+                              + "\n:::disclose detail \"Optional detail\"\nA record.\n\n"
+                              + ranged("review none: no production decision", "The record.") + "\n"
+                              + CELL % "{{review declined: v1 · owner}}" + ":::\n"))["html"]
+        self.assertEqual(h.count('data-uo-disclose="detail"'), 1)
+        # Markup quoted in a code span is text, not a request.
+        self.reset_tmp()
+        self.render(in_04("A claim.\n\n:::disclose detail \"Optional detail\"\nA record citing "
+                          "`<span class=\"doc-mark\" data-review=\"open\">` as markup.\n:::\n"))
+
+    def test_GR5_detail_refused_in_08(self):
+        src = mutate(GUIDED, "The whole synthetic register.\n", "The whole synthetic register.\n\n" + DETAIL)
+        self.fails(src, r"K7: :::disclose at line %d is inside part 08" % row_of(src, ":::disclose detail"))
+
+    def test_GR6_detail_refused_outside_04(self):
+        cases = [
+            (mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n",
+                    "What this synthetic document tests, and what not to judge.\n\n" + DETAIL), r"not :::part 02"),
+            (mutate(GUIDED, "**Status:** open. Finding, significance and limit.\n",
+                    "**Status:** open. Finding, significance and limit.\n\n" + DETAIL), r"not :::finding"),
+            (in_04(":::callout\nA claim.\n\n" + DETAIL + ":::\n"), r"not :::callout"),
+            (mutate(GUIDED, "Field-level listing.\n", "Field-level listing.\n\n" + DETAIL),
+             r"K7: :::disclose at line \d+ sits inside :::disclose evidence"),
+            (in_04(DETAIL.replace("A detail paragraph.\n", "A detail paragraph.\n\n" + DETAIL)),
+             r"K7: :::disclose at line \d+ sits inside :::disclose detail"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_GR7_disclosure_positions_follow_the_declared_parts(self):
+        # The declared parts are the operative positions: moving one moves the rule (README, "What stays visible").
+        with mock.patch.dict(build.DISCLOSE_PARTS, {"evidence": "05"}):
+            self.fails(GUIDED, r"line %d: :::disclose evidence sits in part 05 only, not :::finding"
+                       % row_of(GUIDED, ":::disclose evidence"))
+        with mock.patch.dict(build.DISCLOSE_KINDS, {"detail": ("confirmation",)}):
+            self.fails(in_04("A claim.\n\n" + DETAIL), r"belongs to a confirmation document only; this document's "
+                                                         r"kind is guided-review")
+
+
 class RawHtml(RenderCase):
     def neg(self, text, pattern):
         return self.fails(mutate(GUIDED, "The synthetic executive result.\n", text), pattern)
@@ -629,9 +791,9 @@ class Allowlist(RenderCase):
 
     def test_N43_emitted_classes_are_styled_or_declared_hooks(self):
         with open(build.TEMPLATE, encoding="utf-8") as f:
-            uo_css = f.read().split("</head>")[0] + build.MD_CSS
+            uo_css = f.read().split("</head>")[0] + build.md_css(True)
         register_css = ""
-        for rel in build.MODULES:
+        for rel in build.MODULES + build.STATE_MODULES:
             with open(os.path.join(HERE, "_dsa-surface", rel), encoding="utf-8") as f:
                 register_css += f.read()
 
@@ -1024,6 +1186,40 @@ class Provenance(unittest.TestCase):
         self.assert_fails(r, r"--uo-commit must be 40 lowercase hex")
 
 
+    def test_RS_review_semantics_module_byte_changed_fails_an_unannotated_document(self):
+        # All seven _dsa-surface/ files are verified on every build, whether or not the document annotates.
+        with open(os.path.join(self.owner, "_dsa-surface", "review-semantics.css"), "ab") as f:
+            f.write(b"\n")
+        self.assert_fails(self.run_copy(), r"dependency bytes do not match the manifest: _dsa-surface/review-semantics.css")
+
+    def test_RS_state_module_missing(self):
+        os.unlink(os.path.join(self.owner, "_dsa-surface", "spectral-state.css"))
+        self.assert_fails(self.run_copy(), r"dependency file missing: _dsa-surface/spectral-state.css")
+
+    def test_RS_state_module_manifest_row_missing(self):
+        p = os.path.join(self.owner, "_dsa-surface", "MANIFEST.md")
+        with open(p, encoding="utf-8") as f:
+            text = f.read()
+        new = re.sub(r"^\| evidence-state.css sha256 .*\n", "", text, flags=re.M)
+        self.assertNotEqual(new, text)
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(new)
+        self.assert_fails(self.run_copy(), r"register manifest: no sha256 row for evidence-state.css")
+
+    def test_RS_vendored_bytes_match_both_manifests(self):
+        dep = build.verify_dependencies()
+        self.assertEqual([f["path"] for f in dep["files"]][-7:],
+                         ["_dsa-surface/" + x for x in build.MODULES + build.STATE_MODULES])
+        for name in ("_dsa-tokens", "_dsa-surface"):
+            fields, commit = build._manifest_fields(os.path.join(HERE, name, "MANIFEST.md"), name)
+            self.assertEqual(commit, dep["commit"])
+        with open(os.path.join(HERE, "_dsa-surface", "MANIFEST.md"), encoding="utf-8") as f:
+            text = f.read()
+        for rel in build.STATE_MODULES:
+            with open(os.path.join(HERE, "_dsa-surface", rel), "rb") as f:
+                self.assertIn("| %s sha256 | `%s` |" % (rel, hashlib.sha256(f.read()).hexdigest()), text)
+
+
 class Atomicity(RenderCase):
     def test_N62_markdown_version_not_pin(self):
         with mock.patch.object(build.markdown, "__version__", "3.5.0"):
@@ -1299,7 +1495,7 @@ class AuthoredCase(RenderCase):
         self.assertEqual(build.role_profiles({"disclosures": 0, "authored_case": 0}), [])
 
     def test_R2_the_one_declaration_is_case_and_nothing_else(self):
-        rules = [(sels, d) for m, sels, d in css_rules(build.MD_CSS) + css_rules(template_css())
+        rules = [(sels, d) for m, sels, d in css_rules(build.md_css(True)) + css_rules(template_css())
                  if any("uo-authored-case" in sel for sel in sels)]
         self.assertEqual([(list(sels), d) for sels, d in rules], [([":where(.uo-md) :where(.uo-authored-case)"], {"text-transform": "none"})])
 
@@ -1375,12 +1571,29 @@ class Presentation(unittest.TestCase):
     ROWS_CONTEXTS = ("(max-width: 960px)", "container uo-body (max-width: 1119.98px)", None)
 
     def setUp(self):
-        self.md = css_rules(build.MD_CSS)
+        # The fullest UO stylesheet, an annotating document's: MD_CSS and the passage buffer (build.md_css).
+        self.md = css_rules(build.md_css(True))
         self.tpl = css_rules(template_css())
 
     @staticmethod
     def zero_specificity(sel):
-        return re.fullmatch(r"(?::where\((?:[^()]|\([^()]*(?:\([^()]*\))*[^()]*\))*\)\s*(?:>\s*)?)+", sel) is not None
+        """True when sel is :where() groups, each with balanced parentheses, joined only by combinators."""
+        i, rest = 0, []
+        while i < len(sel):
+            if sel.startswith(":where(", i):
+                depth, j = 0, i + len(":where")
+                while j < len(sel):
+                    depth += {"(": 1, ")": -1}.get(sel[j], 0)
+                    j += 1
+                    if depth == 0:
+                        break
+                if depth:
+                    return False
+                i = j
+            else:
+                rest.append(sel[i])
+                i += 1
+        return ":where(" in sel and re.fullmatch(r"[\s>+~]*", "".join(rest)) is not None
 
     def test_U6_the_uo_stylesheets_set_no_type_and_sit_at_zero_specificity(self):
         exceptions = {
@@ -1817,7 +2030,7 @@ class Identity(RenderCase):
         """U3's banner and index rules had to outrank MD_CSS's prose rules. U6 retired both: the banners, the
         index and every text element take register roles, and no UO rule names a text element at all."""
         text = re.compile(r"(?:^|[\s>+~(])(p|li|h[1-6]|blockquote|code|pre|a|strong|em|th|td|caption|dt|dd|summary)(?=$|[\s.:\[>+~,)])")
-        for sheet, rules in (("template", css_rules(template_css())), ("MD_CSS", css_rules(build.MD_CSS))):
+        for sheet, rules in (("template", css_rules(template_css())), ("MD_CSS", css_rules(build.md_css(True)))):
             for m, sels, d in rules:
                 for sel in sels:
                     if sel == ".uo-details > summary > .surface-disclosure-label":
@@ -1835,9 +2048,9 @@ class Identity(RenderCase):
         index or its ancestors; the rendered check (C9) and the keyboard measurement prove the effect."""
         with open(os.path.join(HERE, "_dsa-tokens", "colors_and_type.css"), encoding="utf-8") as f:
             foundation = f.read()
-        self.assertEqual(focus_ring_hazards(template_css()) + focus_ring_hazards(build.MD_CSS)
+        self.assertEqual(focus_ring_hazards(template_css()) + focus_ring_hazards(build.md_css(True))
                          + focus_ring_hazards(foundation), [])
-        self.assertNotIn("outline", build.MD_CSS + template_css())
+        self.assertNotIn("outline", build.md_css(True) + template_css())
         with open(os.path.join(HERE, "_dsa-surface", "surface-treatments.css"), encoding="utf-8") as f:
             treat = css_rules(f.read())
         self.assertIn({"color": "var(--fg-1)", "outline": "2px solid var(--fg-1)", "outline-offset": "var(--space-1)"},
@@ -1863,7 +2076,8 @@ class Identity(RenderCase):
                       "unchanged, so its embedded text is not byte-equal to the hashed file either.", m)
         dep = build.verify_dependencies()
         self.assertEqual(build.dependency(dep, "_dsa-tokens/" + build.WORDMARK)["path"], "_dsa-tokens/" + build.WORDMARK)
-        self.assertEqual([f["path"] for f in dep["files"]][-len(build.MODULES):], ["_dsa-surface/" + x for x in build.MODULES])
+        surface = build.MODULES + build.STATE_MODULES
+        self.assertEqual([f["path"] for f in dep["files"]][-len(surface):], ["_dsa-surface/" + x for x in surface])
         self.assertIn("The four register modules are embedded byte for byte, in the order listed, after the token CSS.", m)
 
 
@@ -2019,7 +2233,8 @@ class Register(RenderCase):
             (reg(":::structure local=x\n:::group local=y\nA\n:::\n:::\n"), r":::group takes no local= hook"),
             (reg(":::quote\n## A heading\n:::\n"), r"a quotation holds no heading"),
             (reg("> quoted\n>\n> ### heading\n"), r"a quotation holds no heading"),
-            (reg(":::quote\n:::callout\nx\n:::\n:::\n"), r":::callout is allowed inside :::part, :::question, :::finding, :::disclose only"),
+            (reg(":::quote\n:::callout\nx\n:::\n:::\n"), r":::callout is allowed inside :::part, :::question, :::finding, :::disclose, "
+                                                    r":::range only"),
             (reg(":::quote word\nx\n:::\n"), r":::quote takes at most one quoted attribution"),
             (reg(':::quote "​"\nx\n:::\n'), r"attribution must contain visible text"),
             (reg(":::callout\n#### A heading\n:::\n"), r"holds a heading"),
@@ -2140,6 +2355,34 @@ def readme_class_sets(readme):
     return {k: tuple(v) for k, v in table.items()}
 
 
+def readme_visibility(readme):
+    """README's "What stays visible" tables: the parts ALWAYS VISIBLE lists, and the parts MAY DISCLOSE lists, each
+    with the kinds its "(<kind> only)" qualifier limits it to (None: every kind), in order."""
+    block = re.search(r"```text\nALWAYS VISIBLE, including\n(.*?)\nMAY DISCLOSE\n(.*?)```", readme, flags=re.S)
+    if block is None:
+        return None
+    always = tuple(re.findall(r"^  (\d\d)   \S", block.group(1), flags=re.M))
+    may = [(m.group(1), tuple(m.group(2).split(" or ")) if m.group(2) else None)
+           for m in re.finditer(r"^  (\d\d)   (?:\(([a-z-]+(?: or [a-z-]+)*) only\) )?\S", block.group(2), flags=re.M)]
+    return {"always": always, "may": may}
+
+
+def code_visibility():
+    """The same tables from the build's declarations: a part where a disclosure class may sit, with the kinds it is
+    limited to; ALWAYS VISIBLE must list those parts (what precedes or surrounds a disclosure there stays visible) and
+    the parts no disclosure enters. It may list other parts too: a part with no disclosure class is visible whole."""
+    may = sorted((part, build.DISCLOSE_KINDS.get(cls)) for cls, part in build.DISCLOSE_PARTS.items())
+    always = tuple(sorted(set(build.DISCLOSE_PARTS.values()) | set(build.NO_DISCLOSE_PARTS)))
+    return {"always": always, "may": may}
+
+
+def visibility_matches(readme_tables, code):
+    """README's tables against the build's: MAY DISCLOSE equal, and ALWAYS VISIBLE holding every part that has a
+    disclosure class or takes none; README's other ALWAYS VISIBLE lines are allowed."""
+    return (readme_tables is not None and readme_tables["may"] == code["may"]
+            and set(code["always"]) <= set(readme_tables["always"]))
+
+
 class Consistency(unittest.TestCase):
     def readme(self):
         with open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
@@ -2157,6 +2400,57 @@ class Consistency(unittest.TestCase):
                                  "confirmation    07 · 08                         PROVISIONAL")
         self.assertNotEqual(drifted, readme)
         self.assertNotEqual(readme_profiles(drifted), build.KIND_PROFILES)
+
+    def test_N74c_visibility_tables_equal_disclosure_positions(self):
+        readme = self.readme()
+        self.assertEqual(set(build.DISCLOSE_PARTS), set(build.DISCLOSE_CLASSES))
+        self.assertTrue(set(build.DISCLOSE_KINDS) <= set(build.DISCLOSE_CLASSES))
+        self.assertTrue(all(set(k) <= set(build.KIND_PROFILES) for k in build.DISCLOSE_KINDS.values()))
+        self.assertTrue(visibility_matches(readme_visibility(readme), code_visibility()))
+        self.assertEqual(code_visibility(), {"always": ("03", "04", "06", "08", "10"),
+                                             "may": [("03", None), ("04", ("guided-review",)), ("06", None),
+                                                     ("10", None)]})
+        # An ALWAYS VISIBLE line for a part with no disclosure class is allowed.
+        widened = readme.replace("  03   every question's prompt;", "  02   the ask\n  03   every question's prompt;")
+        self.assertNotEqual(widened, readme)
+        self.assertTrue(visibility_matches(readme_visibility(widened), code_visibility()))
+
+    def test_N74d_drifted_visibility_tables_detected(self):
+        readme = self.readme()
+        drifts = [
+            ("  04   (guided-review only) per-finding", "  04   per-finding"),
+            ("  04   (guided-review only) per-finding", "  05   (guided-review only) per-finding"),
+            ("  04   every claim of the short reading", "       every claim of the short reading"),
+            ("  10   the provenance table, as one block\n", "  10   the provenance table, as one block\n  08   x\n"),
+        ]
+        for old, new in drifts:
+            with self.subTest(drift=new):
+                drifted = readme.replace(old, new)
+                self.assertNotEqual(drifted, readme)
+                self.assertFalse(visibility_matches(readme_visibility(drifted), code_visibility()))
+
+    def test_N74e_guided_review_contract_sentences(self):
+        # The parity test compares part numbers and kind qualifiers; these pin the guided-review contract's words.
+        readme = " ".join(self.readme().split())
+        for sentence in (
+            "04 every claim of the short reading and each qualification it needs",
+            "04 (guided-review only) per-finding detail, quoted passages and locators, and supporting records, as "
+            "closed detail after the visible reading; a disclosed finding or claim keeps its own status, limit and "
+            "qualifications inside the same detail",
+            "08 the whole register, never reduced to the limits each finding unit states (except as below for a "
+            "guided review)",
+            "In a guided review, unresolved items already stated visibly beside their claims in 04 are not repeated in "
+            "08, and 08 carries the document-level non-claims.",
+            "A guided review's dates stay visible in 02: when the sources it reports were observed, and when this copy "
+            "was rendered, which re-checks nothing.",
+            "A guided review requires no 06: a finding unit's significance field would have the author pre-answer the "
+            "judgment the reviewer is asked to make.",
+            "whether the visible reading states every claim and the qualifications each needs is a package-review "
+            "check, which no build makes.",
+            "A guided review's detail disclosure holds no request for a judgment:",
+        ):
+            with self.subTest(sentence=sentence[:40]):
+                self.assertIn(sentence, readme)
 
     def test_U6_emitted_class_table_equals_readme(self):
         readme = self.readme()
@@ -2179,6 +2473,1702 @@ class Consistency(unittest.TestCase):
         with open(os.path.join(HERE, "requirements.txt"), encoding="utf-8") as f:
             lines = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
         self.assertEqual(lines, ["Markdown==%s" % build.MARKDOWN_PIN])
+
+
+# Review annotations (README, "Review annotations"), design-system-ASK Review Semantics at 705a195: synthetic sources only.
+ANNOTATED_02 = """## Reviewer brief
+
+:::annotate
+review open: on the frame rule below · whether it holds in every bay · decided by the owner
+:::
+
+:::range
+:::annotate
+review proposed: rev 3 · editor, round 2 · this paragraph
+basis: editor draft
+:::
+The frame keeps {{mark proposed props: two props or fewer}} in each bay, and {{mark accepted bays: every [bay](https://example.org/bay)}} stays.
+:::
+
+:::note props
+:::annotate
+review correction-requested: on “two props or fewer” · owner, round 2
+:::
+The owner asked for a narrower phrase.
+:::
+
+:::note bays
+:::annotate
+review accepted: on “every bay” · owner, round 1
+:::
+:::
+
+- {{review accepted: owner, round 1 · this item}}{{basis: owner-stated}} Each frame is printed once.
+- Proofs reach the studio {{mark open month: before the end of each month}}, as [the plan](https://example.org/plan) says.
+- {{review declined: owner, round 2 · this item}} Glossy stock is used.
+
+:::note month
+:::annotate
+review open: on “before the end of each month” · awaiting the owner
+:::
+:::
+"""
+
+ANNOTATED_04 = """The synthetic executive result.
+
+:::annotate
+basis: owner-stated
+evidence supported: 9 of 14, counted
+:::
+
+The method component, as described.
+
+:::annotate list
+item: the method component, version 0.3
+state structural: schema-proven
+basis: analyst synthesis
+evidence partially-supported: tested in 2 of 5 cases
+review accepted: version 0.3 · reviewer, round 2 · bounded trial
+check: link check passed
+:::
+
+:::note not-yet-testable
+:::annotate
+evidence not-yet-testable: no readings until next season
+:::
+Readings cannot exist yet.
+:::
+
+:::range
+:::annotate
+review open: the reprint plan below · whether each frame is reprinted · owner
+:::
+:::table text text
+| Frame | Basis |
+|---|---|
+| F-1 | {{basis: owner-stated}} |
+:::
+:::
+
+:::table dense key text status
+| Position | Claim | Decision |
+|---|---|---|
+| P-1 | first claim | {{review declined: reviewer, round 1 · replaced by P-2}} |
+| P-2 | second claim | {{basis: owner-stated}} {{review accepted: reviewer, round 1}} |
+:::
+
+:::table text text
+| Earlier position | Decision |
+|---|---|
+| P-3 | {{review open: carried to round 3}} |
+:::
+"""
+
+
+def annotated(src=GUIDED):
+    src = mutate(src, "What this synthetic document tests, and what not to judge.\n", ANNOTATED_02)
+    return mutate(src, "The synthetic executive result.\n", ANNOTATED_04)
+
+
+def in_04(text, src=GUIDED):
+    """GUIDED with text added after part 04's first paragraph; the text's first line is line AT."""
+    return mutate(src, "The synthetic executive result.\n", "The synthetic executive result.\n\n" + text)
+
+
+AT = GUIDED.splitlines().index("The synthetic executive result.") + 3
+
+
+def at(k=0):
+    """The source line k lines into text added by in_04, as an error message names it."""
+    return "line %d" % (AT + k)
+
+
+def item(axis, role, label, meta=None):
+    mark = '<span class="%s" data-%s="%s">%s</span>' % (build.REVIEW_MARK if axis == "review" else build.PLAIN_MARK,
+                                                       axis, role, label)
+    return '<span class="doc-annotation-item">%s%s</span>' % (mark, '<span class="doc-meta">%s</span>' % meta if meta else "")
+
+
+def key_item(label, value):
+    return '<span class="doc-annotation-item"><span class="doc-label">%s</span><span class="doc-meta">%s</span></span>' % (
+        label, value)
+
+
+def row(*items):
+    return '<div class="doc-annotations">\n%s\n</div>' % "\n".join(items)
+
+
+def passage(role, name, words):
+    return '<mark class="doc-passage-mark surface-scope-underline" data-review="%s" aria-describedby="uo-note-%s">%s</mark>' % (
+        role, name, words)
+
+
+RANGE_OPEN = '<div class="doc-group doc-annotation-range surface-labeled-range">\n'
+NOTE = ":::note n\n:::annotate\nreview open\n:::\n:::\n"
+
+
+def ranged(review, text, extra=""):
+    """A :::range whose row names one review item (and any further items), over text."""
+    return ":::range\n:::annotate\n%s\n%s:::\n%s\n:::\n" % (review, extra, text)
+
+
+def row_of(src, text):
+    """The 1-based source line that holds text."""
+    return next(i + 1 for i, line in enumerate(src.splitlines()) if text in line)
+
+
+CELL = ":::table text text\n| A | B |\n|---|---|\n| x | %s |\n:::\n"
+
+
+class ReviewAnnotations(RenderCase):
+    def test_RS_leading_single_block_range(self):
+        # A judgment on one paragraph opens a range: its row first, its review item leading, then the paragraph.
+        h = self.render(in_04(ranged("review accepted: v3 · owner · this paragraph", "One judged paragraph.",
+                                     "basis: owner-stated\n")))["html"]
+        self.assertIn(RANGE_OPEN + row(item("review", "accepted", "Accepted", "v3 · owner · this paragraph"),
+                                       key_item("Basis", "owner-stated"))
+                      + '\n<div class="doc-prose">\n<p class="doc-body">One judged paragraph.</p>\n</div>\n</div>', h)
+        # Several blocks, a lead-in and its list, sit in one range; a quotation and a callout keep their rails inside it.
+        self.reset_tmp()
+        h = self.render(in_04(ranged("review open: awaiting the owner · the lead-in and both items",
+                                     "Two choices remain:\n\n- the square crop;\n- the winter set.\n\n> Quoted words.\n\n"
+                                     ":::callout\nThe document's own point.\n:::")))["html"]
+        self.assertIn(RANGE_OPEN + row(item("review", "open", "Open question", "awaiting the owner · the lead-in and both items"))
+                      + '\n<div class="doc-prose">\n<p class="doc-body">Two choices remain:</p>\n<ul>\n'
+                        '<li class="doc-body">the square crop;</li>\n<li class="doc-body">the winter set.</li>\n</ul>\n'
+                        '<blockquote class="doc-quote">\n<p>Quoted words.</p>\n</blockquote>\n'
+                        '<p class="doc-body surface-emphasis-rail" data-uo-role="callout">The document\'s own point.</p>\n'
+                        '</div>\n</div>', h)
+
+    def test_RS_trailing_review_row_fails(self):
+        # The composition's first model (#178, never adopted here) put a review row after its block; a row after a block
+        # is read as introducing what follows it.
+        src = in_04("One paragraph.\n\n:::annotate\nreview accepted: v3 · owner · this copy\n:::\n")
+        self.fails(src, r"%s: a review judgment on whole blocks opens a :::range, even over one paragraph" % at(2))
+        # So does a row after a heading, and after a table.
+        self.reset_tmp()
+        self.fails(in_04("### A section\n\n:::annotate\nreview open: x\n:::\n\nWords.\n"),
+                   r"%s: a review judgment on whole blocks opens a :::range" % at(2))
+        self.reset_tmp()
+        self.fails(in_04(TABLE + "\n:::annotate\nreview proposed: x\n:::\n"),
+                   r"line \d+: a review judgment on whole blocks opens a :::range")
+
+    def test_RS_one_paragraph_judgment_without_a_range_fails(self):
+        # The withdrawn single-block exemption: a leading review row over one paragraph, without a range.
+        self.fails(in_04(":::annotate\nreview proposed: rev 3 · editor · this paragraph\n:::\n\nOne paragraph.\n"),
+                   r"%s: a review judgment on whole blocks opens a :::range, even over one paragraph: its :::annotate row "
+                   r"is the range's first child" % at())
+
+    def test_RS_nested_range_fails(self):
+        inner = ranged("review accepted: x · y", "Inner.")
+        self.fails(in_04(ranged("review proposed: a", "Outer.\n\n" + inner)),
+                   r"%s: :::range sits inside :::range \(%s\); ranges never nest" % (at(6), at()))
+
+    def test_RS_one_judgment_per_range(self):
+        cases = [
+            (in_04(":::range\n:::annotate\nreview proposed: a\nreview accepted: b\n:::\nWords.\n:::\n"),
+             r"%s: one judgment per range: a second review item" % at(3)),
+            (in_04(":::range\n:::annotate\nbasis: owner-stated\n:::\nWords.\n:::\n"),
+             r"%s: a :::range's row names its one review judgment first; evidence and state never open a range" % at(1)),
+            (in_04(":::range\n:::annotate\nbasis: owner-stated\nreview open: x\n:::\nWords.\n:::\n"),
+             r"%s: a row holding a review item opens a :::range or stands as a prompt before one, and leads with its review "
+             r"item" % at(3)),
+            (in_04(":::range\n:::annotate\nreview open: x\n:::\nWords.\n\n:::annotate\nbasis: y\n:::\n:::\n"),
+             r"%s: :::annotate \(%s\) sits inside :::range \(%s\), which holds one :::annotate row, as its first child"
+             % (at(6), at(6), at())),
+            (in_04(":::range\nWords first.\n\n:::annotate\nreview open: x\n:::\n:::\n"),
+             r"%s: :::annotate \(%s\) sits inside :::range" % (at(3), at(3))),
+            (in_04(":::range\n:::annotate list\nitem: a\nreview open: x\n:::\nWords.\n:::\n"),
+             r"%s: a :::range opens with an :::annotate row naming its one judgment, not a list" % at(1)),
+            (in_04(":::range\nWords without a row.\n:::\n"), r"%s: :::range \(%s\) opens with its :::annotate row" % (at(), at())),
+            (in_04(":::range\n:::annotate\nreview open: x\n:::\n:::\n"), r"%s: :::range \(%s\) covers at least one block after "
+                                                                          r"its row" % (at(), at())),
+            (in_04(ranged("review open: x", "Words {{mark open n: here}}.\n\n" + NOTE)),
+             r"%s: :::note n \(%s\) sits inside :::range \(%s\); a note on words a range holds follows the range"
+             % (at(6), at(6), at())),
+            (in_04(ranged("review open: x", "Words.\n\n### A heading\n\nMore.")),
+             r"%s: :::range \(%s\) holds a heading: .* a range over a heading alone is a UO capability limit for now; raise "
+             r"it with the owner" % (at(6), at())),
+            (in_04(ranged("review open: x", ":::disclose evidence \"E\"\nDetail.\n:::")),
+             r"%s: :::disclose sits inside :::range \(%s\); a range holds its :::annotate row, then the blocks it covers"
+             % (at(4), at())),
+            (in_04(":::callout\nA point.\n\n" + ranged("review open: x", "Words.") + ":::\n"),
+             r":::range is allowed inside :::part, :::question, :::finding, :::disclose only, not :::callout"),
+            (mutate(GUIDED, "Synthetic locator line.\n", "Synthetic locator line.\n\n" + ranged("review open: x", "W.")),
+             r":::range \(line \d+\) is not allowed in part 01, which carries generated chrome"),
+            (mutate(GUIDED, "Synthetic provenance block.\n", "Synthetic provenance block.\n\n" + ranged("review open: x", "W.")),
+             r":::range \(line \d+\) is not allowed in a provenance disclosure"),
+            (in_04(":::range local=x\n:::annotate\nreview open: x\n:::\nW.\n:::\n"), r"%s: :::range takes no local= hook" % at()),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+        # Blocks judged otherwise are a sibling range, 24px apart by the shared rule.
+        self.reset_tmp()
+        h = self.render(in_04(ranged("review proposed: a", "First.") + "\n" + ranged("review accepted: b · owner", "Second.")))["html"]
+        self.assertIn('<p class="doc-body">First.</p>\n</div>\n</div>\n' + RANGE_OPEN, h)
+
+    def test_RS_explicit_target_prompt(self):
+        prompt = ":::annotate\nreview open: for each frame in the range below, may it be printed again? · owner\n:::\n\n"
+        second = ":::annotate\nreview proposed: a second question about the range below · editor\n:::\n\n"
+        h = self.render(in_04(prompt + second + ranged("review proposed: editor, round 2 · the print plan", "The plan.")))["html"]
+        self.assertIn(row(item("review", "open", "Open question", "for each frame in the range below, may it be printed again? · owner"))
+                      + "\n" + row(item("review", "proposed", "Proposed", "a second question about the range below · editor"))
+                      + "\n" + RANGE_OPEN + row(item("review", "proposed", "Proposed", "editor, round 2 · the print plan")), h)
+        cases = [
+            (in_04(prompt + "A paragraph, not a range.\n"), r"%s: a review judgment on whole blocks opens a :::range" % at()),
+            (in_04(prompt + ":::annotate\nbasis: x\n:::\n\n" + ranged("review open: y", "W.")),
+             r"%s: a review judgment on whole blocks opens a :::range" % at()),
+            (in_04(prompt), r"%s: a review judgment on whole blocks opens a :::range" % at()),
+            (in_04(":::annotate\nreview open: q1\nreview proposed: q2\n:::\n\n" + ranged("review open: y", "W.")),
+             r"%s: one judgment per row: a second review item" % at(2)),
+            (in_04(":::annotate\nstate held: s\nreview open: q\n:::\n\n" + ranged("review open: y", "W.")),
+             r"%s: a row holding a review item .* leads with its review item" % at(2)),
+            (in_04(":::annotate\nreview open: q\nevidence supported: e\nstate held: s\n:::\n\n" + ranged("review open: y", "W.")),
+             r"%s: annotation items read in the order review, state, basis, evidence, check; evidence comes after state" % at(3)),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+        # A prompt may open its container: it precedes the range it names.
+        self.reset_tmp()
+        self.render(mutate(GUIDED, ":::part 04\nThe synthetic executive result.\n",
+                           ":::part 04\n" + prompt + ranged("review open: y", "The synthetic executive result.")))
+
+    def test_RS_passage_marks_pending_and_decided(self):
+        h = self.render(annotated())["html"]
+        self.assertIn('The frame keeps %s in each bay, and %s stays.'
+                      % (passage("proposed", "props", "two props or fewer"),
+                         passage("accepted", "bays", 'every <a class="surface-text-link" href="https://example.org/bay">bay</a>')), h)
+        self.assertIn('<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-props">\n%s\n'
+                      '<p class="doc-body">The owner asked for a narrower phrase.</p>\n</div>'
+                      % row(item("review", "proposed", "Correction requested", "on “two props or fewer” · owner, round 2")), h)
+        for role, record in (("accepted", "review accepted: on “here” · owner"), ("declined", "review declined: on “here” · owner"),
+                             ("open", "review open"), ("proposed", "review proposed: a narrower phrase")):
+            with self.subTest(role=role):
+                self.reset_tmp()
+                h = self.render(in_04("Words {{mark %s n: here}}.\n\n:::note n\n:::annotate\n%s\n:::\n:::\n" % (role, record)))["html"]
+                self.assertIn('<p class="doc-body">Words %s.</p>' % passage(role, "n", "here"), h)
+        self.reset_tmp()
+        self.fails(in_04("Words {{mark none n: here}}.\n\n" + NOTE),
+                   r"%s: No decision recorded marks no words: a passage mark names the judgment its words take, proposed, "
+                   r"open, accepted, declined, not 'none'" % at())
+
+    def test_RS_passage_mark_without_a_note_fails(self):
+        self.fails(in_04("Words {{mark accepted n: here}}.\n"),
+                   r"%s: the passage mark naming note 'n' has no :::note n after it in :::part 04" % at())
+        self.reset_tmp()
+        self.fails(in_04(ranged("review open: x", "Words {{mark declined n: here}}.")),
+                   r"%s: the passage mark naming note 'n' has no :::note n after it in :::part 04" % at(4))
+
+    def test_RS_note_follows_the_range_holding_its_mark(self):
+        src = in_04(ranged("review proposed: a · this paragraph", "Words {{mark accepted n: here}}.")
+                    + "\n:::annotate\nbasis: owner-stated\n:::\n\n:::note n\n:::annotate\nreview accepted: on “here” · owner\n:::\n:::\n")
+        h = self.render(src)["html"]
+        self.assertIn('<p class="doc-body">Words %s.</p>\n</div>\n</div>\n%s\n'
+                      '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">'
+                      % (passage("accepted", "n", "here"), row(key_item("Basis", "owner-stated"))), h)
+        # A block or another range before the note separates it from its mark.
+        for between in ("Another block.\n\n", ranged("review open: b", "Second.") + "\n"):
+            with self.subTest(between=between[:12]):
+                self.reset_tmp()
+                self.fails(in_04(ranged("review proposed: a", "Words {{mark accepted n: here}}.") + "\n" + between + NOTE),
+                           r"%s: the passage mark naming note 'n' is followed by another block or container before its note"
+                           % at(4))
+
+    def test_RS_a_mark_in_any_block_a_range_covers_has_its_note_after_the_range(self):
+        # The range's later blocks follow a mark in an earlier one; its note waits for the whole range, then follows
+        # it, and the final HTML passes the allowlist.
+        h = self.render(in_04(ranged("review open: a · these paragraphs", "Words {{mark open n: here}}.\n\nSecond.")
+                              + "\n" + NOTE))["html"]
+        self.assertIn('%s%s\n<div class="doc-prose">\n<p class="doc-body">Words %s.</p>\n<p class="doc-body">Second.</p>\n'
+                      '</div>\n</div>\n<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">'
+                      % (RANGE_OPEN, row(item("review", "open", "Open question", "a · these paragraphs")),
+                         passage("open", "n", "here")), h)
+        build.check_final_html(h, 2)
+        # Marks in a paragraph and a list item, then a callout, a structure and a whole table the range covers;
+        # each mark's note follows the range, in either order.
+        note_m = NOTE.replace(":::note n", ":::note m")
+        blocks = ("Words {{mark open n: here}}.\n\n- an item with {{mark open m: there}}\n- another item\n\n"
+                  ":::callout\nA point.\n:::\n\n:::structure\nA line\n  beneath it\n:::\n\n"
+                  + CELL % "y" + "\nA closing paragraph.")
+        for notes in (NOTE + "\n" + note_m, note_m + "\n" + NOTE):
+            with self.subTest(first=notes[:10]):
+                self.reset_tmp()
+                r = self.render(in_04(ranged("review open: a", blocks) + "\n" + notes))
+                h = r["html"]
+                self.assertEqual((r["counts"]["passage_marks"], r["counts"]["annotation_notes"]), (2, 2))
+                end = h.index("A closing paragraph.</p>\n</div>\n</div>\n")
+                for mark in (passage("open", "n", "here"), passage("open", "m", "there")):
+                    self.assertLess(h.index(RANGE_OPEN), h.index(mark))
+                    self.assertLess(h.index(mark), end)
+                for note in ("uo-note-n", "uo-note-m"):
+                    self.assertGreater(h.index('id="%s"' % note), end)
+                build.check_final_html(h, 2)
+        # A synthesis is a block the range covers too: a mark in an earlier block has its note after the range, which
+        # the synthesis's finality admits.
+        self.reset_tmp()
+        h = self.render(mutate(GUIDED, "The synthetic executive result.\n", "The synthetic executive result.\n\n"
+                               + ranged("review open: a", "Words {{mark open n: here}}.\n\n:::synthesis\nWhat the part "
+                                        "comes to.\n:::\n") + "\n" + NOTE))["html"]
+        self.assertLess(h.index('data-uo-role="synthesis"'), h.index('id="uo-note-n"'))
+        build.check_final_html(h, 2)
+
+    def test_RS_a_ranges_note_still_follows_the_whole_range(self):
+        # The range lets its own blocks follow a mark, and nothing else: a block or another range after the range
+        # still separates the note from its mark, outside a range a block still does, and inside one a note, a
+        # nested range or a heading still fails.
+        two = ranged("review open: a", "Words {{mark open n: here}}.\n\nSecond.")
+        for between in ("Another block.\n\n", ranged("review open: b", "Third.") + "\n"):
+            with self.subTest(between=between[:12]):
+                self.reset_tmp()
+                self.fails(in_04(two + "\n" + between + NOTE),
+                           r"%s: the passage mark naming note 'n' is followed by another block or container before its note"
+                           % at(4))
+        self.reset_tmp()
+        self.fails(in_04("Words {{mark open n: here}}.\n\nSecond.\n\n" + NOTE),
+                   r"%s: the passage mark naming note 'n' is followed by another block or container before its note" % at())
+        inside = [
+            ("Words {{mark open n: here}}.\n\n" + NOTE, r"%s: :::note n \(%s\) sits inside :::range \(%s\); a note on words "
+                                                         r"a range holds follows the range" % (at(6), at(6), at())),
+            ("Words {{mark open n: here}}.\n\n" + ranged("review open: b", "Third."),
+             r"%s: :::range sits inside :::range \(%s\); ranges never nest" % (at(6), at())),
+            ("Words {{mark open n: here}}.\n\n### A heading\n\nUnder it.",
+             r"%s: :::range \(%s\) holds a heading" % (at(6), at())),
+        ]
+        for blocks, pattern in inside:
+            with self.subTest(pattern=pattern[10:40]):
+                self.reset_tmp()
+                self.fails(in_04(ranged("review open: a", blocks) + "\n" + NOTE), pattern)
+        # A note still records the words of one block: marks naming one note in two blocks of a range fail at the
+        # later mark, while two marks in one block name one note.
+        for second in ("B {{mark open n: y}}.", "- an item with {{mark open n: y}}\n- another item"):
+            with self.subTest(second=second[:6]):
+                self.reset_tmp()
+                self.fails(in_04(ranged("review open: a", "A {{mark open n: x}}.\n\n" + second) + "\n" + NOTE),
+                           r"%s: passage marks in two blocks name note 'n'; a note records the words of one block, as it "
+                           r"does those of one list item" % at(6))
+        self.reset_tmp()
+        r = self.render(in_04(ranged("review open: a", "A {{mark open n: x}} and {{mark open n: y}}.\n\nB.") + "\n" + NOTE))
+        self.assertEqual((r["counts"]["passage_marks"], r["counts"]["annotation_notes"]), (2, 1))
+
+    def test_RS_note_attaches_inside_a_plain_list_item(self):
+        h = self.render(annotated())["html"]
+        note = ('<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-month">\n%s\n</div>'
+                % row(item("review", "open", "Open question", "on “before the end of each month” · awaiting the owner")))
+        self.assertIn('<li class="doc-body">Proofs reach the studio %s, as <a class="surface-text-link" '
+                      'href="https://example.org/plan">the plan</a> says.\n%s</li>'
+                      % (passage("open", "month", "before the end of each month"), note), h)
+        self.assertEqual(h.count('id="uo-note-month"'), 1)
+        # A loose item takes the note after its paragraphs; a tight item with a nested list, before that list; a second
+        # note on one item follows the first.
+        cases = [
+            ("- First item.\n\n- Second {{mark open n: here}}.\n\n    More of the item.\n",
+             '<li class="doc-body">\n<p class="doc-body">Second %s.</p>\n<p class="doc-body">More of the item.</p>\n'
+             '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">' % passage("open", "n", "here")),
+            ("- Top {{mark open n: here}}.\n    - nested\n",
+             '<li class="doc-body">Top %s.\n<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">\n%s\n</div>'
+             '\n<ul>\n<li class="doc-body">nested</li>' % (passage("open", "n", "here"), row(item("review", "open", "Open question")))),
+            ("- Nested parent\n    - inner {{mark open n: here}}.\n",
+             '<li class="doc-body">inner %s.\n<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">'
+             % passage("open", "n", "here")),
+        ]
+        for text, want in cases:
+            with self.subTest(text=text[:20]):
+                self.reset_tmp()
+                self.assertIn(want, self.render(in_04(text + "\n" + NOTE))["html"])
+        self.reset_tmp()
+        h = self.render(in_04("- One {{mark open n: a}} and {{mark open m: b}}.\n\n" + NOTE
+                              + "\n:::note m\n:::annotate\nreview open\n:::\n:::\n"))["html"]
+        self.assertLess(h.index('id="uo-note-n"'), h.index('id="uo-note-m"'))
+        self.assertLess(h.index('id="uo-note-m"'), h.index("</li>", h.index('id="uo-note-n"')))
+        # Words in an item host keep their note after the list.
+        self.reset_tmp()
+        h = self.render(in_04("- {{review open: x · this item}} Words {{mark accepted n: here}}.\n\n"
+                              ":::note n\n:::annotate\nreview accepted: on “here” · owner\n:::\n:::\n"))["html"]
+        self.assertIn('</p></li>\n</ul>\n</div>\n<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">', h)
+
+    def test_RS_item_host(self):
+        h = self.render(annotated())["html"]
+        self.assertIn('<ul>\n<li class="doc-annotation-range surface-labeled-range">%s<p class="doc-body">Each frame is printed '
+                      'once.</p></li>\n<li class="doc-body">Proofs reach' % row(
+                          item("review", "accepted", "Accepted", "owner, round 1 · this item"), key_item("Basis", "owner-stated")), h)
+        self.assertIn('<li class="doc-annotation-range surface-labeled-range">%s<p class="doc-body">Glossy stock is used.</p></li>'
+                      % row(item("review", "declined", "Declined", "owner, round 2 · this item")), h)
+        # A loose item keeps its further paragraphs after its words; consecutive hosts are allowed.
+        self.reset_tmp()
+        h = self.render(in_04("- {{review open: a · this item}} First.\n\n    Its second paragraph.\n\n"
+                              "- {{review proposed: b · this item}} Second.\n"))["html"]
+        self.assertIn('<li class="doc-annotation-range surface-labeled-range">%s<p class="doc-body">First.</p>\n'
+                      '<p class="doc-body">Its second paragraph.</p>\n</li>' % row(item("review", "open", "Open question",
+                                                                                      "a · this item")), h)
+        self.assertEqual(h.count('<li class="doc-annotation-range surface-labeled-range">'), 2)
+        cases = [
+            (in_04(ranged("review open: x", "- {{review accepted: y}} Words.")),
+             r"%s: an item host never sits inside a :::range" % at(4)),
+            (in_04("Words {{mark open n: x}}.\n\n:::note n\n:::annotate\nreview open\n:::\n- {{review open: y}} In a note.\n:::\n"),
+             r"%s: an annotation item \{\{review \.\.\.\}\} sits in a :::table body cell, or opens a list item in body text "
+             r"as an item host; not in :::note n" % at(6)),
+            (in_04(":::quote\n- {{review open: y}} Quoted.\n:::\n"), r"not in :::quote"),
+            (in_04(":::callout\n- {{review open: y}} Called out.\n:::\n"), r"not in :::callout"),
+            (in_04("- Parent\n    - {{review open: y}} Nested.\n"), r"%s: an item host is an item of a top-level list, never of "
+                                                                     r"a nested list" % at(1)),
+            (in_04("- Words first {{review open: y}}.\n"), r"%s: an item host's row opens its list item: its items come first, "
+                                                          r"before any of the item's words" % at()),
+            (in_04("- {{review open: a}}{{review accepted: b}} Words.\n"),
+             r"%s: an item host carries one review judgment; a second judgment on one whole list item is raised with the "
+             r"owner" % at()),
+            (in_04("- {{basis: owner}} Words.\n"), r"%s: an item host's row leads with its review item" % at()),
+            (in_04("- {{review open: a}}{{evidence supported: e}}{{basis: b}} Words.\n"),
+             r"%s: an item host's items read in the order review, state, basis, evidence, check; evidence comes after basis"
+             % at()),
+            (in_04("- {{review open: a}}\n"), r"%s: an item host's words follow its row" % at()),
+            (in_04("- **{{review open: a}}** Words.\n"), r"%s: an item host's row opens its list item" % at()),
+            (in_04("Words {{review open: x}}.\n"), r"%s: an annotation item \{\{review \.\.\.\}\} sits in a :::table body cell, "
+                                                  r"or opens a list item as an item host" % at()),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_annotation_list_names_its_item(self):
+        h = self.render(annotated())["html"]
+        self.assertIn('<dl class="doc-annotation-list">\n'
+                      '<dt class="doc-label">Item</dt>\n<dd><span class="doc-meta">the method component, version 0.3</span></dd>\n'
+                      '<dt class="doc-label">State</dt>\n<dd>%s</dd>\n'
+                      '<dt class="doc-label">Basis</dt>\n<dd><span class="doc-meta">analyst synthesis</span></dd>\n'
+                      '<dt class="doc-label">Evidence</dt>\n<dd>%s</dd>\n'
+                      '<dt class="doc-label">Review</dt>\n<dd>%s</dd>\n'
+                      '<dt class="doc-label">Check</dt>\n<dd><span class="doc-meta">link check passed</span></dd>\n</dl>'
+                      % ('<span class="doc-mark doc-label" data-state="structural">Structural</span><span class="doc-meta">schema-proven</span>',
+                         '<span class="doc-mark doc-label" data-evidence="partially-supported">Partially supported</span>'
+                         '<span class="doc-meta">tested in 2 of 5 cases</span>',
+                         '<span class="%s" data-review="accepted">Accepted</span>'
+                         '<span class="doc-meta">version 0.3 · reviewer, round 2 · bounded trial</span>' % build.REVIEW_MARK), h)
+        self.assertIn('<div class="doc-group doc-annotation-note" data-evidence="not-yet-testable">\n%s\n'
+                      '<p class="doc-body">Readings cannot exist yet.</p>\n</div>'
+                      % row(item("evidence", "not-yet-testable", "Not yet testable", "no readings until next season")), h)
+        cases = [
+            (in_04(":::annotate list\nevidence supported: e\nreview accepted: v1 · owner\n:::\n"),
+             r"%s: an :::annotate list with a review line names the item it judges first, in an `item: <name>` line" % at()),
+            (in_04(":::annotate list\nevidence supported: e\nitem: x\n:::\n"),
+             r"%s: an annotation list names its item first, in one `item:` line" % at(2)),
+            (in_04(":::annotate\nitem: x\nbasis: b\n:::\n"), r"%s: an `item:` line names the item an :::annotate list judges; "
+                                                             r"a row takes none" % at(1)),
+            (in_04(":::annotate list\nitem:  \nbasis: b\n:::\n"), r"%s: the item line's text after ':' must contain visible text"
+                                                                  % at(1)),
+            (in_04(":::annotate list\nitem: x\n:::\n"), r"%s: :::annotate list \(%s\) is empty; it holds at least one item line "
+                                                        r"after its `item:` line" % (at(), at())),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+        # Without a review line the Item line is optional.
+        self.reset_tmp()
+        self.assertNotIn('<dt class="doc-label">Item</dt>', self.render(in_04(":::annotate list\nbasis: b\ncheck: c\n:::\n"))["html"])
+
+    def test_RS_document_record(self):
+        record = ":::annotate document\nbasis: synthetic fixture\nreview open: on SYN-GR-001 as a whole · the reviewer decides\n:::\n\n"
+        src = mutate(GUIDED, ":::part 01\n", record + ":::part 01\n")
+        r = self.render(src)
+        self.assertIn('<h1 class="doc-title">Synthetic guided review</h1>\n%s\n<dl class="uo-head__meta">' % row(
+            key_item("Basis", "synthetic fixture"),
+            item("review", "open", "Open question", "on SYN-GR-001 as a whole · the reviewer decides")), r["html"])
+        self.assertEqual(r["counts"]["document_records"], 1)
+        self.assertEqual(r["inlined"], build.MODULES + build.STATE_MODULES)
+        self.assertIn("| document record (:::annotate document) | `1` |", r["manifest_text"])
+        build.check_final_html(r["html"], 2)
+        cases = [
+            (mutate(GUIDED, ":::part 02\n", record + ":::part 02\n"), r"line \d+: :::annotate document comes before the first :::part"),
+            (mutate(GUIDED, ":::part 01\n", record + record + ":::part 01\n"), r"line \d+: a document carries one :::annotate "
+                                                                             r"document record"),
+            (in_04(":::annotate document\nbasis: x\n:::\n"), r"%s: :::annotate document is the document's own record: it sits at "
+                                                            r"top level" % at()),
+            (mutate(GUIDED, ":::part 01\n", ":::annotate document\nreview open: a\nreview none: b\nbasis: c\n:::\n\n:::part 01\n"),
+             r"line \d+: annotation items read in the order state, basis, evidence, review, check; review comes after basis"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_tables(self):
+        h = self.render(annotated())["html"]
+        self.assertIn('<td class="doc-table-cell" data-uo-cell="status" data-uo-label="Decision"><span class="uo-cell-label doc-label">'
+                      'Decision</span><span class="doc-annotations">%s</span></td>'
+                      % item("review", "declined", "Declined", "reviewer, round 1 · replaced by P-2"), h)
+        self.assertIn('<span class="uo-cell-label doc-label">Decision</span><span class="doc-annotations">%s%s</span></td>'
+                      % (key_item("Basis", "owner-stated"), item("review", "accepted", "Accepted", "reviewer, round 1")), h)
+        # A whole-table range, its cells carrying no judgment of their own.
+        self.assertIn(RANGE_OPEN + row(item("review", "open", "Open question", "the reprint plan below · whether each frame is "
+                                            "reprinted · owner")) + '\n<div class="doc-prose">\n<table>\n', h)
+        self.assertNotIn("doc-table-scroll", h.split("<body>")[1])
+        cases = [
+            (in_04(ranged("review proposed: the plan", CELL.rstrip("\n") % "{{review accepted: v1 · owner}}")),
+             r"line %d: a :::table whose cells carry review items cannot sit in a :::range" % (AT + 4)),
+            (in_04(":::table text text\n| A | B |\n|---|---|\n:::range\n:::annotate\nreview open: x\n:::\n| x | y |\n:::\n:::\n"),
+             r"%s: :::range inside :::table \(%s\): a per-cell block range is a UO capability limit: .* raise it with the owner"
+             % (at(3), at())),
+            (in_04(CELL % "{{range open: x}}"), r"%s: a per-cell block range is a UO capability limit" % at(3)),
+            (in_04("Words {{range open: x}}.\n"), r"%s: `\{\{range` is not an annotation: a judgment on whole blocks opens a "
+                                                  r":::range container" % at()),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_every_vocabulary_word_takes_its_role_and_label(self):
+        marks = ["state %s" % w for w in build.STATE_WORDS] + ["evidence %s" % w for w in build.EVIDENCE_WORDS]
+        table = ":::table text status\n| Claim | Decision |\n|---|---|\n%s\n:::\n" % "\n".join(
+            "| c%d | {{review %s: x}} |" % (i, w) for i, w in enumerate(build.REVIEW_WORDS))
+        h = self.render(in_04(":::annotate\n%s\n:::\n\nA second block.\n\n%s" % ("\n".join(marks), table)))["html"]
+        for w, label in build.STATE_WORDS.items():
+            self.assertIn(item("state", w, label), h)
+        for w, label in build.EVIDENCE_WORDS.items():
+            self.assertIn(item("evidence", w, label), h)
+        for w, (role, label) in build.REVIEW_WORDS.items():
+            self.assertIn(item("review", role, label, "x"), h)
+        # the owner's checker vocabulary (role-conformance.js C12) is the renderer's
+        self.assertEqual(build.FACET_VALUES, {"data-review": ("accepted", "declined", "none", "open", "proposed"),
+                                              "data-evidence": ("supported", "partially-supported", "unresolved",
+                                                                "weakened", "not-yet-testable"),
+                                              "data-state": ("earned", "structural", "partial", "deflated", "held",
+                                                             "external", "proposed", "neutral")})
+        self.assertEqual(build.PASSAGE_ROLES, ("proposed", "open", "accepted", "declined"))
+
+    def test_RS_meta_is_plain_text_and_escaped(self):
+        h = self.render(in_04(":::annotate\nbasis: a <b> & *c* `d`\n:::\n"))["html"]
+        self.assertIn(key_item("Basis", "a &lt;b&gt; &amp; *c* `d`"), h)
+
+    def test_RS_annotations_in_question_finding_and_disclosure(self):
+        # A question and a finding take ranges, rows, lists, passage marks and notes (prompts:
+        # test_RS_prompts_in_a_question_a_finding_and_a_disclosure).
+        src = mutate(GUIDED, "The central question prompt.\n",
+                     ":::range\n:::annotate\nreview open: awaiting the reviewer · this question\n:::\nThe central question prompt.\n:::\n")
+        src = mutate(src, "**Status:** open. Finding, significance and limit.\n",
+                     "**Status:** open. Finding, {{mark open lst: significance}} and limit.\n\n:::annotate list\n"
+                     "evidence unresolved: two readings disagree\n:::\n\n:::note lst\n:::annotate\nreview open: whose reading\n:::\n:::\n")
+        r = self.render(src)
+        self.assertIn('<div data-uo-role="question" data-uo-central="true" class="doc-section">\n' + RANGE_OPEN, r["html"])
+        self.assertEqual({k: r["counts"][k] for k in build.ANNOTATION_COUNTS},
+                         {"annotation_rows": 2, "annotation_lists": 1, "annotation_notes": 1, "passage_marks": 1,
+                          "cell_items": 0, "annotation_ranges": 1, "item_hosts": 0, "document_records": 0})
+
+    def test_RS_annotations_inside_an_authored_disclosure(self):
+        # A question-detail or evidence disclosure takes what its container takes: ranges, rows, lists,
+        # notes, passage marks, item hosts and cell items. A passage mark and its note sit in one disclosure.
+        src = mutate(GUIDED, "Field-level listing.\n",
+                     "Field-level listing.\n\n:::annotate\nstate held: until the second pass\nbasis: survey sheet\n"
+                     "evidence supported: two sheets agree\n:::\n\n"
+                     + ranged("review open: whose total · the second listing · owner", "A second listing, {{mark open lst: one "
+                              "reading}} in question.")
+                     + "\n:::note lst\n:::annotate\nreview open: which sheet\n:::\nOn “one reading”: which sheet holds it?\n:::\n\n"
+                     ":::note not-yet-testable\n:::annotate\nevidence not-yet-testable: no readings until next season\n:::\n:::\n\n"
+                     "- {{review accepted: v2 · owner · this line}} A disclosed line.\n\n"
+                     + CELL % "{{review accepted: v2 · owner · this listing}}")
+        src = mutate(src, "The non-central question's detail.\n",
+                     "The non-central question's detail, {{mark proposed qd: as worded}}.\n\n:::annotate list\n"
+                     "state external: the archive\nevidence unresolved: two readings\n:::\n\n"
+                     ":::note qd\n:::annotate\nreview correction-requested: owner, round 2\n:::\n:::\n")
+        r = self.render(src)
+        h = r["html"]
+        self.assertEqual({k: r["counts"][k] for k in build.ANNOTATION_COUNTS},
+                         {"annotation_rows": 5, "annotation_lists": 1, "annotation_notes": 3, "passage_marks": 2,
+                          "cell_items": 1, "annotation_ranges": 1, "item_hosts": 1, "document_records": 0})
+        evidence = h[h.index('<details data-uo-disclose="evidence"'):]
+        evidence = evidence[:evidence.index("</details>")]
+        for piece in (item("state", "held", "Held", "until the second pass"), RANGE_OPEN,
+                      passage("open", "lst", "one reading"), '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-lst">',
+                      '<div class="doc-group doc-annotation-note" data-evidence="not-yet-testable">',
+                      '<li class="doc-annotation-range surface-labeled-range">',
+                      item("review", "accepted", "Accepted", "v2 · owner · this listing")):
+            self.assertIn(piece, evidence)
+        detail = h[h.index('<details data-uo-disclose="question-detail"'):]
+        detail = detail[:detail.index("</details>")]
+        for piece in (passage("proposed", "qd", "as worded"), '<dl class="doc-annotation-list">',
+                      '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-qd">',
+                      item("review", "proposed", "Correction requested", "owner, round 2")):
+            self.assertIn(piece, detail)
+        build.check_final_html(h, 2)
+        # A mark and its record stay in one scope, and the provenance disclosure takes no annotation.
+        out = mutate(GUIDED, "Field-level listing.\n:::\n",
+                     "Field-level listing, {{mark open n: here}}.\n:::\n\n" + NOTE)
+        into = mutate(mutate(GUIDED, "**Status:** open. Finding, significance and limit.\n",
+                             "**Status:** open. Finding, {{mark open n: significance}} and limit.\n"),
+                      "Field-level listing.\n", "Field-level listing.\n\n" + NOTE)
+        provenance = [mutate(GUIDED, "Synthetic provenance block.\n", "Synthetic provenance block.\n\n" + extra) for extra in (
+            ":::note not-yet-testable\n:::annotate\nevidence not-yet-testable: y\n:::\n:::\n",
+            ranged("review open: x", "W."), ":::annotate\nbasis: x\n:::\n")]
+        cases = [
+            (out, r"line %d: the passage mark naming note 'n' has no :::note n after it in :::disclose evidence"
+                  % row_of(out, "{{mark")),
+            (into, r"line %d: :::note n \(line %d\) follows no passage mark naming it in :::disclose evidence"
+                   % (row_of(into, ":::note n"), row_of(into, ":::note n"))),
+        ] + [(src, r"line %d: :::(note not-yet-testable|range|annotate) \(line %d\) is not allowed in a provenance disclosure"
+              % (row_of(src, "Synthetic provenance block.") + 2, row_of(src, "Synthetic provenance block.") + 2))
+             for src in provenance]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_code_spans_keep_braces_literal(self):
+        h = self.render(in_04("Write `{{mark open x: y}}` and\n\n```\n{{ fenced }}\n```\n\n:::structure\n{{ structured }}\n:::\n"))["html"]
+        self.assertIn('<code class="doc-code">{{mark open x: y}}</code>', h)
+        self.assertIn("{{ fenced }}", h)
+        self.assertIn('<pre class="doc-pre-part">{{ structured }}</pre>', h)
+        self.assertNotIn("doc-passage-mark", h)
+
+    def test_RS_review_semantics_modules_inline_only_when_a_document_annotates(self):
+        modules = {}
+        for rel in build.MODULES + build.STATE_MODULES:
+            with open(os.path.join(HERE, "_dsa-surface", rel), encoding="utf-8") as f:
+                modules[rel] = f.read()
+        plain = self.render(GUIDED, name="plain")
+        head = plain["html"].split("</head>")[0]
+        for rel in build.STATE_MODULES:
+            self.assertNotIn(modules[rel], head)
+            self.assertNotIn("SEALED design-system-ASK %s" % rel, head)
+        self.assertEqual(plain["inlined"], build.MODULES)
+        self.assertIn("| modules inlined, in order | `%s` |" % " ".join(build.MODULES), plain["manifest_text"])
+        rich = self.render(annotated(), name="rich")
+        head = rich["html"].split("</head>")[0]
+        at_ = head.index("--tracking-caption")          # inside the token CSS
+        for rel in build.MODULES + build.STATE_MODULES:
+            i = head.find(modules[rel])
+            self.assertGreater(i, at_, rel)
+            self.assertEqual(head.count(modules[rel]), 1, rel)
+            at_ = i
+        self.assertLess(at_, head.index("urban-observatory // review-document overlay"))
+        self.assertEqual(rich["inlined"], build.MODULES + build.STATE_MODULES)
+        self.assertIn("| modules inlined, in order | `%s` |" % " ".join(build.MODULES + build.STATE_MODULES),
+                      rich["manifest_text"])
+        for field, n in (("annotation rows (:::annotate)", 8), ("annotation lists (:::annotate list)", 1),
+                         ("annotation notes (:::note)", 4), ("passage marks", 3), ("annotation items in table cells", 5),
+                         ("annotation ranges (:::range)", 2), ("item hosts (whole list items)", 2),
+                         ("document record (:::annotate document)", 0)):
+            self.assertIn("| %s | `%d` |" % (field, n), rich["manifest_text"])
+        self.assertEqual(build.role_profiles(rich["counts"]), build.role_profiles(plain["counts"]))
+        # A range, an item host or a document record alone inlines the modules.
+        for name, src in (("range", in_04(ranged("review open: x", "W."))), ("host", in_04("- {{review open: x}} W.\n")),
+                          ("record", mutate(GUIDED, ":::part 01\n", ":::annotate document\nbasis: b\n:::\n\n:::part 01\n"))):
+            with self.subTest(name=name):
+                self.assertEqual(self.render(src, name=name)["inlined"], build.MODULES + build.STATE_MODULES)
+
+    def test_RS_cell_items_alone_inline_the_modules(self):
+        r = self.render(with_table(table=":::table text status\n| Claim | Decision |\n|---|---|\n| a | {{review open: round 2}} |\n:::\n"))
+        self.assertEqual(r["inlined"], build.MODULES + build.STATE_MODULES)
+
+    def test_RS_output_passes_the_allowlist(self):
+        h = self.render(annotated())["html"]
+        build.check_final_html(h, 2)
+
+    def test_RS_source_refusals(self):
+        row_ = ":::annotate\n%s\n:::\n"
+        cases = [
+            (in_04(row_ % "evidence supported: x\nbasis: y"), at(2) + r": annotation items read in the order state, basis, "
+                                                                r"evidence, review, check; evidence comes after basis"),
+            (in_04(row_ % "status open"), at(1) + r": 'status open' is not an annotation item"),
+            (in_04(row_ % "review maybe: x"), at(1) + r": review 'maybe' is outside the closed set"),
+            (in_04(row_ % "evidence proven"), at(1) + r": evidence 'proven' is outside the closed set"),
+            (in_04(row_ % "state done"), at(1) + r": state 'done' is outside the closed set"),
+            (in_04(row_ % "review accepted"), at(1) + r": review accepted shows a decision and needs its record"),
+            (in_04(row_ % "review declined"), at(1) + r": review declined shows a decision"),
+            (in_04(row_ % "review correction-requested"), at(1) + r": review correction-requested names a request to change "
+                                                                r"existing words and needs its record after ':' \(on what, who asked\)"),
+            (in_04(row_ % "basis:"), at(1) + r": the basis item's text after ':' must contain visible text"),
+            (in_04(row_ % "check owner: x"), at(1) + r": a check item is 'check: <value>'"),
+            (in_04(row_ % "basis"), at(1) + r": a basis item is 'basis: <value>'"),
+            (in_04(row_ % "basis: a {{b}}"), at(1) + r": an annotation item is plain text and holds no `\{\{`"),
+            (in_04(":::annotate\n\n:::\n"), at() + r": :::annotate \(%s\) is empty" % at()),
+            (in_04(":::annotate foo\nbasis: x\n:::\n"), at() + r": :::annotate takes no token but an optional 'list' or 'document'"),
+            (in_04(":::annotate local=x\nbasis: x\n:::\n"), at() + r": :::annotate takes no local= hook"),
+            (in_04(":::range foo\n"), at() + r": unknown token 'foo' on :::range"),
+            (in_04(":::note Bad\n"), at() + r": invalid note name 'Bad'"),
+            (in_04(":::note x local=y\n"), at() + r": :::note takes no local= hook"),
+            (in_04(":::annotate\n```\nbasis: x\n:::\n"), at(1) + r": '```' is not an annotation item"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_placement_refusals(self):
+        basis = ":::annotate\nbasis: x\n:::\n"
+        cases = [
+            (mutate(GUIDED, ":::part 04\nThe synthetic executive result.\n", ":::part 04\n" + basis + "The synthetic executive result.\n"),
+             r"%s: :::annotate \(%s\) is the first child of :::part 04 \(%s\); a row or list without a review item follows "
+             r"the heading or block it qualifies" % (at(-2), at(-2), at(-3))),
+            (in_04(basis + "\n" + basis), r"%s: :::annotate \(%s\) follows :::annotate \(%s\)" % (at(4), at(4), at())),
+            (in_04(":::annotate list\nbasis: x\n:::\n" + basis), r"%s: :::annotate \(%s\) follows :::annotate list \(%s\)"
+                                                               % (at(3), at(3), at())),
+            (in_04("W {{mark open n: x}}.\n\n" + NOTE + basis), r":::annotate \(line \d+\) follows :::note n \(%s\)" % at(2)),
+            (mutate(GUIDED, "Synthetic locator line.\n", "Synthetic locator line.\n" + basis),
+             r"line 1\d: :::annotate \(line 1\d\) is not allowed in part 01, which carries generated chrome"),
+            (mutate(GUIDED, "Synthetic provenance block.\n", "Synthetic provenance block.\n" + basis),
+             r":::annotate \(line \d+\) is not allowed in a provenance disclosure"),
+            (mutate(GUIDED, ":::part 10\n", ":::part 10\nSeal text.\n\n" + basis), r"is not allowed in part 10"),
+            (in_04(":::callout\nA point.\n\n" + basis + ":::\n"), r":::annotate is allowed inside :::part, :::question, :::finding, "
+                                                                r":::disclose, :::note, :::range only, not :::callout"),
+            (in_04(":::quote\nWords.\n\n" + basis + ":::\n"), r"not :::quote"),
+            (in_04(":::framing thesis\nA frame.\n\n" + basis + ":::\n"), r"not :::framing"),
+            (mutate(GUIDED, "Synthetic locator line.\n", ":::banner review-status\nStatus.\n\n" + basis + ":::\n"),
+             r"sits inside :::banner review-status \(line \d+\); a banner holds Markdown only"),
+            (in_04("Words {{mark open n: here}}.\n\n:::note n\n:::annotate list\nreview open\n:::\n:::\n"),
+             r"a :::note holds an annotation row, not a list"),
+            (in_04("Words {{mark open n: here}}.\n\n:::note n\nText first.\n\n:::annotate\nreview open\n:::\n:::\n"),
+             r"a :::note holds one :::annotate row, as its first child"),
+            (in_04("Words {{mark open n: here}}.\n\n:::note n\n:::annotate\nreview open\n:::\n" + NOTE + ":::\n"),
+             r":::note is allowed inside :::part, :::question, :::finding, :::disclose only, not :::note n"),
+            (in_04("Words {{mark open n: here}}.\n\n:::note n\nOnly text.\n:::\n"), r":::note n \(%s\) holds an :::annotate row first" % at(2)),
+            (in_04("Words.\n\n:::note not-yet-testable\n:::annotate\nevidence unresolved: x\n:::\n:::\n"),
+             r"a :::note not-yet-testable row carries an 'evidence not-yet-testable' item"),
+            (in_04("Words {{mark open n: here}}.\n\n:::note n\n:::annotate\nreview open\n:::\n### A heading\n:::\n"),
+             r":::note n \(%s\) holds a heading" % at(2)),
+            (in_04("Words.\n\n" + NOTE), r"%s: :::note n \(%s\) follows no passage mark naming it in :::part 04" % (at(2), at(2))),
+            (in_04("Words {{mark open n: here}}.\n\n### Next\n\nMore.\n\n" + NOTE),
+             at() + r": the passage mark naming note 'n' has no note before the next heading"),
+            (in_04("Words {{mark open n: here}}.\n\n" + NOTE + "\nAgain {{mark open n: there}}.\n"),
+             r"the passage mark naming note 'n' has no :::note n after it"),
+            (mutate(in_04("Words {{mark open n: here}}.\n\n" + NOTE), "The whole synthetic register.\n",
+                    "The whole synthetic register {{mark open n: again}}.\n\n" + NOTE),
+             r"line \d+: note name 'n' is already used at %s" % at(2)),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_inline_refusals(self):
+        note = "\n" + NOTE
+        cases = [
+            (in_04("Open {{mark open n: words\n"), at() + r": `\{\{` opens no annotation"),
+            (in_04("A {{foo}} here.\n"), at() + r": `\{\{foo` is not an annotation"),
+            (in_04("A \\{{mark open n: x}} here.\n"), at() + r": `\{\{` outside a code span that is not an annotation"),
+            (in_04("[x](https://example.org/{{b}})\n"), at() + r": `\{\{` outside a code span that is not an annotation"),
+            (in_04("A {{mark open n: `code`}}.\n" + note), at() + r": a passage mark's words are plain text and may hold a "
+                                                                r"link written \[text\]\(url\): no code span, escape or other "
+                                                                r"construct inside `\{\{mark \.\.\.\}\}`"),
+            (in_04("A {{mark maybe n: words}}.\n" + note), at() + r": a passage mark names the judgment its words take, "
+                                                                r"proposed, open, accepted, declined, not 'maybe'"),
+            (in_04("A {{mark open not-yet-testable: words}}.\n"), r"the not-yet-testable evidence note takes no passage mark"),
+            (in_04("A {{mark open n:  }}.\n" + note), r"a passage mark's words after ':' must contain visible text"),
+            (in_04("A {{mark open n: [](https://example.org/)}}.\n" + note), r"a passage mark's words after ':' must contain "
+                                                                           r"visible text"),
+            (in_04("A {{mark open N: x}}.\n"), r"invalid note name 'N' in a passage mark"),
+            (in_04("### Heading {{mark open n: x}}\n" + note), at() + r": a passage mark sits in a paragraph or list item, not inside <h3>"),
+            (in_04("> Quoted {{mark open n: x}}\n" + note), r"not inside <blockquote>"),
+            (in_04("[A {{mark open n: x}}](https://example.org/a)\n" + note), r"not inside <a>"),
+            (in_04(":::quote\nQuoted {{mark open n: x}}.\n:::\n" + note), r"a passage mark sits in body text directly inside a part "
+                                                                            r"02 to 09, .* not in :::quote \(%s\)" % at()),
+            (in_04(":::callout\nA {{mark open n: x}}.\n:::\n" + note), r"not in :::callout"),
+            (in_04(":::framing thesis\nA {{mark open n: x}}.\n:::\n" + note), r"not in :::framing"),
+            (in_04("Words {{mark open n: x}}.\n\n:::note n\n:::annotate\nreview open\n:::\nIn the note {{mark open m: y}}.\n:::\n"),
+             r"not in :::note n"),
+            (mutate(GUIDED, "Synthetic locator line.\n", "Synthetic {{mark open n: locator}} line.\n"), r"not in :::part 01"),
+            (in_04(":::table text text\n| A | B |\n|---|---|\n| {{mark open n: x}} | y |\n:::\n" + note), r"not in a :::table"),
+            (in_04(":::table text text\n| A {{review open}} | B |\n|---|---|\n| x | y |\n:::\n"),
+             at(1) + r": an annotation item sits in a body cell, never in a header"),
+            (in_04(":::table key text\n| A | B |\n|---|---|\n| {{review open}} | y |\n:::\n"),
+             at(3) + r": column 1 is a key column; annotation items sit in a text or status column"),
+            (in_04(":::table text num\n| A | B |\n|---|---|\n| x | {{review open}} |\n:::\n"), r"column 2 is a num column"),
+            (in_04(":::table text text\n| A | B |\n|---|---|\n| x | y {{review open}} |\n:::\n"),
+             at(3) + r": a cell holding annotation items holds them only \(column 2\)"),
+            (in_04(":::table text text\n| A | B |\n|---|---|\n| x | **{{review open}}** |\n:::\n"), r"holds them only"),
+            (in_04(":::table text text\n| A | B |\n|---|---|\n| x | {{review open}} {{basis: y}} |\n:::\n"),
+             at(3) + r": annotation items read in the order state, basis, evidence, review, check; review comes after basis"),
+            (in_04(":::table text text \"Cap {{x}}\"\n| A | B |\n|---|---|\n| x | y |\n:::\n"),
+             at() + r": a container token holds `\{\{`"),
+            (mutate(GUIDED, "title: Synthetic guided review\n", "title: Synthetic {{x}} review\n"),
+             r"meta line 3: meta key 'title' holds `\{\{`"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_link_inside_marked_words(self):
+        h = self.render(in_04("Each print follows {{mark accepted n: the [paper plan](https://example.org/p \"Plan\") agreed}}.\n\n"
+                              ":::note n\n:::annotate\nreview accepted: on “the paper plan agreed” · owner\n:::\n:::\n"))["html"]
+        self.assertIn('Each print follows %s.' % passage("accepted", "n", 'the <a class="surface-text-link" '
+                                                         'href="https://example.org/p" title="Plan">paper plan</a> agreed'), h)
+        build.check_final_html(h, 2)
+        cases = [
+            (in_04("A {{mark open n: the [*plan*](https://example.org/p)}}.\n" + "\n" + NOTE),
+             at() + r": a link inside marked words holds plain text: no code span, escape or emphasis in its text"),
+            (in_04("A {{mark open n: the [`plan`](https://example.org/p)}}.\n" + "\n" + NOTE), r"a link inside marked words holds "
+                                                                                              r"plain text"),
+            (in_04("A {{mark open n: a \\* b}}.\n" + "\n" + NOTE), r"a passage mark's words are plain text and may hold a link"),
+            (in_04(CELL % "{{review open: a [l](https://example.org/) b}}"), r"an annotation is plain text: no code span, escape "
+                                                                            r"or link inside `\{\{\.\.\.\}\}`; only a passage "
+                                                                            r"mark's words may hold a link"),
+            (in_04("A {{mark open n: [x](other.html)}}.\n" + "\n" + NOTE), r"only https:// and http:// links are allowed"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_RS_allowlist_places_the_composition(self):
+        h = self.render(annotated())["html"]
+        accepted = item("review", "accepted", "Accepted", "on “every bay” · owner, round 1")
+        para = '<p class="doc-body">The whole synthetic register.</p>'
+        host = '<li class="doc-annotation-range surface-labeled-range">'
+        range_row = row(item("review", "proposed", "Proposed", "rev 3 · editor, round 2 · this paragraph"),
+                        key_item("Basis", "editor draft"))
+        bad = [
+            (h.replace('data-review="accepted">Accepted', 'data-review="maybe">Accepted', 1), r"data-review='maybe' is outside the review vocabulary"),
+            (h.replace('data-review="accepted">Accepted', 'data-review="declined">Accepted', 1),
+             r"annotation words 'Accepted' are not their role's or key's words \(Declined\)"),
+            (h.replace('<span class="%s" data-review="accepted">' % build.REVIEW_MARK, '<span class="%s" data-review="accepted" '
+                       'data-state="earned">' % build.REVIEW_MARK, 1), r"a mark carries exactly one of data-review, data-evidence, data-state"),
+            (h.replace('<span class="%s" data-review="accepted">' % build.REVIEW_MARK, '<span class="doc-mark doc-label" '
+                       'data-review="accepted">', 1), r"a review mark is the bordered label"),
+            (h.replace('<span class="doc-mark doc-label" data-evidence', '<span class="%s" data-evidence' % build.REVIEW_MARK, 1),
+             r"a review mark is the bordered label, class .*; an evidence or state mark is doc-mark doc-label"),
+            (h.replace(' aria-describedby="uo-note-props"', "", 1), r"a passage mark names its note"),
+            (h.replace(' aria-describedby="uo-note-props"', ' aria-describedby="uo-note-other"', 1),
+             r"each annotation note is named by a passage mark and each passage mark names a note"),
+            (h.replace('data-review="proposed" aria-describedby="uo-note-props"', 'data-review="none" aria-describedby="uo-note-props"', 1),
+             r"a passage mark carries data-review, the judgment its words take"),
+            (h.replace('<mark class="doc-passage-mark surface-scope-underline"', '<mark class="doc-passage-mark"', 1),
+             r"class 'doc-passage-mark' not allowed on <mark>"),
+            (h.replace('<div class="doc-annotations">', '<div class="doc-annotations" data-review="open">', 1),
+             r"a facet attribute sits on a mark, a passage mark or the not-yet-testable note only"),
+            (h.replace(para, para + accepted, 1), r"an annotation item sits only in an annotation row"),
+            (h.replace(para, '<p class="doc-body">The whole synthetic register <span class="%s" data-review="open">Open '
+                       'question</span></p>' % build.REVIEW_MARK, 1),
+             r"a mark or its metadata sits only in an annotation item or an annotation list's value"),
+            (h.replace('<dt class="doc-label">Basis</dt>', '<dt class="doc-label">Origin</dt>', 1),
+             r"annotation words 'Origin' are not their role's or key's words"),
+            (h.replace(para, '<blockquote class="doc-quote"><p>Quoted <mark class="doc-passage-mark surface-scope-underline" '
+                       'data-review="open" aria-describedby="uo-note-month">x</mark></p></blockquote>', 1),
+             r"a passage mark sits in document body text"),
+            (h.replace('id="uo-note-month"', 'id="uo-note-month" data-evidence="unresolved"', 1),
+             r"a facet attribute sits on a mark, a passage mark or the not-yet-testable note only"),
+            # ranges
+            (h.replace(RANGE_OPEN + range_row + "\n", RANGE_OPEN, 1), r"an annotation range opens with its annotation row"),
+            (h.replace(range_row, row(key_item("Basis", "editor draft"), item("review", "proposed", "Proposed", "x")), 1),
+             r"an annotation range opens with its row, which names its one review judgment first"),
+            (h.replace(range_row, row(item("review", "proposed", "Proposed", "x"), item("review", "open", "Open question", "y")), 1),
+             r"an annotation range opens with its row, which names its one review judgment first"),
+            (h.replace('<p class="doc-body">The frame keeps', '<p class="doc-body"><span class="doc-annotations">x</span>The frame '
+                       'keeps', 1), r"a cell's annotation row sits directly in its table cell"),
+            (h.replace(' in each bay, and', ' in each bay <span class="doc-annotations"><span class="doc-annotation-item">%s'
+                       '</span></span>, and' % item("review", "open", "Open question")[len('<span class="doc-annotation-item">'):-7], 1),
+             r"an annotation range carries one judgment"),
+            (h.replace(para, RANGE_OPEN + row(item("review", "open", "Open question")) + '\n<div class="doc-prose">\n' + para
+                       + "\n</div>\n</div>", 1).replace(RANGE_OPEN + range_row, RANGE_OPEN + range_row + "\n" + RANGE_OPEN
+                                                      + row(item("review", "open", "Open question")) + '\n<div class="doc-prose">'
+                                                        '\n<p class="doc-body">x</p>\n</div>\n</div>', 1),
+             r"annotation ranges never nest"),
+            (h.replace('<div class="doc-prose">\n<p class="doc-body">The frame keeps',
+                       '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-zz">%s</div>\n<div class="doc-prose">\n'
+                       '<p class="doc-body">The frame keeps' % row(item("review", "open", "Open question")), 1),
+             r"an annotation note never sits inside an annotation range"),
+            (h.replace(RANGE_OPEN + range_row + "\n", RANGE_OPEN + range_row + "\n" + '<p class="doc-body">bare</p>\n', 1),
+             r"an annotation range holds its row, then the blocks it covers"),
+            (h.replace(RANGE_OPEN, '<div class="doc-prose">' + RANGE_OPEN, 1).replace("stays.</p>\n</div>\n</div>",
+                                                                                      "stays.</p>\n</div>\n</div>\n</div>", 1),
+             r"an annotation range sits directly in a section"),
+            # prompts
+            (h.replace("\n" + RANGE_OPEN, '\n<div class="doc-prose"><p class="doc-body">between</p></div>\n' + RANGE_OPEN, 1),
+             r"a review row outside a range is an explicit-target prompt, immediately before the range"),
+            (h.replace(para, para + "\n</div>\n" + row(item("review", "open", "Open question", "x")) + '\n<div class="doc-prose">', 1),
+             r"a review row outside a range is an explicit-target prompt"),
+            # item hosts
+            (h.replace(host + '<div class="doc-annotations">', host + '<p class="doc-body">w</p><div class="doc-annotations">', 1),
+             r"an annotation range opens with its annotation row"),
+            (h.replace('<li class="doc-body">Proofs reach the studio', '<li class="doc-body">Proofs <ul>' + host
+                       + row(item("review", "open", "Open question", "x")) + '<p class="doc-body">n</p></li></ul> reach the studio', 1),
+             r"an item host is an item of a top-level list in the flow"),
+            (h.replace("</div><p class=\"doc-body\">Glossy stock is used.</p>", "</div>Glossy stock is used.", 1),
+             r"annotation text sits in a mark, a key or a metadata span, not directly in <li>"),
+            # notes in list items, links in marks
+            (h.replace('<p class="doc-body">Glossy stock is used.</p></li>',
+                       '<p class="doc-body">Glossy stock is used.</p><div class="doc-hierarchy doc-group doc-annotation-note" '
+                       'id="uo-note-zz">%s</div></li>' % row(item("review", "open", "Open question")), 1),
+             r"an annotation note sits directly in a section, or in a plain list item after its text"),
+            (h.replace('href="https://example.org/bay">bay</a>', 'href="https://example.org/bay"><em>bay</em></a>', 1),
+             r"a link inside marked words holds plain text only, not <em>"),
+            (h.replace('aria-describedby="uo-note-bays">every ', 'aria-describedby="uo-note-bays"><em>every</em> ', 1),
+             r"a passage mark holds its words as text, and a link inside them, only"),
+            # the list's Item line, the document record
+            (h.replace('<dt class="doc-label">Item</dt>\n<dd><span class="doc-meta">the method component, version 0.3</span></dd>\n', "", 1),
+             r"an annotation list with a Review line names the item it judges first, in an Item line"),
+            (h.replace('<dd><span class="doc-meta">the method component, version 0.3</span></dd>',
+                       '<dd><span class="doc-meta">the method component</span>%s</dd>' % item("review", "open", "Open question")[
+                           len('<span class="doc-annotation-item">'):-7], 1),
+             r"an annotation list's Item line holds the name of the item it judges"),
+            (h.replace('<h1 class="doc-title">', row(key_item("Basis", "x")) + '\n<h1 class="doc-title">', 1),
+             r"the document's review record sits once, directly under the masthead title"),
+        ]
+        for doc, pattern in bad:
+            with self.subTest(pattern=pattern):
+                self.assertNotEqual(doc, h)
+                with self.assertRaises(build.BuildError) as cm:
+                    build.check_final_html(doc, 2)
+                self.assertRegex(str(cm.exception), pattern)
+
+
+class ReviewAnnotationPlacementAndRecords(RenderCase):
+    """Where no annotation sits (the chrome parts and the provenance disclosure), the note's record of the judgment its
+    marks show, and the composition rules of README, "Review annotations", under design-system-ASK #185 (705a195)."""
+
+    def test_no_annotation_in_chrome_parts_or_provenance(self):
+        accepted = "{{review accepted: y · owner · this copy}}"
+        basis, check = "{{basis: owner-stated}}", "{{check: re-summed}}"
+        cases = [
+            (mutate(GUIDED, "Synthetic locator line.\n", "Synthetic locator line.\n\n" + CELL % accepted), accepted, r":::part 01"),
+            (with_part_01(part=":::part 01\n:::banner review-status\nStatus.\n:::\n\n" + CELL % accepted + ":::\n\n"), accepted,
+             r":::part 01"),
+            (mutate(GUIDED, ":::part 10\n", ":::part 10\nSeal text.\n\n" + CELL % basis), basis, r":::part 10"),
+            (mutate(GUIDED, "Synthetic provenance block.\n", "Synthetic provenance block.\n\n" + CELL % basis), basis,
+             r":::disclose provenance"),
+            (mutate(GUIDED, "Synthetic provenance block.\n", "Synthetic provenance block.\n\n" + CELL % check), check,
+             r":::disclose provenance"),
+        ]
+        for src, construct, where in cases:
+            with self.subTest(where=where, construct=construct):
+                self.reset_tmp()
+                self.fails(src, r"line %d: no annotation sits in part 01 or 10 or in a provenance disclosure; this :::table "
+                                r"is in %s \(line \d+\)" % (row_of(src, construct), where))
+        self.reset_tmp()
+        r = self.render(in_04(CELL % basis))                          # the positive control: part 04
+        self.assertIn(key_item("Basis", "owner-stated"), r["html"])
+
+    def test_allowlist_refuses_annotations_in_chrome_parts(self):
+        h = self.render(GUIDED, name="a")["html"]
+        row_ = '<div class="doc-annotations">%s</div>' % key_item("Basis", "x")
+        doc = h.replace('<p class="doc-body">Synthetic locator line.</p>\n</div>', '<p class="doc-body">Synthetic locator line.</p>\n'
+                        '</div>\n' + row_, 1)
+        self.assertNotEqual(doc, h)
+        with self.assertRaises(build.BuildError) as cm:
+            build.check_final_html(doc, 2)
+        self.assertRegex(str(cm.exception), r"no annotation sits in part 01 or 10 or in a provenance disclosure "
+                                            r"\(<div class='doc-annotations'>\)")
+        h = self.render(mutate(GUIDED, ":::part 10\n", ":::part 10\nSeal text.\n\n" + CELL % "plain"), name="b")["html"]
+        doc = h.replace("</span>plain</td>", '</span><span class="doc-annotations">%s</span></td>' % key_item("Basis", "x"), 1)
+        self.assertNotEqual(doc, h)
+        with self.assertRaises(build.BuildError) as cm:
+            build.check_final_html(doc, 2)
+        self.assertRegex(str(cm.exception), r"no annotation sits in part 01 or 10 or in a provenance disclosure "
+                                            r"\(<span class='doc-annotations'>\)")
+        doc = h.replace('<p class="doc-body">Seal text.</p>', '<p class="doc-body">Seal text.</p>\n</div>\n' + RANGE_OPEN
+                        + row(item("review", "open", "Open question")) + '\n<div class="doc-prose">\n<p class="doc-body">x</p>', 1)
+        with self.assertRaises(build.BuildError) as cm:
+            build.check_final_html(doc, 2)
+        self.assertRegex(str(cm.exception), r"no annotation sits in part 01 or 10 or in a provenance disclosure "
+                                            r"\(<div class='doc-annotation-range doc-group surface-labeled-range'>\)")
+
+    def note_doc(self, mark_role, note_lines, words="here"):
+        return in_04("Words {{mark %s n: %s}}.\n\n:::note n\n:::annotate\n%s\n:::\n:::\n" % (mark_role, words, note_lines))
+
+    def test_a_note_records_the_judgment_its_marks_show(self):
+        def msg(role, words):
+            return r"%s: a passage mark showing %s names note 'n', whose row records no %s item" % (at(), role, words)
+        proposed = msg("proposed", "review proposed or review correction-requested")
+        cases = [
+            (self.note_doc("proposed", "review accepted: v2 · owner · this copy"), proposed),
+            (self.note_doc("proposed", "basis: owner-stated\ncheck: re-summed"), proposed),
+            (self.note_doc("open", "review proposed: an answer"), msg("open", "review open")),
+            (self.note_doc("accepted", "review declined: v2 · owner"), msg("accepted", "review accepted")),
+            (self.note_doc("declined", "review open: who decides"), msg("declined", "review declined")),
+            (in_04("A {{mark proposed n: one}} and {{mark open n: two}}.\n\n:::note n\n:::annotate\nreview proposed: x\n:::\n:::\n"),
+             msg("open", "review open")),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern, src=src[-120:]):
+                self.reset_tmp()
+                self.fails(src, pattern)
+        good = [
+            self.note_doc("proposed", "review correction-requested: on “here” · owner, round 2"),
+            self.note_doc("proposed", "review proposed: a narrower phrase · editor\nreview correction-requested: on “here” · "
+                                      "owner"),
+            self.note_doc("accepted", "review accepted: on “here” · owner, round 1"),
+            self.note_doc("declined", "review declined: on “here” · owner, round 1"),
+            in_04("A {{mark proposed n: one}} and {{mark open n: two}}.\n\n:::note n\n:::annotate\nreview proposed: x\n"
+                  "review open: y\n:::\n:::\n"),
+        ]
+        for i, src in enumerate(good):
+            with self.subTest(good=i):
+                self.reset_tmp()
+                self.render(src)
+
+    def test_a_note_row_holds_no_review_item_its_marks_do_not_show(self):
+        # A review item in a note's row that no mark naming the note shows would judge the blocks before the note from
+        # a row placed after them: the trailing row a whole-block judgment never takes. A named note after a paragraph,
+        # and the not-yet-testable evidence note, which no mark names, after a paragraph and after a synthesis. (A
+        # named note follows a synthesis only where it follows the range around it, for a mark in that range's earlier
+        # block: no mark sits in a panel.)
+        def other(line, word, role):
+            return (r"line %d: the row of note 'n' holds review %s, but no passage mark naming the note shows %s: a "
+                    r"note's review items record only what its marks show" % (line, word, role))
+        nyt = (":::note not-yet-testable\n:::annotate\nevidence not-yet-testable: no readings yet\n%s\n:::\n:::\n")
+        synthesis = mutate(GUIDED, "The synthetic executive result.\n",
+                           "The synthetic executive result.\n\n:::synthesis\nWhat the part comes to.\n:::\n\n%s")
+        cases = [
+            (self.note_doc("proposed", "review correction-requested: on “here” · owner\n"
+                                       "review accepted: this whole paragraph · owner"),
+             other(row_of(in_04(""), "The synthetic executive result.") + 7, "accepted", "accepted")),
+            (self.note_doc("open", "review open: who decides\nreview declined: phase 1 · owner · phase 1 only"),
+             other(row_of(in_04(""), "The synthetic executive result.") + 7, "declined", "declined")),
+            (self.note_doc("open", "review open: who decides\nreview none: no production decision"),
+             r"line %d: the row of note 'n' holds review none: No decision recorded marks no words"
+             % (row_of(in_04(""), "The synthetic executive result.") + 7)),
+        ]
+        for text, after in (("Words.\n\n" + nyt, "a paragraph"), (nyt, "a synthesis")):
+            src = in_04(text % "review declined: owner · this paragraph") if after == "a paragraph" else (
+                synthesis % (nyt % "review accepted: synthesis v1 · owner · this document"))
+            cases.append((src, r"line %d: a :::note not-yet-testable row carries no review item: it is an evidence note, "
+                               r"and no passage mark names it" % (row_of(src, "evidence not-yet-testable:") + 1)))
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern[:60], src=src[-100:]):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_allowlist_mirrors_the_note_roles(self):
+        h = self.render(annotated())["html"]
+        doc = h.replace('data-review="proposed">Correction requested</span>', 'data-review="accepted">Accepted</span>', 1)
+        self.assertNotEqual(doc, h)
+        with self.assertRaises(build.BuildError) as cm:
+            build.check_final_html(doc, 2)
+        self.assertRegex(str(cm.exception), r"a passage mark showing proposed names uo-note-props, whose first row records "
+                                            r"no review proposed mark")
+
+    def test_spectral_and_review_proposed_take_the_list(self):
+        both = "state proposed: a candidate stage\nreview proposed: its adoption"
+        cases = [
+            (in_04(":::annotate\nreview proposed: its adoption\nstate proposed: a candidate stage\n:::\n\n" + ranged("review open: q", "W.")),
+             r"%s: state proposed and review proposed on one item read as one word twice; an :::annotate list carries them, "
+             r"one key each" % at(1)),
+            (self.note_doc("proposed", both), r"%s: a note's row cannot carry both state proposed and review proposed; keep "
+                                              r"the state item in the block's own row or list" % at(5)),
+            (in_04(CELL % "{{state proposed: s}} {{review proposed: r}}"),
+             r"%s: state proposed and review proposed in one cell read as one word twice; carry them in an :::annotate "
+             r"list, one key each \(column 2\)" % at(3)),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+        self.reset_tmp()
+        h = self.render(in_04(":::annotate list\nitem: a candidate stage\n%s\n:::\n" % both))["html"]
+        self.assertIn('<dt class="doc-label">State</dt>\n<dd><span class="doc-mark doc-label" data-state="proposed">Proposed</span>', h)
+        self.assertIn('<dt class="doc-label">Review</dt>\n<dd><span class="%s" data-review="proposed">Proposed</span>'
+                      % build.REVIEW_MARK, h)
+        for src in (self.note_doc("proposed", "state proposed: s\nreview correction-requested: on “x” · owner"),
+                    in_04(CELL % "{{state proposed: s}} {{review correction-requested: on x · owner}}")):
+            with self.subTest(src=src[-80:]):
+                self.reset_tmp()
+                self.assertIn('data-review="proposed">Correction requested</span>', self.render(src)["html"])
+
+    def test_a_status_cell_decision_record_wraps(self):
+        md = css_rules(build.MD_CSS)
+        rule = ':where(.uo-md) :where(td[data-uo-cell="status"]) > :where(.doc-annotations)'
+        self.assertEqual(rules_with(md, rule), [{"white-space": "normal"}])
+        nowrap = ':where(.uo-md) :where(td[data-uo-cell="key"], td[data-uo-cell="num"], td[data-uo-cell="status"])'
+        order = [sels for m, sels, d in md if m is None]
+        self.assertLess(order.index((nowrap,)), order.index((rule,)))
+        self.assertTrue(Presentation.zero_specificity(rule))
+
+    def test_a_heading_in_a_child_container_separates_a_mark_from_its_note(self):
+        note = NOTE + "\n"
+        mark = "Words {{mark open n: here}}.\n\n"
+        finding = mutate(GUIDED, ":::part 06\n", ":::part 06\n" + mark + ":::finding\n### Inside\n\nA finding.\n:::\n\n" + note)
+        deep = mutate(GUIDED, ":::part 06\n", ":::part 06\n" + mark + ":::finding\nA finding.\n\n:::disclose evidence \"E\"\n"
+                      "#### Deep\n\nListing.\n:::\n:::\n\n" + note)
+        question = mutate(GUIDED, "The bounded question set.\n", "The bounded question set.\n\n" + mark
+                          + ":::question\n### A heading\n\nA prompt.\n:::\n\n" + note)
+        for src in (finding, deep, question):
+            with self.subTest(src=row_of(src, "{{mark")):
+                self.reset_tmp()
+                self.fails(src, r"line %d: the passage mark naming note 'n' has no note before the next heading" % row_of(src, "{{mark"))
+        # Without a heading the container still separates block and note; before the container, the note builds.
+        self.reset_tmp()
+        self.fails(finding.replace("### Inside\n\n", ""), r"line %d: the passage mark naming note 'n' is followed by another "
+                                                         r"block or container before its note" % row_of(finding, "{{mark"))
+        self.reset_tmp()
+        self.render(mutate(GUIDED, ":::part 06\n", ":::part 06\n" + mark + note + ":::finding\n### Inside\n\nA finding.\n:::\n\n"))
+
+    def test_construct_text_is_plain_whichever_checks_reach_it(self):
+        probed = []
+        real = build.Text.renders_text
+
+        def spy(text):
+            if any("{{" in line for _, line in text.lines):
+                probed.append(True)
+            return real(text)
+        with mock.patch.object(build.Text, "renders_text", spy):
+            a = self.render(self.note_doc("open", "review open: x", words="a <b> c"), name="a")["html"]
+        self.assertTrue(probed)                               # the flow check read the mark's paragraph
+        probed.clear()
+        with mock.patch.object(build.Text, "renders_text", spy):
+            b = self.render(in_04(CELL % "{{review open: a <b> c}}"), name="b")["html"]
+        self.assertFalse(probed)                              # no check reads a table's text
+        self.assertIn('aria-describedby="uo-note-n">a &lt;b&gt; c</mark>', a)
+        self.assertIn('<span class="doc-meta">a &lt;b&gt; c</span>', b)
+        c = self.render(self.note_doc("open", "review open: x", words="x<y"), name="c")["html"]
+        self.assertIn('aria-describedby="uo-note-n">x&lt;y</mark>', c)
+        probe = build.Text()
+        probe.lines = [(1, "Words {{mark open n: a <b> c}}.")]
+        self.assertTrue(probe.renders_text())
+
+    def test_seal_line_and_manifest_name_the_sealed_parts(self):
+        short = build.verify_dependencies()["commit"][:7]
+        heading = "## design-system-ASK tokens, document register and semantic-state modules"
+        plain = self.render(GUIDED, name="plain")
+        self.assertIn('design-system-ASK tokens and document register <code class="doc-code">%s</code>' % short, plain["html"])
+        self.assertNotIn("semantic-state modules <code", plain["html"])
+        rich = self.render(annotated(), name="rich")
+        self.assertIn('design-system-ASK tokens, document register and semantic-state modules <code class="doc-code">%s</code>'
+                      % short, rich["html"])
+        for r in (plain, rich):
+            self.assertIn(heading, r["manifest_text"])
+            self.assertNotIn("\x00", r["html"])
+
+    def test_a_list_answers_each_question_once(self):
+        self.fails(in_04(":::annotate list\nitem: x\nreview accepted: v1 · owner · trial\nreview none: no production decision\n:::\n"),
+                   r"%s: a list answers each question once; a second judgment at another scope is its own :::annotate "
+                   r"list, naming its item in its `item:` line" % at(3))
+        for axis, first, second in (("basis", "basis: owner-stated", "basis: analyst"),
+                                    ("evidence", "evidence supported: owner", "evidence unresolved: analyst"),
+                                    ("state", "state earned: v1", "state held: v2"),
+                                    ("check", "check: owner", "check: analyst")):
+            with self.subTest(axis=axis):
+                self.reset_tmp()
+                self.fails(in_04("Words.\n\n:::annotate list\nitem: x\n%s\n%s\n:::\n" % (first, second)),
+                           r"%s: a list answers each question once, and this is a second %s record; two records of one "
+                           r"axis at different scopes take one row, which may repeat that axis" % (at(5), axis))
+                # The form the message names builds: one row after the block it qualifies, repeating that axis.
+                self.reset_tmp()
+                r = self.render(in_04("Words.\n\n:::annotate\n%s\n%s\n:::\n" % (first, second)))
+                self.assertEqual((r["counts"]["annotation_rows"], r["counts"]["annotation_lists"]), (1, 0))
+                self.assertEqual(r["html"].count('<span class="doc-annotation-item">'), 2)
+
+    def test_only_notes_and_rows_without_a_review_item_sit_between_a_block_and_its_note(self):
+        cases = [
+            in_04("Words {{mark open n: here}}.\n\nAnother block.\n\n" + NOTE),
+            in_04("Words {{mark open n: here}}.\n\n" + TABLE + "\n" + NOTE),
+            in_04("Words {{mark open n: here}}.\n\n:::callout\nA point.\n:::\n\n" + NOTE),
+            in_04("Words {{mark open n: here}}.\n\n:::annotate list\nitem: x\nreview accepted: v1 · owner\n:::\n\n" + NOTE),
+        ]
+        for src in cases:
+            with self.subTest(src=src[-60:]):
+                self.reset_tmp()
+                self.fails(src, r"%s: the passage mark naming note 'n' is followed by another block or container before its "
+                                r"note; a note follows the block or range holding its mark, with only other notes and rows "
+                                r"or lists without a review item between" % at())
+        self.reset_tmp()
+        self.render(in_04("Words {{mark open n: here}} and {{mark open m: there}}.\n\n:::annotate\nbasis: x\n:::\n\n" + NOTE
+                          + "\n:::note m\n:::annotate\nreview open\n:::\n:::\n\n:::note not-yet-testable\n:::annotate\n"
+                          "evidence not-yet-testable: later\n:::\n:::\n\nA later block.\n"))
+
+    def test_construct_source_refusals(self):
+        cases = [
+            (in_04("See <https://example.org/{{mark open n: x}}>\n"), r"%s: an annotation never sits inside an autolink" % at()),
+            (in_04("Words {{mark open n: here}}.\n\n:::note n\n​\n\n:::annotate\nreview open\n:::\n:::\n"),
+             r":::note n \(%s\) holds an :::annotate row first" % at(2)),
+            (in_04("A `{{foo}}` span,\nthen {{foo}} here.\n"), r"%s: `\{\{foo` is not an annotation" % at(1)),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_allowlist_keeps_words_plain_and_marks_full(self):
+        h = self.render(annotated())["html"]
+        bad = [
+            (h.replace('data-review="accepted">Accepted</span>', 'data-review="accepted"><em>Accepted</em></span>', 1),
+             r"an annotation's words are text only, not <em>"),
+            (h.replace('<span class="doc-meta">on “every bay” · owner, round 1</span>',
+                       '<span class="doc-meta"><a class="surface-text-link" href="https://example.org/">v3</a></span>', 1),
+             r"an annotation's words are text only, not <a>"),
+            (h.replace('aria-describedby="uo-note-props">two props or fewer</mark>', 'aria-describedby="uo-note-props"></mark>', 1),
+             r"a passage mark shows the words it marks; it is never empty"),
+        ]
+        for doc, pattern in bad:
+            with self.subTest(pattern=pattern):
+                self.assertNotEqual(doc, h)
+                with self.assertRaises(build.BuildError) as cm:
+                    build.check_final_html(doc, 2)
+                self.assertRegex(str(cm.exception), pattern)
+
+
+class ReviewAnnotationRecordsAndEscapes(RenderCase):
+    """A correction request's record, the sealed modules' comments, error lines and escapes inside a construct, and the
+    allowlist's hold of each note to its row, under design-system-ASK #185 (705a195)."""
+
+    def test_correction_requested_is_a_request_not_a_decision(self):
+        msg = self.fails(in_04(":::annotate\nreview correction-requested\n:::\n"),
+                         r"%s: review correction-requested names a request to change existing words and needs its record "
+                         r"after ':' \(on what, who asked\)$" % at(1))
+        self.assertNotIn("decision", msg)
+        self.reset_tmp()
+        self.fails(in_04(":::annotate\nreview accepted\n:::\n"),
+                   r"%s: review accepted shows a decision and needs its record after ':' \(what, who, scope\)$" % at(1))
+
+    def test_sealed_comments_name_each_modules_manifest(self):
+        plain = self.render(GUIDED, name="plain")["html"].split("</head>")[0]
+        rich = self.render(annotated(), name="rich")["html"].split("</head>")[0]
+        for rel in build.MODULES:
+            for head in (plain, rich):
+                self.assertIn("SEALED design-system-ASK %s (upstream 705a195, verbatim; bytes verified against the register "
+                              "manifest) === */" % rel, head)
+        for rel in build.STATE_MODULES:
+            self.assertIn("SEALED design-system-ASK %s (upstream 705a195, verbatim; bytes verified against the _dsa-surface "
+                          "manifest) === */" % rel, rich)
+            self.assertNotIn(rel, plain)
+
+    def test_error_lines_skip_code_spans_and_count_identical_constructs(self):
+        note = "\n" + NOTE
+        cases = [
+            # a code-span literal before a real construct in a heading: the heading's line
+            (in_04("Write `{{mark open n: x}}` here.\n\n### Head {{mark open n: x}}\n" + note), at(2),
+             r"a passage mark sits in a paragraph or list item, not inside <h3>"),
+            # a code-span literal before a real mark whose note is missing: the mark's line
+            (in_04("`{{mark open n: x}}`\n\nWords {{mark open n: x}}.\n"), at(2),
+             r"the passage mark naming note 'n' has no :::note n after it"),
+            # an identical valid construct before a bad one, with identical surrounding text: the bad one's line
+            (in_04("{{mark open n: x}}\n\n### {{mark open n: x}}\n" + note), at(2),
+             r"a passage mark sits in a paragraph or list item, not inside <h3>"),
+            # an identical construct inside a code span on the same line as the bad one
+            (in_04("A `{{foo}}` then {{foo}} here.\n"), at(), r"`\{\{foo` is not an annotation"),
+        ]
+        for src, line, pattern in cases:
+            with self.subTest(line=line, pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, r"^%s: %s" % (line, pattern))
+
+    def test_escapes_and_code_fail_inside_a_construct_and_show_in_a_row(self):
+        for text in ("a \\* b", "a `c` b"):
+            for src in (in_04(CELL % ("{{review open: %s}}" % text)), in_04("Words {{mark open n: %s}}.\n\n" % text + NOTE),
+                        in_04("- {{review open: %s}} Words.\n" % text)):
+                with self.subTest(text=text, src=src[-40:]):
+                    self.reset_tmp()
+                    self.fails(src, r"(an annotation is plain text: no code span, escape or link inside|a passage mark's words "
+                                    r"are plain text and may hold a link)")
+        self.reset_tmp()
+        h = self.render(in_04(":::annotate\nbasis: a \\* b `c` [l](https://example.org/)\n:::\n"))["html"]
+        self.assertIn(key_item("Basis", "a \\* b `c` [l](https://example.org/)"), h)
+
+    def test_allowlist_holds_each_note_to_its_row(self):
+        h = self.render(annotated())["html"]
+        nyt_mark = '<span class="doc-mark doc-label" data-evidence="not-yet-testable">Not yet testable</span>'
+        nyt_row = row(item("evidence", "not-yet-testable", "Not yet testable", "no readings until next season")) + "\n"
+        named_open = '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-props">\n'
+        self.assertEqual(h.count(nyt_mark), 1)
+        self.assertEqual(h.count(nyt_row), 1)
+        bad = [
+            (h.replace(nyt_mark, '<span class="doc-mark doc-label" data-evidence="supported">Supported</span>', 1),
+             r"a not-yet-testable note's row carries a Not yet testable evidence mark"),
+            (h.replace(nyt_row, row(key_item("Check", "x")) + "\n", 1),
+             r"a not-yet-testable note's row carries a Not yet testable evidence mark"),
+            (h.replace(nyt_row, "", 1), r"an annotation note holds its row first, not <p>"),
+            (h.replace(named_open, named_open + '<p class="doc-body">x</p>\n', 1), r"an annotation note holds its row first, not <p>"),
+        ]
+        for doc, pattern in bad:
+            with self.subTest(pattern=pattern):
+                self.assertNotEqual(doc, h)
+                with self.assertRaises(build.BuildError) as cm:
+                    build.check_final_html(doc, 2)
+                self.assertRegex(str(cm.exception), pattern)
+
+
+class ReviewAnnotationSynthesisAndDisclosures(RenderCase):
+    """A synthesis, or the range around it, is its part's last substantive content, and an authored disclosure takes
+    annotations (README, "Disclosures and the synthesis"; test_RS_annotations_inside_an_authored_disclosure)."""
+
+    SYNTHESIS = ":::synthesis\nThe finding is bounded to this survey.\n:::\n"
+    PANEL = ('<div data-uo-role="synthesis" class="%s">\n<p class="surface-emphasis-chip surface-emphasis--magenta">compression'
+             '</p>\n<p class="doc-body">The finding is bounded to this survey.</p>\n</div>' % build.FLAT_PANEL)
+
+    def accepted(self, inner=None):
+        return (":::range\n:::annotate\nreview accepted: synthesis v1 · reviewer · this document only\n"
+                "basis: analyst synthesis\n:::\n" + (inner if inner is not None else self.SYNTHESIS) + ":::\n")
+
+    def test_an_accepted_synthesis_takes_a_range(self):
+        # The synthesis stays its part's last content and keeps its panel; the range around it carries its judgment,
+        # and its origin survives the acceptance (review-semantics.md, "Origin survives adoption").
+        h = self.render(in_04(self.accepted()))["html"]
+        self.assertIn(RANGE_OPEN + row(item("review", "accepted", "Accepted", "synthesis v1 · reviewer · this document only"),
+                                       key_item("Basis", "analyst synthesis")) + "\n" + self.PANEL + "\n</div>\n</section>", h)
+        # A row or list without a review item, then a not-yet-testable note, may follow it outside the panel.
+        self.reset_tmp()
+        h = self.render(in_04(self.SYNTHESIS + "\n:::annotate list\nevidence partially-supported: one survey\n:::\n\n"
+                              ":::note not-yet-testable\n:::annotate\nevidence not-yet-testable: the second season\n:::\n:::\n"))["html"]
+        self.assertIn(self.PANEL + '\n<dl class="doc-annotation-list">', h)
+        self.assertIn('<div class="doc-group doc-annotation-note" data-evidence="not-yet-testable">', h)
+        # A range over a panel belongs to its part, and the prompt before it moves with it out of a ### section.
+        self.reset_tmp()
+        h = self.render(in_04("### A section\n\nIts text.\n\n:::annotate\nreview open: on the synthesis below · owner\n:::\n\n"
+                              + self.accepted()))["html"]
+        self.assertIn('<p class="doc-body">Its text.</p>\n</div>\n</div>\n' + row(item("review", "open", "Open question",
+                                                                                     "on the synthesis below · owner"))
+                      + "\n" + RANGE_OPEN, h)
+
+    def test_prose_after_the_synthesis_fails(self):
+        for holder in (self.SYNTHESIS, self.accepted()):
+            cases = [
+                ("A line after.\n", "A line after."),
+                ("### A later section\n", "### A later section"),
+                (":::callout\nA later callout.\n:::\n", ":::callout"),
+                (TABLE, ":::table dense"),
+                (":::quote\nA later quotation.\n:::\n", ":::quote"),
+                (ranged("review open: x", "A later range."), ":::range"),
+            ]
+            for tail, first in cases:
+                with self.subTest(holder=holder[:9], tail=first):
+                    self.reset_tmp()
+                    src = in_04(holder + "\n" + tail)
+                    if holder != self.SYNTHESIS and first == ":::range":
+                        first_line = [i + 1 for i, ln in enumerate(src.splitlines()) if ln == ":::range"][1]
+                    else:
+                        first_line = row_of(src, first) if first != ":::range" else row_of(src, ":::range")
+                    self.fails(src, r"line %d: a :::synthesis closes its part; only notes, and rows or lists without a review "
+                                    r"item, may follow it in part 04, and line %d does not" % (row_of(src, ":::synthesis"), first_line))
+        # A review row or a review list after the synthesis fails: a judgment on it is a range around it.
+        for tail in (":::annotate\nreview accepted: v1 · reviewer\n:::\n", ":::annotate list\nitem: the synthesis\n"
+                                                                                  "review accepted: v1 · reviewer\n:::\n"):
+            with self.subTest(tail=tail[:16]):
+                self.reset_tmp()
+                src = in_04(self.SYNTHESIS + "\n" + tail)
+                self.fails(src, r"line %d: a :::synthesis closes its part, and a review judgment on it opens a :::range around "
+                                r"it; the review row or list at line %d follows it" % (row_of(src, ":::synthesis"), row_of(src, ":::annotate")))
+        # Inside its range, the synthesis is the last block.
+        self.reset_tmp()
+        src = in_04(self.accepted(self.SYNTHESIS + "\nAfter it.\n"))
+        self.fails(src, r"line %d: a :::synthesis closes its part, and closes the :::range that holds it; line %d follows it"
+                   % (row_of(src, ":::synthesis"), row_of(src, "After it.")))
+
+    def test_panels_in_a_range_keep_their_rules(self):
+        cases = [
+            (mutate(GUIDED, "The non-central question's detail.\n:::\n:::\n",
+                    "The non-central question's detail.\n:::\n\n" + self.accepted() + ":::\n"),
+             r"a :::synthesis sits in a :::range only where that range sits directly in a part, not in :::question"),
+            (in_04(self.accepted() + "\n" + self.accepted()), r"part 04 carries at most one :::synthesis"),
+            (in_04("### A section\n\nText.\n\n" + ranged("review proposed: x", ":::framing thesis\nA frame.\n:::")),
+             r"a :::framing opens its part, before the part's first ### or #### section"),
+            (mutate(GUIDED, ":::part 10\n", ":::part 10\n" + ranged("review open: x", ":::framing thesis\nA frame.\n:::")),
+             r":::range \(line \d+\) is not allowed in part 10"),
+        ]
+        for src, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self.reset_tmp()
+                self.fails(src, pattern)
+
+    def test_ranges_over_a_quotation_a_callout_and_a_framing(self):
+        # A whole-block judgment opens a range and leaves the block's document role alone: the quotation keeps its rail
+        # and attribution, the callout its magenta rail, the framing its panel and chip (review-semantics.md, rule 1).
+        src = mutate(GUIDED, "What this synthetic document tests, and what not to judge.\n",
+                     "What this synthetic document tests, and what not to judge.\n\n"
+                     + ranged("review proposed: owner, round 1", ":::framing thesis\nShaded streets stay cooler.\n:::"))
+        src = in_04(ranged("review accepted: v1 · owner", ':::quote "Resident"\nLook used, not styled.\n:::',
+                           "basis: interview transcript\n")
+                    + "\n" + ranged("review open: does wear mean use", ":::callout\nWe read this as signs of use.\n:::"), src)
+        h = self.render(src)["html"]
+        self.assertIn(RANGE_OPEN + row(item("review", "accepted", "Accepted", "v1 · owner"), key_item("Basis", "interview transcript"))
+                      + '\n<div class="doc-prose">\n<blockquote class="doc-quote">\n<p>Look used, not styled.</p>\n'
+                        '<footer>Resident</footer>\n</blockquote>\n</div>\n</div>', h)
+        self.assertIn(RANGE_OPEN + row(item("review", "open", "Open question", "does wear mean use"))
+                      + '\n<div class="doc-prose">\n<p class="doc-body surface-emphasis-rail" data-uo-role="callout">We read this '
+                        'as signs of use.</p>\n</div>\n</div>', h)
+        self.assertIn(RANGE_OPEN + row(item("review", "proposed", "Proposed", "owner, round 1")) + '\n<div data-uo-role="framing" '
+                      'class="%s">\n<p class="surface-emphasis-chip surface-emphasis--magenta">thesis</p>' % build.FLAT_PANEL, h)
+        build.check_final_html(h, 2)
+
+
+
+class _Tree(HTMLParser):
+    """A rendered body as an element tree: (tag, class tokens, children), elements only."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.root = ("root", (), [])
+        self.stack = [self.root]
+
+    def handle_starttag(self, tag, attrs):
+        el = (tag, tuple((dict(attrs).get("class") or "").split()), [])
+        self.stack[-1][2].append(el)
+        if tag not in build.VOID_ELEMENTS:
+            self.stack.append(el)
+
+    def handle_endtag(self, tag):
+        if tag not in build.VOID_ELEMENTS:
+            while self.stack[-1][0] != tag:
+                self.stack.pop()
+            self.stack.pop()
+
+
+def rail_depth(el, edge):
+    """How deep el reaches a scope rail at its first or last (edge) edge, as the renderer's buffer rule reads it: 0
+    for a range or a list that opens or closes on an item host, n for a div.doc-section or div.doc-prose whose edge
+    child reaches one at n - 1; None otherwise."""
+    tag, cls, kids = el
+    if tag == "div" and "surface-labeled-range" in cls:
+        return 0
+    k = kids[0 if edge == "first" else -1] if kids else None
+    if tag in ("ul", "ol"):
+        return 0 if k is not None and k[0] == "li" and "surface-labeled-range" in k[1] else None
+    if tag == "div" and ("doc-section" in cls or "doc-prose" in cls) and k is not None:
+        d = rail_depth(k, edge)
+        return None if d is None else d + 1
+    return None
+
+
+def rail_pairs(html_):
+    """Each pair of adjacent element siblings in the body where the first ends on a scope rail and the second starts
+    on one: (depth at the end, depth at the start)."""
+    t = _Tree()
+    t.feed(html_[html_.index("<main"):html_.index("</main>") + len("</main>")])
+    pairs = []
+
+    def walk(el):
+        kids = el[2]
+        for a, b in zip(kids, kids[1:]):
+            da, db = rail_depth(a, "last"), rail_depth(b, "first")
+            if da is not None and db is not None:
+                pairs.append((da, db))
+        for k in kids:
+            walk(k)
+    walk(t.root)
+    return pairs
+
+
+class ReviewAnnotationBoundaries(RenderCase):
+    """Records on prompts and ranges, one note per list item and per note role, the passage buffer across UO's
+    wrappers, diagnostics that name the working form, and placements README states (README, "Review annotations").
+    Synthetic sources only."""
+
+    def test_passage_buffer_rule_is_zero_specificity_geometry(self):
+        md = css_rules(build.md_css(True))
+        rules = [(sels, d) for m, sels, d in md if m is None and any(".surface-labeled-range" in x for x in sels)]
+        self.assertEqual(len(rules), 1)
+        sels, decls = rules[0]
+        self.assertEqual(decls, {"margin-top": "var(--space-5)"})
+        self.assertEqual(len(sels), 1)
+        self.assertTrue(Presentation.zero_specificity(sels[0]))
+        self.assertEqual(build.RAIL_BUFFER, ":where(.uo-md :is(%s) + :is(%s)) { margin-top: var(--space-5); }"
+                         % (build._rail_edge("last"), build._rail_edge("first")))
+        # Each edge names a range and a host list at every depth from 0 to RAIL_DEPTH: two alternatives per depth.
+        for edge in ("first", "last"):
+            alts = top_level_split(build._rail_edge(edge))
+            self.assertEqual(len(alts), 2 * (build.RAIL_DEPTH + 1))
+            self.assertEqual(sorted(a.count(build.RAIL_WRAPPER) for a in alts),
+                             sorted([0, 0] + [d for d in range(1, build.RAIL_DEPTH + 1) for _ in (0, 1)]))
+            for a in alts:
+                self.assertNotIn("padding", a)
+        self.assertNotRegex(build.RAIL_BUFFER, r"margin-(left|right|inline)|padding|border|::before")
+
+    def test_passage_buffer_reaches_ranges_across_uo_wrappers(self):
+        # The shapes whose rails met at 4 to 10px before the rule: a range closing a heading's section, then a range
+        # around a synthesis lifted to the part; a list closing on an item host, then that range; adjacent questions
+        # and findings, the first closing on a range and the next opening on one. And the direct siblings the owner's
+        # rule spaces. These are the block pairs the rule's selectors reach; no maintained check measures the rendered
+        # gap (the rendered check's buffer rule counts siblings only).
+        synth = ranged("review accepted: v1 · owner · this synthesis", ":::synthesis\nWhat the part comes to.\n:::")
+        shapes = {
+            "section then panel range": in_04("### A subsection\n\nText.\n\n" + ranged("review open: a · owner", "Last.")
+                                              + "\n" + synth),
+            "host list then panel range": in_04("### A subsection\n\n- A plain item.\n- {{review open: owner · this item}} "
+                                                "The last item.\n\n" + synth),
+            "adjacent questions": mutate(GUIDED, ":::question\nA non-central question prompt.\n",
+                                         ":::question\n" + ranged("review accepted: owner · this question as posed",
+                                                                  "A non-central question prompt.")),
+            "direct siblings": in_04(ranged("review proposed: a · editor", "First.") + "\n"
+                                     + ranged("review accepted: b · owner", "Second.")),
+        }
+        shapes["adjacent questions"] = mutate(shapes["adjacent questions"], "The central question's detail, visible.\n",
+                                              ranged("review accepted: owner · this answer",
+                                                     "The central question's detail, visible."))
+        findings = mutate(GUIDED, ":::finding\n**Status:** open. Finding, significance and limit.\n",
+                          ":::finding\n**Status:** open. A first finding.\n\n"
+                          + ranged("review accepted: owner · this limit", "Its limit.") + ":::\n\n:::finding\n"
+                          + ranged("review accepted: owner · this status", "**Status:** open. A second finding."))
+        shapes["adjacent findings"] = findings
+        want = {"section then panel range": (1, 0), "host list then panel range": (2, 0), "adjacent questions": (1, 1),
+                "direct siblings": (0, 0), "adjacent findings": (1, 1)}
+        for name, src in shapes.items():
+            with self.subTest(shape=name):
+                self.reset_tmp()
+                pairs = rail_pairs(self.render(src)["html"])
+                self.assertIn(want[name], pairs)
+                self.assertTrue(all(max(p) <= build.RAIL_DEPTH for p in pairs))
+
+    def test_passage_buffer_depth_covers_the_deepest_nesting(self):
+        # Three heading levels in part 03, the last question in the deepest, three heading levels inside it and a list
+        # closing on an item host, then a range around the part's synthesis: the deepest chain UO composes.
+        src = mutate(GUIDED, "The bounded question set.\n",
+                     "The bounded question set.\n\n## Two\n\nText.\n\n### Three\n\nText.\n\n#### Four\n\nText.\n")
+        src = mutate(src, "A non-central question prompt.\n\n:::disclose question-detail \"Question detail\"\n"
+                          "The non-central question's detail.\n:::\n:::\n:::\n",
+                     "A non-central question prompt.\n\n## Two\n\nText.\n\n### Three\n\nText.\n\n#### Four\n\n"
+                     "- A plain item.\n- {{review accepted: owner · this item}} The last item.\n:::\n\n"
+                     + ranged("review accepted: v1 · owner · this synthesis", ":::synthesis\nWhat the set comes to.\n:::")
+                     + ":::\n")
+        pairs = rail_pairs(self.render(src)["html"])
+        self.assertIn((9, 0), pairs)
+        self.assertLessEqual(max(max(p) for p in pairs), build.RAIL_DEPTH)
+
+    def test_prompt_and_range_rows_carry_their_record(self):
+        # review-semantics.md, rule 2: a bare label that names no target is no prompt; a range's row names its judgment.
+        for word in build.REVIEW_WORDS:
+            with self.subTest(word=word, row="prompt"):
+                self.reset_tmp()
+                src = in_04(":::annotate\nreview %s\n:::\n\n" % word + ranged("review open: x · owner", "W."))
+                self.fails(src, r"%s: (a prompt's review item carries its record after ':'|review %s (shows a decision|"
+                                r"names a request))" % (at(1), word))
+            with self.subTest(word=word, row="range"):
+                self.reset_tmp()
+                src = in_04(":::range\n:::annotate\nreview %s\n:::\nW.\n:::\n" % word)
+                self.fails(src, r"%s: (the review item that opens a :::range carries its record after ':'|review %s "
+                                r"(shows a decision|names a request))" % (at(2), word))
+        self.reset_tmp()
+        self.fails(in_04(":::annotate\nreview open\n:::\n\n" + ranged("review open: x · owner", "W.")),
+                   r"%s: a prompt's review item carries its record after ':': the content below as its target, the scope "
+                   r"of its question and who decides, as in `review open: <record>`; a bare label that names no target is "
+                   r"no prompt" % at(1))
+        self.reset_tmp()
+        self.fails(in_04(":::range\n:::annotate\nreview none\n:::\nW.\n:::\n"),
+                   r"%s: the review item that opens a :::range carries its record after ':': what the range holds, the "
+                   r"scope of the judgment and who decides or asks, as in `review none: <record>`" % at(2))
+        # A note's row keeps its bare label: its marks name what it records.
+        self.reset_tmp()
+        self.render(in_04("Words {{mark open n: here}}.\n\n" + NOTE))
+
+    def test_a_note_records_the_words_of_one_list_item(self):
+        note = ":::note n\n:::annotate\nreview proposed: a narrower phrase · editor\n:::\n:::\n"
+        cases = [
+            ("- {{mark proposed n: alpha}} first.\n- middle.\n- {{mark proposed n: omega}} last.\n", 2),
+            ("- {{mark proposed n: alpha}} first.\n    - {{mark proposed n: omega}} nested.\n- last.\n", 1),
+            ("- {{mark proposed n: alpha}} first.\n- {{review open: owner · this item}} host {{mark proposed n: omega}}.\n", 1),
+            ("- {{review open: owner · this item}} {{mark proposed n: alpha}}.\n"
+             "- {{review accepted: owner · this item}} {{mark proposed n: omega}}.\n", 1),
+        ]
+        for text, k in cases:
+            with self.subTest(text=text[:40]):
+                self.reset_tmp()
+                self.fails(in_04(text + "\n" + note), r"%s: passage marks in 2 list items name note 'n'; a note records "
+                                                      r"the words of one list item" % at(k))
+        self.reset_tmp()
+        self.fails(in_04(ranged("review open: x · owner", "- {{mark proposed n: alpha}}.\n- {{mark proposed n: omega}}.")
+                         + "\n" + note), r"%s: passage marks in 2 list items name note 'n'" % at(5))
+        # Two marks in one item share their note, inside that item.
+        self.reset_tmp()
+        h = self.render(in_04("- {{mark proposed n: alpha}} and {{mark proposed n: omega}}.\n- another.\n\n" + note))["html"]
+        self.assertIn('%s and %s.\n<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">'
+                      % (passage("proposed", "n", "alpha"), passage("proposed", "n", "omega")), h)
+
+    def test_a_note_on_a_plain_item_a_range_holds_follows_the_range(self):
+        h = self.render(in_04(ranged("review open: x · owner · the list", "- A plain {{mark accepted n: item}}.\n- Another.")
+                              + "\n:::note n\n:::annotate\nreview accepted: on “item” · owner\n:::\n:::\n"))["html"]
+        self.assertIn('<li class="doc-body">A plain %s.</li>\n<li class="doc-body">Another.</li>\n</ul>\n</div>\n</div>\n'
+                      '<div class="doc-hierarchy doc-group doc-annotation-note" id="uo-note-n">'
+                      % passage("accepted", "n", "item"), h)
+
+    def test_a_range_over_a_structure(self):
+        h = self.render(in_04(ranged("review accepted: v1 · owner · this outline", ":::structure\nTop\n  Child\n:::")))["html"]
+        self.assertIn(RANGE_OPEN + row(item("review", "accepted", "Accepted", "v1 · owner · this outline"))
+                      + '\n<div class="doc-prose">\n<div class="doc-pre doc-pre--structured"><pre class="doc-pre-part">Top'
+                        '</pre><div class="doc-hierarchy"><pre class="doc-pre-part">Child</pre></div></div>\n</div>\n</div>', h)
+
+    def test_RS_prompts_in_a_question_a_finding_and_a_disclosure(self):
+        prompt = ":::annotate\nreview open: on the range below · whether it holds · owner\n:::\n\n"
+        src = mutate(GUIDED, "The central question prompt.\n",
+                     prompt + ranged("review accepted: owner · this prompt", "The central question prompt."))
+        src = mutate(src, "**Status:** open. Finding, significance and limit.\n",
+                     prompt + ranged("review declined: owner · this status line", "**Status:** open. Finding, significance "
+                                                                                 "and limit."))
+        src = mutate(src, "The non-central question's detail.\n",
+                     "The non-central question's detail.\n\n" + prompt
+                     + ranged("review accepted: owner · this detail", "A ranged line in the detail."))
+        src = mutate(src, "Field-level listing.\n", "Field-level listing.\n\n" + prompt
+                     + ranged("review none: no production decision", "A ranged listing."))
+        r = self.render(src)
+        h = r["html"]
+        self.assertEqual(r["counts"]["annotation_rows"], 8)          # four prompts and the four ranges' rows
+        self.assertEqual(r["counts"]["annotation_ranges"], 4)
+        prompt_html = row(item("review", "open", "Open question", "on the range below · whether it holds · owner"))
+        for where in ('<div data-uo-role="question" data-uo-central="true"', '<div data-uo-role="finding"',
+                      '<details data-uo-disclose="question-detail"', '<details data-uo-disclose="evidence"'):
+            with self.subTest(where=where):
+                block = h[h.index(where):]
+                self.assertIn(prompt_html + "\n" + RANGE_OPEN, block[:block.index("</details>" if "details" in where
+                                                                                   else "</div>\n</div>\n</div>")])
+        build.check_final_html(h, 2)
+
+    def test_a_later_row_or_list_in_a_range_names_the_first_child_rule(self):
+        for later in (":::annotate list\nitem: a\nbasis: b\n:::\n", ":::annotate\nbasis: b\n:::\n"):
+            with self.subTest(later=later[:16]):
+                self.reset_tmp()
+                src = in_04(":::range\n:::annotate\nreview open: x · owner\n:::\nWords.\n\n" + later + ":::\n")
+                what = ":::annotate list" if "list" in later else ":::annotate"
+                self.fails(src, r"%s: %s \(%s\) sits inside :::range \(%s\), which holds one :::annotate row, as its first "
+                                r"child: one judgment per range" % (at(6), what, at(6), at()))
+
+    def test_document_record_refuses_the_proposed_pair(self):
+        src = mutate(GUIDED, ":::part 01\n", ":::annotate document\nstate proposed: draft\nreview proposed: SYN-GR-001 as a "
+                                             "whole · editor\n:::\n\n:::part 01\n")
+        self.fails(src, r"line %d: the document's record cannot carry both state proposed and review proposed: they read "
+                        r"as one word twice, and the record is a row, never a list" % row_of(src, "review proposed: SYN"))
+
+    def test_an_item_host_carries_its_record(self):
+        # An item host is its own range (README, "Review annotations"): its review item names its judgment after ':',
+        # whatever its word, as a range's row and a prompt's do. A table cell's item keeps judging its cell.
+        host = "- {{review %s}} The item's words.\n- A plain item.\n"
+
+        def in_question(text):
+            return mutate(GUIDED, "The central question's detail, visible.\n",
+                          "The central question's detail, visible.\n\n" + text)
+        places = (("part 04", in_04), ("question", in_question))
+        for word in build.REVIEW_WORDS:
+            for where, place in places:
+                with self.subTest(word=word, where=where):
+                    self.reset_tmp()
+                    src = place(host % word)
+                    self.fails(src, r"line %d: (the review item that opens an item host carries its record after ':'|"
+                                    r"review %s (shows a decision|names a request))" % (row_of(src, "{{review"), word))
+        for word in ("open", "proposed", "none"):
+            for where, place in places:
+                for text in (host % word, "- {{review %s}}{{basis: owner-stated}} The item's words.\n" % word):
+                    with self.subTest(word=word, where=where, text=text[:30]):
+                        self.reset_tmp()
+                        src = place(text)
+                        self.fails(src, r"line %d: the review item that opens an item host carries its record after "
+                                        r"':': what the item holds, the scope of the judgment and who decides or asks, "
+                                        r"as in \{\{review %s: <record>\}\}" % (row_of(src, "{{review"), word))
+        for word in build.REVIEW_WORDS:
+            for where, place in places:
+                with self.subTest(word=word, where=where, record=True):
+                    self.reset_tmp()
+                    r = self.render(place("- {{review %s: owner · this item}} The item's words.\n" % word))
+                    self.assertEqual(r["counts"]["item_hosts"], 1)
+        self.reset_tmp()
+        self.assertEqual(self.render(in_04(CELL % "{{review open}}"))["counts"]["cell_items"], 1)
+
+    def test_passage_buffer_only_where_the_document_annotates(self):
+        # The passage buffer is gated where the semantic-state modules are: an unannotated document's stylesheet is
+        # MD_CSS alone, with no rule naming a range; an annotated one's is MD_CSS, then the buffer.
+        self.assertEqual(build.md_css(False), build.MD_CSS)
+        self.assertEqual(build.md_css(True), build.MD_CSS + build.RAIL_BUFFER + "\n")
+        self.assertNotIn("surface-labeled-range", build.MD_CSS)
+        self.assertNotIn(build.RAIL_BUFFER, build.MD_CSS)
+        plain = self.render(GUIDED, name="plain")
+        self.assertEqual(build.annotation_count(plain["counts"]), 0)
+        self.assertEqual(plain["inlined"], build.MODULES)
+        self.assertNotIn(build.RAIL_BUFFER, plain["html"])
+        self.assertNotIn(":where(.uo-md :is(div.surface-labeled-range", plain["html"])
+        self.assertEqual(plain["html"].count("<style>" + build.MD_CSS + "</style>"), 1)
+        rich = self.render(in_04(ranged("review open: x · owner", "W.")), name="rich")
+        self.assertGreater(build.annotation_count(rich["counts"]), 0)
+        self.assertEqual(rich["inlined"], build.MODULES + build.STATE_MODULES)
+        self.assertEqual(rich["html"].count(build.RAIL_BUFFER), 1)
+        self.assertEqual(rich["html"].count("<style>" + build.md_css(True) + "</style>"), 1)
 
 
 if __name__ == "__main__":

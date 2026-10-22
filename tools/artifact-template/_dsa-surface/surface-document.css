@@ -310,7 +310,11 @@
                      --space-5, as two emphasis rails are. NEUTRAL IS
                      STRUCTURE ONLY: the 1px hierarchy rail structures a section,
                      a list or a block, and is never the outer boundary of a
-                     set-apart passage. No wash, no
+                     set-apart passage. A labeled range's scope rail
+                     (surface-treatments.css) is not a passage rail: it sits
+                     in the outer margin, outside the content edge, and
+                     bounds a label's scope beside a passage that keeps its own
+                     rail. No wash, no
                      blur, no shadow. The emphasis violet here is a document
                      role; it names no review, proof or evidence state, and a
                      surface's own labeled uses of the accents keep their own
@@ -405,7 +409,15 @@
                      cue
      variation       a narrative table keeps a 32rem measure and scrolls below
                      it; a dense value does not wrap; code in a cell breaks
-                     only at its own break opportunities
+                     only at its own break opportunities. A table with a
+                     labeled range in its first or only column adds
+                     .doc-table-scroll--range-lane to its box, which keeps the
+                     range's lane inside the box that scrolls: the box reaches
+                     that 14px into the page's margin and pads it back, so no
+                     column, header or cell moves; scrolled, the table's
+                     content passes through the lane. A table without a range
+                     there does not take it, and a consumer that sets the
+                     box's inline margin or width itself restates the pair
      exclusions      never implied: not by table.doc-dense-table, not by a text
                      role on a cell and not by the table element, so a table
                      without both markers keeps its consumer's geometry, and a
@@ -572,6 +584,8 @@
      1.4                   metadata and quotation-attribution leading
      1.3                   Caption leading inside document compositions
      1px, 2px              hierarchy rail and passage rail widths
+     2px                   with --space-3, a labeled range's lane, which a
+                           range-lane table's box keeps (surface-treatments.css)
      #000, transparent     overflow mask stops: alpha only, never paint
      0.9em                 inline code, the foundation code rule's own size
      1lh, 2lh, 3lh         blank source lines in structured text; 1lh is also
@@ -858,6 +872,22 @@
    long token never forces a horizontal scroll; this table already scrolls in
    its box. Line breaking only: the code's type is unchanged. */
 .doc-table-scroll > table.doc-table :is(code, .doc-code) { overflow-wrap: normal; }
+/* The range lane. A labeled range's scope rail hangs 14px outside its content
+   edge (surface-treatments.css, THE LABELED RANGE'S LANE). In any later column
+   that is the gutter of the column before it; the first column has no gutter
+   before it, and the box clips there. A table that holds a range in its first
+   column, or in its only column, adopts .doc-table-scroll--range-lane: its box
+   reaches the lane's width into the page's margin and pads it back, so the
+   rail is drawn inside the box that scrolls, at the x of a range in the
+   flow, and no column, header or cell moves. The page keeps that lane, as it
+   does for every range. Scrolled, the table's content passes through the
+   lane, so the box's visible edge is the lane's. The margin and the padding
+   are one pair, so the rule outranks a consumer's rule of one class: a margin
+   shorthand set on the box for the space below it cannot split them. */
+.doc-table-scroll.doc-table-scroll--range-lane {
+  margin-left: calc(-1 * (var(--space-3) + 2px));
+  padding-left: calc(var(--space-3) + 2px);
+}
 
 /* ---- Hierarchy rail --------------------------------------------------- */
 
