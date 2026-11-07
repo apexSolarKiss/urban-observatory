@@ -6,26 +6,48 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `705a1958cc763ebd008392d696a286e8abe4e765` |
-| short | `705a195` |
-| commit date | `2026-10-15 09:36:14 -0700` |
-| commit subject | `treatments + semantics: exact words take a scope underline, a whole list item becomes its own range, and Open question takes the emphasis cyan (#185)` |
-| synced at | `2026-10-21` |
+| commit | `14e1bb0c69dee70ed0ea17052ddf74e385c71f6d` |
+| short | `14e1bb0` |
+| commit date | `2026-11-06 13:42:14 -0800` |
+| commit subject | `feat(surface-document): add comparison tables with assessment rails and the Criterion Assessment profile (PRG-028) (#204)` |
+| synced at | `2026-11-06` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `9a6acf457ffbe2a0bb31ae28507855b6446195ff9dcd3cc7112f04ec5bf0fce3` |
-| surface-document.css sha256 | `7dbc392202aab5bb3f849f2947e585f7a6c4bccd7d8cd09171a6e12bd05bf888` |
-| surface-treatments.css sha256 | `836f5957d28fce2ef06c01e4aedf82f84fc92b7615bbb880bbbe43ae9f7a5e91` |
+| surface-document.css sha256 | `fc912a50a95ae93040fd7ff98ab4611ba28b70ee5e844058f9138334e08aee46` |
+| surface-treatments.css sha256 | `ee6f1dc655d9fe84efaa6c5190320b5cabc823334b1e79cde999d4275e28d25b` |
 | spectral-state.css sha256 | `dd30fdc0b7b9174801129f0d01f45e22da5bbd92ff47e58d7aabaeea64f0d05b` |
 | evidence-state.css sha256 | `1256fb8c9178a29aa4ee9d4b586da40087e1ea30a1264689bd9a0b4e0aab209e` |
-| review-semantics.css sha256 | `13e0debf0a93d98779a3afb23f366619fb440784decc917be2f1b09d9b35d88c` |
+| review-semantics.css sha256 | `74345c46c9260d6cfb0eefb47f4ff4d289e4b7cd51279afaeecacf1e75b1f31a` |
 
 **Created 2026-09-25 at U6.** The design-system-ASK document register: the four modules the owner's sealed-use rule inlines after the
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-10-21 (`53fa86e` → `705a195`; three semantic-state modules added, three register modules change):**
+**Re-sync 2026-11-06 (`705a195` → `14e1bb0`; two register modules and one semantic-state module change):**
+crosses the owner events **#186–#204**. **#186–#202** change no file this renderer vendors; only **#203** and **#204** do.
+`surface-document.css` changes at **#203** (`021bb2a`): it adds the `.doc-section > .doc-flow` lead, for a flow of peer parts
+nested in a section, which this renderer's markup does not match: its one `.doc-flow` is the `main` element, never a child of a
+`.doc-section`. At **#204** (`14e1bb0`) it adds the comparison-table composition (`.doc-compare-table` in a `.doc-table-scroll`,
+with its assessment rails), which this renderer does not adopt: it emits none of the composition's classes, and the final-HTML
+allowlist refuses them. `surface-treatments.css` changes at **#204**: it adds the rail-paint variables on the root
+(`--surface-rail-paint-earned`, `--surface-rail-paint-structural` and `--surface-rail-paint-deflated`), and the labeled range's
+rail now sets its own `color` to the range's color and draws its 2px stroke in `currentColor`, with a `box-shadow` from
+`--surface-labeled-range-paint`, else `none`. `review-semantics.css` changes at **#204**: an accepted range binds
+`--surface-labeled-range-paint` to `--surface-rail-paint-earned` and a declined range to `--surface-rail-paint-deflated`; both
+are `none` in every theme, so the bindings resolve to no paint. The composition's classes, attributes and `data-review` values
+are unchanged. `surface-panel.css`, `surface-text-link.css`, `spectral-state.css` and `evidence-state.css` are byte-identical
+at both commits (same hashes). The three files are copied verbatim from the commit above:
+
+- `surface-document.css` sha256 `7dbc3922…` → `fc912a50…`, 59,833 → 78,786 B;
+- `surface-treatments.css` sha256 `836f5957…` → `ee6f1dc6…`, 42,117 → 47,403 B;
+- `review-semantics.css` sha256 `13e0debf…` → `74345c46…`, 32,642 → 33,109 B.
+
+`surface-document-overflow.js` is still not copied, and `criterion-assessment.css`, which #204 adds, is not vendored. **No
+frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-10-21 (`53fa86e` → `705a195`; three semantic-state modules added, three register modules change):**
 crosses the owner events **#170–#185**. **#170–#177** change no file this renderer vendors. **#178** (`e0ee2e1`) adds
 `review-semantics.css`, which carries the opt-in Review Semantics composition; **#182–#185** replace that composition's first
 model, so this repo adopts it in its #185 form only and never vendored the #178 form. **#179** and **#180** change no vendored

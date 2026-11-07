@@ -3718,10 +3718,10 @@ class ReviewAnnotationRecordsAndEscapes(RenderCase):
         rich = self.render(annotated(), name="rich")["html"].split("</head>")[0]
         for rel in build.MODULES:
             for head in (plain, rich):
-                self.assertIn("SEALED design-system-ASK %s (upstream 705a195, verbatim; bytes verified against the register "
+                self.assertIn("SEALED design-system-ASK %s (upstream 14e1bb0, verbatim; bytes verified against the register "
                               "manifest) === */" % rel, head)
         for rel in build.STATE_MODULES:
-            self.assertIn("SEALED design-system-ASK %s (upstream 705a195, verbatim; bytes verified against the _dsa-surface "
+            self.assertIn("SEALED design-system-ASK %s (upstream 14e1bb0, verbatim; bytes verified against the _dsa-surface "
                           "manifest) === */" % rel, rich)
             self.assertNotIn(rel, plain)
 
