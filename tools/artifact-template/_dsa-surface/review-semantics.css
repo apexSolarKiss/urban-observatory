@@ -200,8 +200,10 @@
                      .doc-table-scroll--range-lane (surface-document.css)
      owner           surface-treatments.css for the scope rail: the shared
                      labeled range, drawn in the outer margin, its stroke,
-                     reach and lane, an item host's included. This module for
-                     its color, the review value of the judgment its row names
+                     reach and lane, an item host's included, and the paint
+                     its color takes as a rail (RAIL PAINT). This module for
+                     its color, the review value of the judgment its row
+                     names, and for binding that color's paint
      variation       the rail takes the review value: magenta for Proposed
                      and Correction requested, cyan for Open question, green
                      for Accepted, red for Declined, the faintest neutral for
@@ -476,11 +478,19 @@
 
 /* The range: its scope rail is the shared labeled range's
    (surface-treatments.css); it takes the review value of the one judgment its
-   opening row names. */
+   opening row names. Accepted and declined, Spectral State's green and red,
+   also take that color's paint as a rail (RAIL PAINT), as every rail in
+   those colors does; proposed, open and none have no paint there. */
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="proposed"]) { --surface-labeled-range-color: var(--review-proposed); }
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="open"])     { --surface-labeled-range-color: var(--review-open); }
-.doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="accepted"]) { --surface-labeled-range-color: var(--review-accepted); }
-.doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="declined"]) { --surface-labeled-range-color: var(--review-declined); }
+.doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="accepted"]) {
+  --surface-labeled-range-color: var(--review-accepted);
+  --surface-labeled-range-paint: var(--surface-rail-paint-earned);
+}
+.doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="declined"]) {
+  --surface-labeled-range-color: var(--review-declined);
+  --surface-labeled-range-paint: var(--surface-rail-paint-deflated);
+}
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="none"])     { --surface-labeled-range-color: var(--review-none); }
 
 /* The list: one key per question. */
