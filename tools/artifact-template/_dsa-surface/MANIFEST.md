@@ -6,17 +6,17 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `14e1bb0c69dee70ed0ea17052ddf74e385c71f6d` |
-| short | `14e1bb0` |
-| commit date | `2026-11-06 13:42:14 -0800` |
-| commit subject | `feat(surface-document): add comparison tables with assessment rails and the Criterion Assessment profile (PRG-028) (#204)` |
-| synced at | `2026-11-06` |
+| commit | `8fbda728c958990a81d1cbfcd26a7dfe97cdc631` |
+| short | `8fbda72` |
+| commit date | `2026-11-11 14:29:13 -0800` |
+| commit subject | `fix(surface-document): draw no overflow cue in print (#208)` |
+| synced at | `2026-11-11` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `9a6acf457ffbe2a0bb31ae28507855b6446195ff9dcd3cc7112f04ec5bf0fce3` |
-| surface-document.css sha256 | `fc912a50a95ae93040fd7ff98ab4611ba28b70ee5e844058f9138334e08aee46` |
-| surface-treatments.css sha256 | `ee6f1dc655d9fe84efaa6c5190320b5cabc823334b1e79cde999d4275e28d25b` |
+| surface-document.css sha256 | `d0c67bedbe610a130f15a083329bf3455879a8c3cf1828f57db21aa8ac536543` |
+| surface-treatments.css sha256 | `a277e97e99779f42053e6c1c4043ddda1ecdfaaa34945096dc1cf724b2625c31` |
 | spectral-state.css sha256 | `dd30fdc0b7b9174801129f0d01f45e22da5bbd92ff47e58d7aabaeea64f0d05b` |
 | evidence-state.css sha256 | `1256fb8c9178a29aa4ee9d4b586da40087e1ea30a1264689bd9a0b4e0aab209e` |
 | review-semantics.css sha256 | `74345c46c9260d6cfb0eefb47f4ff4d289e4b7cd51279afaeecacf1e75b1f31a` |
@@ -25,7 +25,26 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-11-06 (`705a195` → `14e1bb0`; two register modules and one semantic-state module change):**
+**Re-sync 2026-11-11 (`14e1bb0` → `8fbda72`; two register modules change):**
+crosses the owner events **#205–#208**. **#205** and **#207** change no file this renderer vendors; only **#206** and **#208** do.
+`surface-treatments.css` changes at **#206** (`241ca4a`): the structural rail paint is now dosed per field rather than per theme,
+and a root that declares a `data-surface-field` other than `ask-lavender` sets `--surface-rail-paint-structural` to `none`; the
+rest of the change is comment text. This renderer declares no `data-surface-field`, and nothing it vendors binds the structural
+paint: Review Semantics binds an accepted range to the earned paint and a declined range to the deflated paint, and only
+Criterion Assessment, which is not vendored, binds the structural one. `surface-document.css` changes at **#208** (`8fbda72`):
+in print, a `.doc-pre` or `.doc-table-scroll` that carries the overflow helper's attributes draws neither the scroll label nor
+the edge fade; the rest of the change is comment text. A sealed document carries no script, so no overflow attribute is ever
+set and the print rule matches nothing here. `surface-panel.css`, `surface-text-link.css`, `spectral-state.css`,
+`evidence-state.css` and `review-semantics.css` are byte-identical at both commits (same hashes). The two files are copied
+verbatim from the commit above:
+
+- `surface-document.css` sha256 `fc912a50…` → `d0c67bed…`, 78,786 → 79,800 B;
+- `surface-treatments.css` sha256 `ee6f1dc6…` → `a277e97e…`, 47,403 → 48,906 B.
+
+`surface-document-overflow.js` is still not copied, and `criterion-assessment.css`, which #206 also changes, is not vendored. **No
+frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-11-06 (`705a195` → `14e1bb0`; two register modules and one semantic-state module change):**
 crosses the owner events **#186–#204**. **#186–#202** change no file this renderer vendors; only **#203** and **#204** do.
 `surface-document.css` changes at **#203** (`021bb2a`): it adds the `.doc-section > .doc-flow` lead, for a flow of peer parts
 nested in a section, which this renderer's markup does not match: its one `.doc-flow` is the `main` element, never a child of a

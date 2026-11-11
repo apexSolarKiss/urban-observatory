@@ -6,11 +6,11 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `14e1bb0c69dee70ed0ea17052ddf74e385c71f6d` |
-| short | `14e1bb0` |
-| commit date | `2026-11-06 13:42:14 -0800` |
-| commit subject | `feat(surface-document): add comparison tables with assessment rails and the Criterion Assessment profile (PRG-028) (#204)` |
-| synced at | `2026-11-06` |
+| commit | `8fbda728c958990a81d1cbfcd26a7dfe97cdc631` |
+| short | `8fbda72` |
+| commit date | `2026-11-11 14:29:13 -0800` |
+| commit subject | `fix(surface-document): draw no overflow cue in print (#208)` |
+| synced at | `2026-11-11` |
 | consuming project | `urban-observatory` |
 | files copied | `colors_and_type.css`, `fonts/InterVariable.woff2`, `fonts/InterVariable-Italic.woff2`, `fonts/JetBrainsMono.woff2`, `fonts/JetBrainsMono-Italic.woff2`, `assets/logo-ASK.svg` |
 | colors_and_type.css sha256 | `4fed9d796a0d51072802f430b9528459a5cbb9c709fa1964bf5b13f18464122a` |
@@ -20,7 +20,9 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | fonts/JetBrainsMono-Italic.woff2 sha256 | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 | assets/logo-ASK.svg sha256 | `76babfb09522a9236f8ec43e7d72ce4c3f32be41982962cd14505493b7664e69` |
 
-**Re-sync 2026-11-06 (`705a195` → `14e1bb0`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot's `surface-document.css` changes at **#203** (`021bb2a`) and **#204** (`14e1bb0`), and its `surface-treatments.css` and `review-semantics.css` at **#204**, across the owner events **#186–#204**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+**Re-sync 2026-11-11 (`14e1bb0` → `8fbda72`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot's `surface-treatments.css` changes at **#206** (`241ca4a`) and its `surface-document.css` at **#208** (`8fbda72`), across the owner events **#205–#208**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-11-06 (`705a195` → `14e1bb0`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot's `surface-document.css` changes at **#203** (`021bb2a`) and **#204** (`14e1bb0`), and its `surface-treatments.css` and `review-semantics.css` at **#204**, across the owner events **#186–#204**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
 **Prior re-sync 2026-10-21 (`53fa86e` → `705a195`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot adds the three semantic-state modules, of which only `review-semantics.css` is new upstream, at **#178** (`e0ee2e1`), and changes `surface-text-link.css`, `surface-document.css` and `surface-treatments.css`, across the owner events **#170–#185**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
