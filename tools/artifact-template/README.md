@@ -365,7 +365,7 @@ opt-in Review Semantics composition (`review-semantics.md`), adopted for
 presentation. UO's review anatomy (its parts, banners, table roles and domain
 vocabulary) stays `urban-observatory`'s own; annotation presentation and the
 scopes it draws are `design-system-ASK`'s. The renderer follows the composition
-as of `design-system-ASK` `8fbda72` (#208), the commit both snapshot manifests
+as of `design-system-ASK` `e84394b` (#211), the commit both snapshot manifests
 pin. The re-sync that adopted it moved this repo's pin from `53fa86e` (#169) to
 `705a195` (#185) and crosses the owner's events #170 to #185, which
 `_dsa-surface/MANIFEST.md` records file by file: #170 to #177 change no
@@ -376,7 +376,9 @@ model, so this repo adopts it only in its #185 form. The later re-sync, to
 neither changes the composition's vocabulary. #204 gives an accepted or
 declined range's rail a shared paint that draws nothing in any theme. The
 re-sync after that, to `8fbda72`, crosses #205 to #208; only #206 and #208
-change vendored files, and neither changes the composition's vocabulary. A
+change vendored files, and neither changes the composition's vocabulary. The
+one after that, to `e84394b`, crosses #209 to #211; only #211 changes a
+vendored file, and it does not change the composition's vocabulary. A
 review mark is the shared bordered label
 (#182); a judgment on whole blocks opens a labeled range with a scope rail
 (#183, #184); exact words take the scope underline, pending or decided, and a

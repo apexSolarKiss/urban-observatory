@@ -6,16 +6,16 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `8fbda728c958990a81d1cbfcd26a7dfe97cdc631` |
-| short | `8fbda72` |
-| commit date | `2026-11-11 14:29:13 -0800` |
-| commit subject | `fix(surface-document): draw no overflow cue in print (#208)` |
+| commit | `e84394bae81f7b202f1673e7ef7696a5bc3bba1c` |
+| short | `e84394b` |
+| commit date | `2026-11-11 20:32:29 -0800` |
+| commit subject | `feat(surface-document): outline focused scroll regions and add a compact narrative table (#211)` |
 | synced at | `2026-11-11` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `9a6acf457ffbe2a0bb31ae28507855b6446195ff9dcd3cc7112f04ec5bf0fce3` |
-| surface-document.css sha256 | `d0c67bedbe610a130f15a083329bf3455879a8c3cf1828f57db21aa8ac536543` |
+| surface-document.css sha256 | `1c122ddf355a065197b05bb4e8b3c821bee37617f052982c68da923cfdb72a27` |
 | surface-treatments.css sha256 | `a277e97e99779f42053e6c1c4043ddda1ecdfaaa34945096dc1cf724b2625c31` |
 | spectral-state.css sha256 | `dd30fdc0b7b9174801129f0d01f45e22da5bbd92ff47e58d7aabaeea64f0d05b` |
 | evidence-state.css sha256 | `1256fb8c9178a29aa4ee9d4b586da40087e1ea30a1264689bd9a0b4e0aab209e` |
@@ -25,7 +25,27 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-11-11 (`14e1bb0` → `8fbda72`; two register modules change):**
+**Re-sync 2026-11-11 (`8fbda72` → `e84394b`; one register module changes):**
+crosses the owner events **#209–#211**. **#209** and **#210** change no file this renderer vendors; only **#211** does.
+`surface-document.css` changes at **#211** (`e84394b`): a `.doc-pre` or `.doc-table-scroll` that shows keyboard focus draws a
+2px `--fg-1` outline `--space-1` out, and its edge fade is dropped while focus shows; it adds an opt-in marker for a compact
+narrative table, `table.doc-compact-table`, which takes no measure; and the 32rem measure rule, still at zero specificity inside
+`:where()`, now leaves out a compact table and keeps a comparison table's measure even when it is marked compact; the rest of the
+change is comment text. This renderer does not adopt the compact marker: the final-HTML allowlist admits only `doc-dense-table`
+on a `table`, and the renderer emits no `.doc-table-scroll`, so neither the marker nor the measure rule matches anything here.
+The focus rule reaches new renders: the renderer emits `pre.doc-pre`, and a structured block as `div.doc-pre`, and both scroll on
+screen (`overflow-x: auto`; this renderer's `pre-wrap` applies in print only), so where a browser makes a scrolling block
+focusable, keyboard focus on it draws the 2px `--fg-1` outline. That is the owner's intended change. A sealed document carries
+no script, so no overflow attribute is set and no edge fade is drawn for focus to drop. `surface-panel.css`,
+`surface-text-link.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css` and `review-semantics.css` are
+byte-identical at both commits (same hashes). The one file is copied verbatim from the commit above:
+
+- `surface-document.css` sha256 `d0c67bed…` → `1c122ddf…`, 79,800 → 82,587 B.
+
+`surface-document-overflow.js` is still not copied. **No frozen/sealed artifact regenerated**; renders made after this re-sync
+use the new pin.
+
+**Prior re-sync 2026-11-11 (`14e1bb0` → `8fbda72`; two register modules change):**
 crosses the owner events **#205–#208**. **#205** and **#207** change no file this renderer vendors; only **#206** and **#208** do.
 `surface-treatments.css` changes at **#206** (`241ca4a`): the structural rail paint is now dosed per field rather than per theme,
 and a root that declares a `data-surface-field` other than `ask-lavender` sets `--surface-rail-paint-structural` to `none`; the
