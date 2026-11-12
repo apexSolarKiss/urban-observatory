@@ -6,11 +6,11 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `e84394bae81f7b202f1673e7ef7696a5bc3bba1c` |
-| short | `e84394b` |
-| commit date | `2026-11-11 20:32:29 -0800` |
-| commit subject | `feat(surface-document): outline focused scroll regions and add a compact narrative table (#211)` |
-| synced at | `2026-11-11` |
+| commit | `e88e92b42d354ae98f687c28b9f1eefcbeb4f557` |
+| short | `e88e92b` |
+| commit date | `2026-11-12 11:12:51 -0800` |
+| commit subject | `fix(colors-and-type): let the body's field scroll with the document in print (#212)` |
+| synced at | `2026-11-12` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
@@ -25,7 +25,15 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-11-11 (`8fbda72` → `e84394b`; one register module changes):**
+**Re-sync 2026-11-12 (`e84394b` → `e88e92b`; no byte change):**
+crosses the owner event **#212**, which changes no file in this snapshot. The commit row moves only to keep this snapshot and
+`../_dsa-tokens/` at one commit, which the build requires; at this re-sync that snapshot's `colors_and_type.css` changes at
+**#212** (`e88e92b`). `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`,
+`spectral-state.css`, `evidence-state.css` and `review-semantics.css` are byte-identical at both commits (same hashes).
+`surface-document-overflow.js` is still not copied. **No frozen/sealed artifact regenerated**; renders made after this re-sync
+use the new pin.
+
+**Prior re-sync 2026-11-11 (`8fbda72` → `e84394b`; one register module changes):**
 crosses the owner events **#209–#211**. **#209** and **#210** change no file this renderer vendors; only **#211** does.
 `surface-document.css` changes at **#211** (`e84394b`): a `.doc-pre` or `.doc-table-scroll` that shows keyboard focus draws a
 2px `--fg-1` outline `--space-1` out, and its edge fade is dropped while focus shows; it adds an opt-in marker for a compact

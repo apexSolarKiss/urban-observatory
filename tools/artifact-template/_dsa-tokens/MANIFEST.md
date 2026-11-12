@@ -6,21 +6,23 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `e84394bae81f7b202f1673e7ef7696a5bc3bba1c` |
-| short | `e84394b` |
-| commit date | `2026-11-11 20:32:29 -0800` |
-| commit subject | `feat(surface-document): outline focused scroll regions and add a compact narrative table (#211)` |
-| synced at | `2026-11-11` |
+| commit | `e88e92b42d354ae98f687c28b9f1eefcbeb4f557` |
+| short | `e88e92b` |
+| commit date | `2026-11-12 11:12:51 -0800` |
+| commit subject | `fix(colors-and-type): let the body's field scroll with the document in print (#212)` |
+| synced at | `2026-11-12` |
 | consuming project | `urban-observatory` |
 | files copied | `colors_and_type.css`, `fonts/InterVariable.woff2`, `fonts/InterVariable-Italic.woff2`, `fonts/JetBrainsMono.woff2`, `fonts/JetBrainsMono-Italic.woff2`, `assets/logo-ASK.svg` |
-| colors_and_type.css sha256 | `4fed9d796a0d51072802f430b9528459a5cbb9c709fa1964bf5b13f18464122a` |
+| colors_and_type.css sha256 | `d00f1f4f17d4af5201d840dd9f1f558800e69c77280826a3f8d07e9ffd99ef5e` |
 | fonts/InterVariable.woff2 sha256 | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | fonts/InterVariable-Italic.woff2 sha256 | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | fonts/JetBrainsMono.woff2 sha256 | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | fonts/JetBrainsMono-Italic.woff2 sha256 | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 | assets/logo-ASK.svg sha256 | `76babfb09522a9236f8ec43e7d72ce4c3f32be41982962cd14505493b7664e69` |
 
-**Re-sync 2026-11-11 (`8fbda72` → `e84394b`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot's `surface-document.css` changes at **#211** (`e84394b`), across the owner events **#209–#211**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+**Re-sync 2026-11-12 (`e84394b` → `e88e92b`, `colors_and_type.css` only):** crosses one carrier-changing owner event, **#212** (`e88e92b`): a print-only rule, `@media print { body { background-attachment: scroll; } }`, with its comment; no token value, selector outside print, `@font-face` block or theme behavior changes. This template prints its ground (`print-color-adjust: exact` on the root), so the rule reaches every render made after this re-sync. Measured on renders of synthetic sources at both pins, printed to PDF in headless Chrome 157 at 375 and 1440 wide, light: at `e84394b` the body's field was fixed to the printing window, repeated on every sheet and, from the 375px window, drawn only in a strip that wide with the root's field beside it; at `e88e92b` it is one gradient the length of the document, drawn across the printed column, the same from both widths. Screen output does not change. The four fonts and the wordmark are **byte-identical** at both commits (same hashes). `colors_and_type.css` sha256 `4fed9d79…` → `d00f1f4f…`, 15,496 → 15,945 B. `../_dsa-surface/` moves to the same commit with no byte change. **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-11-11 (`8fbda72` → `e84394b`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot's `surface-document.css` changes at **#211** (`e84394b`), across the owner events **#209–#211**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
 **Prior re-sync 2026-11-11 (`14e1bb0` → `8fbda72`; no byte change):** the commit row moves only to keep this snapshot and `../_dsa-surface/` at one commit, which the build requires; at this re-sync that snapshot's `surface-treatments.css` changes at **#206** (`241ca4a`) and its `surface-document.css` at **#208** (`8fbda72`), across the owner events **#205–#208**. Every file here (`colors_and_type.css`, `fonts/` and `assets/logo-ASK.svg`) is **byte-identical** at both commits (same hashes). **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
