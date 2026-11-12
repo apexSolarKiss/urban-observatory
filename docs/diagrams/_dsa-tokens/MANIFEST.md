@@ -11,11 +11,11 @@ This mirror is a **build input, not a fork** and not a second source of truth.
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `067691a2fb6ca979cb6a5b0c9ca1d97790134b3f` |
-| short | `067691a` |
-| commit date | `2026-09-17 15:41:55 -0700` |
-| commit subject | `Merge pull request #155 from apexSolarKiss/feat/prg-019-shared-language-batch-b` |
-| synced at | `2026-09-17` |
+| commit | `e88e92b42d354ae98f687c28b9f1eefcbeb4f557` |
+| short | `e88e92b` |
+| commit date | `2026-11-12 11:12:51 -0800` |
+| commit subject | `fix(colors-and-type): let the body's field scroll with the document in print (#212)` |
+| synced at | `2026-11-12` |
 | consuming surface | `urban-observatory/docs/diagrams/` |
 | scope | Tier 1 + Tier 2 only (no Tier 3) |
 
@@ -38,14 +38,18 @@ _dsa-tokens/
 
 | file | sha256 |
 | --- | --- |
-| `colors_and_type.css` | `4fed9d796a0d51072802f430b9528459a5cbb9c709fa1964bf5b13f18464122a` |
+| `colors_and_type.css` | `d00f1f4f17d4af5201d840dd9f1f558800e69c77280826a3f8d07e9ffd99ef5e` |
 | `spectral-state.css` | `dd30fdc0b7b9174801129f0d01f45e22da5bbd92ff47e58d7aabaeea64f0d05b` |
 | `fonts/InterVariable.woff2` | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | `fonts/InterVariable-Italic.woff2` | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | `fonts/JetBrainsMono.woff2` | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | `fonts/JetBrainsMono-Italic.woff2` | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 
-**Re-sync 2026-09-17 (`2bbab41` → `067691a`, `colors_and_type.css` only):** crosses **one** carrier-changing owner event for this mirror, **PRG-019 SL3** (`31e283e`, DS **#154**) — `--tracking-caption: 0.14em` is added to the Tier-1 token block, and the foundation's `.caption` utility is rebound from `letter-spacing: var(--tracking-wide)` (0.08em) to `var(--tracking-caption)` (0.14em). Caption becomes a role with its own tracking rather than a borrower of the operative mono value. **SL3 is a coupled pair, and this repo vendors both halves**, so the second half travels in the same commit outside this mirror: `../interactive/diagrams-interactive-spine.css` (`9178d8d` → `7e43a98`) gains an explicit `letter-spacing: var(--tracking-wide)` on the spine's own `.caption` band, which set none before and therefore expressed the foundation's. Taking the token half alone would have moved that band 0.08em → 0.14em; the two are atomic here and are not separable across commits. One file re-vendored **in this mirror**: `colors_and_type.css` (sha256 `fd8207bf…` → `4fed9d79…`, 15,463 → 15,496 B; new value in the file table). `spectral-state.css` and the four fonts are **byte-identical** between `2bbab41` and `067691a` and remain pinned at `1231d03` — this mirror stays at **mixed pins**.
+**Re-sync 2026-11-12 (`067691a` → `e88e92b`, `colors_and_type.css` only):** crosses **one** carrier-changing owner event for this mirror, **#212** (`e88e92b`): a print-only rule, `@media print { body { background-attachment: scroll; } }`, with its comment. No token value, selector outside print, `@font-face` block or theme behavior changes. One file re-vendored **in this mirror**: `colors_and_type.css` (sha256 `4fed9d79…` → `d00f1f4f…`, 15,496 → 15,945 B; new value in the file table). `spectral-state.css` and the four fonts are **byte-identical** between `067691a` and `e88e92b` and remain pinned at `1231d03`; this mirror stays at **mixed pins**.
+
+**Render impact: print only, measured.** Headless Chrome 157, printed to PDF with background graphics on, base `91ff888` against this tree, at 375 and 1440 wide, light. The two static figure pages load `diagrams.css`, and the interactive spine `../interactive/diagrams-interactive-spine.css`, after the foundation; each restates `body { background: var(--bg-gradient); background-attachment: fixed; }` for every medium at equal specificity, so the new rule does not reach them and their print does not change: 0 differing pixels on each of the three at both widths. The pages that load the tokens with no diagram stylesheet now print the field scrolling with the document: the diagram front door `index.html`, and the home page and reading pages that `tools/read/` composes from this mirror at deploy (measured on the home page and the data dictionary). At `067691a` their field was fixed to the printing window: it repeated on every sheet and, from a 375px window, was drawn only in a strip that wide with the root's field beside it. At `e88e92b` it is one gradient the length of the document, drawn across the printed column from either width. Screen renders do not change, which follows from the bytes: the rule sits inside `@media print`, and no page links the tokens with a `media` attribute. **Render stamps held, no raster regenerated:** no diagram's realization changes, and the repository commits no raster exported from these pages.
+
+**Prior re-sync 2026-09-17 (`2bbab41` → `067691a`, `colors_and_type.css` only):** crosses **one** carrier-changing owner event for this mirror, **PRG-019 SL3** (`31e283e`, DS **#154**) — `--tracking-caption: 0.14em` is added to the Tier-1 token block, and the foundation's `.caption` utility is rebound from `letter-spacing: var(--tracking-wide)` (0.08em) to `var(--tracking-caption)` (0.14em). Caption becomes a role with its own tracking rather than a borrower of the operative mono value. **SL3 is a coupled pair, and this repo vendors both halves**, so the second half travels in the same commit outside this mirror: `../interactive/diagrams-interactive-spine.css` (`9178d8d` → `7e43a98`) gains an explicit `letter-spacing: var(--tracking-wide)` on the spine's own `.caption` band, which set none before and therefore expressed the foundation's. Taking the token half alone would have moved that band 0.08em → 0.14em; the two are atomic here and are not separable across commits. One file re-vendored **in this mirror**: `colors_and_type.css` (sha256 `fd8207bf…` → `4fed9d79…`, 15,463 → 15,496 B; new value in the file table). `spectral-state.css` and the four fonts are **byte-identical** between `2bbab41` and `067691a` and remain pinned at `1231d03` — this mirror stays at **mixed pins**.
 
 **Render impact — measured neutral on all three diagram surfaces, and neutral for a different reason on each.** Headless Chrome, computed `letter-spacing` on the live `.caption` elements of the actual committed pages over `file://`, before and after. **Architecture tree** and **ontology**: 0.6px before, 0.6px after (10px × 0.06em) — `diagrams.css` loads after the foundation and sets its own `.caption { letter-spacing: 0.06em }` at equal specificity, so these pages never expressed the foundation value and cannot move with it. **Interactive IA spine**: 0.8px before, 0.8px after (10px × 0.08em) — this page *did* express the foundation value, and holds only because SL3's spine half re-pins it to `--tracking-wide` in the same commit. A **control run with the token half applied alone** measured that same band at **1.4px**, which is the regression the coupling exists to prevent and the reason the pair is not split. `index.html` carries no `.caption` element; its local `.card .cls` label keeps its own literal `0.14em` (1.96px, unmoved) and is UO-authored chrome, not a vendored carrier. **Render stamps held** — not merely because UO commits no diagram rasters, but because the tracking on every committed page was measured unchanged across the event. **No raster consequence:** the repo commits no diagram export of any kind; the only images under `docs/diagrams/` are the two vendored ASK wordmark PNGs in `_dsa-surface/assets/`, which no diagram page loads.
 
@@ -70,7 +74,7 @@ _dsa-tokens/
 This mirror carries `colors_and_type.css` + fonts (everything the **static**
 Class A diagrams need, `diagram-static-H`) **and** `spectral-state.css` (Spectral
 State v1.1), required by the **interactive** IA spine (`diagram-interactive-spine`,
-in `../interactive/`). Now at **mixed pins**: `colors_and_type.css` @ `067691a` (DS #154);
+in `../interactive/`). Now at **mixed pins**: `colors_and_type.css` @ `e88e92b` (DS #212);
 `spectral-state.css` + the four fonts @ `1231d03` (prior `b5d158e`) — see the
 field table and the re-sync notes.
 
@@ -83,8 +87,8 @@ diagrams-interactive-spine.css`. Color on the interactive surface encodes
 
 This manifest records the vendored owner-carrier pins: the upstream
 `design-system-ASK` state each file listed above was copied from (current
-pins: `colors_and_type.css` @ `067691a`, `spectral-state.css` + fonts @
-`1231d03`; prior `2bbab41`). Each diagram's `<head>` records a separate
+pins: `colors_and_type.css` @ `e88e92b`, `spectral-state.css` + fonts @
+`1231d03`; prior `067691a`). Each diagram's `<head>` records a separate
 identity, its `source-vN` // `render-vN` tuple: the authored source and the
 rendered output. The two planes advance independently, and a pin advance alone
 changes neither tuple. Drift means the vendored bytes differ from this manifest,
