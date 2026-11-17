@@ -6,26 +6,64 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `e88e92b42d354ae98f687c28b9f1eefcbeb4f557` |
-| short | `e88e92b` |
-| commit date | `2026-11-12 11:12:51 -0800` |
-| commit subject | `fix(colors-and-type): let the body's field scroll with the document in print (#212)` |
-| synced at | `2026-11-12` |
+| commit | `842f272280a3240ac51182d43d5d70efe7108f2c` |
+| short | `842f272` |
+| commit date | `2026-11-17 07:22:31 -0800` |
+| commit subject | `feat(color): define the six state values once in the foundation, reserved (#223)` |
+| synced at | `2026-11-17` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `9a6acf457ffbe2a0bb31ae28507855b6446195ff9dcd3cc7112f04ec5bf0fce3` |
-| surface-document.css sha256 | `1c122ddf355a065197b05bb4e8b3c821bee37617f052982c68da923cfdb72a27` |
-| surface-treatments.css sha256 | `a277e97e99779f42053e6c1c4043ddda1ecdfaaa34945096dc1cf724b2625c31` |
-| spectral-state.css sha256 | `dd30fdc0b7b9174801129f0d01f45e22da5bbd92ff47e58d7aabaeea64f0d05b` |
-| evidence-state.css sha256 | `1256fb8c9178a29aa4ee9d4b586da40087e1ea30a1264689bd9a0b4e0aab209e` |
-| review-semantics.css sha256 | `74345c46c9260d6cfb0eefb47f4ff4d289e4b7cd51279afaeecacf1e75b1f31a` |
+| surface-document.css sha256 | `57140e0d5383f95d4d88001e535c682d0c47152e2165e92516ece2ba4cf999ed` |
+| surface-treatments.css sha256 | `272bb52c3f84e845a2c040bf90e0b04289bd3b121512de8e879c70665fec06da` |
+| spectral-state.css sha256 | `d93aa47ad8acb4c7b7873d8a0bcd5f55abec1f19035eecb4d239d2621cc354bc` |
+| evidence-state.css sha256 | `9d70966f33ca4c940e8b2e2b6c2c10350ce2a305e65d07c7e43f8507c223358a` |
+| review-semantics.css sha256 | `1647f1d54f7873db5b932dea117c1b12f56dc779881cf8e0587ca586dd648f34` |
 
 **Created 2026-09-25 at U6.** The design-system-ASK document register: the four modules the owner's sealed-use rule inlines after the
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-11-12 (`e84394b` → `e88e92b`; no byte change):**
+**Re-sync 2026-11-17 (`e88e92b` → `842f272`; two register modules and two semantic-state modules change, and one more in comment text only):**
+crosses the owner events **#213–#223**. **#213**, **#215–#218**, **#220** and **#221** change no file this renderer vendors; **#214**,
+**#219**, **#222** and **#223** do. `surface-document.css` changes at **#214** (`1f5461f`): it adds the ordered sequence,
+`.doc-sequence` on a list and `.doc-sequence-step` on each step, with a print rule that keeps a step whole, and it declares the
+hierarchy rail's geometry once for `.doc-hierarchy` and `.doc-sequence`, so `.doc-hierarchy` keeps its declarations. This renderer
+does not adopt the sequence: it emits no `.doc-sequence`, and the final-HTML allowlist admits no class set that carries it.
+`spectral-state.css` changes at **#219** (`ea0057c`): every role takes one value in both themes (Spectral State v1.2), so
+accepted and declined, which take the earned and deflated values, no longer change with the theme; and it adds the
+`--state-*-ink` bindings to the fill paint, which nothing here reads. At **#223** (`842f272`) it reads its four health-ramp values
+from the foundation's reserved state values (v1.3), with no value changed. `evidence-state.css` changes at the same two events:
+weakened takes `hsl(30, 45%, 48%)` and not-yet-testable `hsl(264, 8%, 53%)` in both themes (v0.2), read from the foundation at
+#223 (v0.3); the three roles it reuses follow Spectral State. `surface-treatments.css` changes at **#219**: it adds the fill paint
+(`.surface-fill`, `.surface-fill-ink`, `.surface-fill--neutral` and the `--surface-fill-*` inks), which this renderer does not
+adopt; a bordered label's dark edge reinforcement goes from 0.5px to 0, so a review mark, neutral label or emphasis chip draws
+the plain 1px border under a dark theme; and the structural rail paint becomes `none` everywhere, which nothing here binds. At
+**#222** (`b6dc02c`) it changes the orange and cyan inks, which nothing here reads. `review-semantics.css` changes at **#219** in
+comment text only; its rules are byte-identical with comments removed, so the composition's classes, attributes and `data-review`
+values are unchanged. The modules' load order (tokens, the four register modules ending with `surface-treatments.css`, then
+`spectral-state.css`, `evidence-state.css` and `review-semantics.css`) satisfies the order `evidence-state.css` now states.
+
+Measured on renders of synthetic sources at both pins in headless Chrome 157, light and dark: a document without annotations
+renders identically (computed styles of all 132 elements, and screenshots, in both themes; the fixture carries no bordered label).
+In an annotated document, under light accepted's green moves `rgb(17, 212, 17)` → `rgb(56, 250, 56)`, declined's red
+`rgb(212, 17, 17)` → `rgb(250, 56, 56)`, and the Spectral State markers' earned green, structural yellow and partial orange
+take their single values; under dark every bordered review mark loses its 0.5px reinforcement, partial's orange moves `rgb(250, 153, 56)` →
+`rgb(255, 128, 0)`, and not-yet-testable's edge moves `rgb(161, 152, 174)` → `rgb(133, 126, 145)`. Open and proposed do not
+change. The five files are copied verbatim from the commit above:
+
+- `surface-document.css` sha256 `1c122ddf…` → `57140e0d…`, 82,587 → 88,017 B;
+- `surface-treatments.css` sha256 `a277e97e…` → `272bb52c…`, 48,906 → 55,223 B;
+- `spectral-state.css` sha256 `dd30fdc0…` → `d93aa47a…`, 5,235 → 6,581 B;
+- `evidence-state.css` sha256 `1256fb8c…` → `9d70966f…`, 4,362 → 5,060 B;
+- `review-semantics.css` sha256 `74345c46…` → `1647f1d5…`, 33,109 → 33,137 B.
+
+`surface-panel.css` and `surface-text-link.css` are byte-identical at both commits (same hashes). `surface-document-overflow.js` is
+still not copied, and `criterion-assessment.css` and `three-functions.css` are not vendored. **No frozen/sealed artifact
+regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-11-12 (`e84394b` → `e88e92b`; no byte change):**
 crosses the owner event **#212**, which changes no file in this snapshot. The commit row moves only to keep this snapshot and
 `../_dsa-tokens/` at one commit, which the build requires; at this re-sync that snapshot's `colors_and_type.css` changes at
 **#212** (`e88e92b`). `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`,
