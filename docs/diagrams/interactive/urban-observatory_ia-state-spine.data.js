@@ -33,7 +33,7 @@ window.IA_STATE_SPINE = {
   meta: {
     title: 'Information architecture — state',
     subtitle: 'operational state surface · earned / structural / partial / held / proposed / external, and where · color encodes state only',
-    stamp: { source: 'source-v1', render: 'render-v1', date: '2026-06-05' },
+    stamp: { source: 'source-v1', render: 'render-v7', date: '2026-11-17' },
   },
 
   // The eight Spectral State v1.3 roles (inherited vocabulary — do not rename).
