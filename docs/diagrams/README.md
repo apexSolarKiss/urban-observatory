@@ -21,7 +21,7 @@ axis) and *structure or state*.
 |---|---|---|---|---|
 | **Architecture tree** | whole repo (the atlas) | structure | [`diagram-static-H`](https://github.com/apexSolarKiss/design-system-ASK/blob/main/patterns/diagram-static-H/README.md) | built |
 | **Ontology** | one axis — *kinds* of concepts (Axis A) | structure | `diagram-static-H` | built |
-| **Interactive IA spine** | the operational whole | **state** (Spectral State v1.1) | [`diagram-interactive-spine`](https://github.com/apexSolarKiss/design-system-ASK/blob/main/patterns/diagram-interactive-spine/README.md) | built |
+| **Interactive IA spine** | the operational whole | **state** (Spectral State v1.3) | [`diagram-interactive-spine`](https://github.com/apexSolarKiss/design-system-ASK/blob/main/patterns/diagram-interactive-spine/README.md) | built |
 
 - The **structure** diagrams keep **one axis each** (axis purity) and assert no
   maturity. The **state** diagram is the one place the mixed operational whole is
@@ -40,7 +40,7 @@ docs/diagrams/
 ├── README.md                                      this file
 ├── _dsa-surface/                                  VENDORED, PINNED design-system-ASK surface carriers (full set below)
 │   ├── surface-panel.css                          panel material (verbatim) — index.html, the static pages' compact triggers + interactive spine
-│   └── surface-treatments.css                     disclosure grammar (verbatim) — the static pages' compact triggers + interactive spine
+│   └── surface-treatments.css                     disclosure grammar + fill paint (verbatim) — the static pages' compact triggers; the interactive spine's nodes + triggers
 ├── _dsa-tokens/                                   VENDORED, PINNED design-system-ASK mirror
 │   ├── MANIFEST.md                                upstream commit + per-file sha256
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
@@ -75,11 +75,15 @@ crowded canvas the caption and legend close behind those triggers beside or
 above the HUD and the header's subtitle and stamp move into About; one finger pans the
 drawing from anywhere on it, two pinch the drawing rather than the page, and the
 panels keep their own taps and scrolling. The **interactive** IA spine sits in
-`interactive/` and additionally loads `spectral-state.css` and, for the About,
-Legend and Inspector disclosure triggers its engine adds on a narrow or short
-canvas, `surface-panel.css` + `surface-treatments.css` (load order:
+`interactive/` and additionally loads `spectral-state.css` and
+`surface-panel.css` + `surface-treatments.css` (load order:
 `colors_and_type.css → spectral-state.css → diagrams-interactive-spine.css`,
-then `surface-panel.css → surface-treatments.css`); it references the shared
+then `surface-panel.css → surface-treatments.css`). It needs
+`surface-treatments.css` for two things: its fill paint (FILL PAINT) paints
+every node (a state node filled at 100% of its state's color, its group tag and
+label in that color's ink; the root as the neutral filled shape), and its
+disclosure grammar styles the About, Legend and Inspector triggers the engine
+adds on a narrow or short canvas. The spine references the shared
 mirrors one level up at `../_dsa-tokens/` and `../_dsa-surface/`, and loads
 `diagrams-pointer.js`, the shared pointer controller, before `../diagrams-fit.js`
 and its engine. The interactive surface is the only one that consumes Spectral
@@ -89,7 +93,7 @@ State; **color encodes state only**.
 
 - [`index.html`](index.html) — ASK-branded live navigation surface for this folder's three diagram pages. It consumes the local Tier 1 + Tier 2 mirror and vendored `_dsa-surface/` carriers; its locally assigned Tier 3 does not propagate into any of the three diagrams. Opened from a clone, its source, data, architecture, object-model and README links open the raw files they name. The site build ([`tools/read/`](../../tools/read/README.md)) serves a composed copy, in which those links open the reading pages and source views generated from the same files, a documents route and a documents action in the navigation panel are added, and the breadcrumb's `urban-observatory` links the site's home page. Its project cards open each project's public site.
 - **Reading pages.** The site build's pages, the home page at the site root and the reading pages under `/read/` (`tools/read/`), also load `surface-shell.css`, `surface-shell.js`, `surface-panel.css`, `surface-action.css`, the wordmark pair and the `_dsa-tokens/` foundation stylesheet, `colors_and_type.css`, with its fonts, from this folder. They take their own document-register carriers from `tools/read/carriers/`, and never this folder's `surface-treatments.css`. [`tools/read/declared.json`](../../tools/read/declared.json) records the sha256 of each stylesheet and script they load, and the build stops when one of them moves without it.
-- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, `surface-action`, `surface-text-link` and `surface-treatments` carriers, the optional `surface-shell.js` navigation runtime, and the mode-aware ASK wordmark pair. `index.html` uses all of them except `surface-treatments`. `surface-shell.js` is vendored because that surface **adopts** the shell's responsive navigation; the three diagram pages adopt none of it. Of the diagram pages, the two static pages and the interactive IA spine load `surface-panel` and `surface-treatments`, for their disclosure triggers, and nothing else here.
+- `_dsa-surface/` — pinned, byte-identical `surface-shell`, `surface-panel`, `surface-action`, `surface-text-link` and `surface-treatments` carriers, the optional `surface-shell.js` navigation runtime, and the mode-aware ASK wordmark pair. `index.html` uses all of them except `surface-treatments`. `surface-shell.js` is vendored because that surface **adopts** the shell's responsive navigation; the three diagram pages adopt none of it. Of the diagram pages, the two static pages and the interactive IA spine load `surface-panel` and `surface-treatments` and nothing else here: the static pages for their disclosure triggers, and the spine for its disclosure triggers and its nodes' fill paint.
 
 ## Consumption discipline
 
