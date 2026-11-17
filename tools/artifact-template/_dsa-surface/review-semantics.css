@@ -43,9 +43,10 @@
 
    Offline; no CDN. Theme-aware through the foundation's [data-theme] +
    prefers-color-scheme model: every color resolves through a foundation or
-   Spectral token, and all but proposed and open flip with the theme;
-   proposed takes the fixed emphasis magenta and open the fixed emphasis cyan,
-   the same in both themes. This file sets no value per theme.
+   Spectral token. Since Spectral State v1.2 only none flips with the theme,
+   through --fg-3: proposed and open take the fixed emphasis magenta and cyan,
+   and accepted and declined take Spectral's single values. This file sets no
+   value per theme.
 
    STATUS: v0.1 // first version. Opt-in. A consumer takes it through its own
    gates; no existing document is recolored by its arrival. Contract:
@@ -56,13 +57,13 @@
    ---------------------------------------------------------------------------
    Review meaning       Value                      Relationship
      proposed           value of                   a candidate, not yet
-                        --ask-emphasis-magenta     decided; Spectral proposed's
-                                                   hue, not its value
+                        --ask-emphasis-magenta     decided; the same foundation
+                                                   magenta as Spectral proposed
      open               value of                   a named open question, the
                         --ask-emphasis-cyan        matter Spectral held and
                                                    Evidence unresolved also
-                                                   name: their meaning, not
-                                                   their value
+                                                   name, in the same
+                                                   foundation cyan
      accepted           value of --state-earned    a recorded decision to adopt
                                                    or permit, at its scope
      declined           value of --state-deflated  a recorded decision not to
@@ -85,20 +86,20 @@
    by who made the request. A surface never relabels a review role by a
    Spectral or Evidence name, and never relabels an Evidence or Spectral role
    by a review name because a value is shared. Spectral's Proposed and
-   review's Proposed share a word and the magenta hue, not a value: Spectral's
-   is its theme-calibrated --state-proposed, review's the fixed emphasis
-   magenta. Where both apply to one item, the keyed list carries them, one key
-   each.
+   review's Proposed share a word and, since Spectral State v1.2, a value: the
+   foundation magenta. They remain two roles. Where both apply to one item,
+   the keyed list carries them, one key each.
 
    The proposed value is the emphasis magenta (#FF00FF in both themes), the
    value a document's other magenta labels and rails already use, so a
    proposal never sits beside a near-identical second pink. A proposal and a
    thesis are told apart by their words, their place and their key, never by
    a difference in pink. The open value is the emphasis cyan (#00BEFF in both
-   themes), by reference, as proposed takes the magenta: it reads bluer than
-   Spectral held, which is tealer, and apart from accepted's green. Spectral
-   held and Evidence unresolved keep their own values; an open question shares
-   their meaning, a matter not yet settled, not their value.
+   themes), by reference, as proposed takes the magenta, and apart from
+   accepted's green. Since Spectral State v1.2 Spectral held and Evidence
+   unresolved take the same foundation cyan: an open question shares their
+   meaning, a matter not yet settled, and their value, and remains its own
+   review role.
 
    ---------------------------------------------------------------------------
    FACET 2 // ANNOTATION

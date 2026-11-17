@@ -44,7 +44,7 @@ docs/diagrams/
 ├── _dsa-tokens/                                   VENDORED, PINNED design-system-ASK mirror
 │   ├── MANIFEST.md                                upstream commit + per-file sha256
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
-│   ├── spectral-state.css                         Spectral State v1.1 (verbatim) — interactive spine only
+│   ├── spectral-state.css                         Spectral State v1.3 (verbatim) — interactive spine only
 │   └── fonts/                                      Inter + JetBrains Mono (+ OFL licenses)
 ├── diagrams-chrome.js                             upstream responsive chrome (#169, #175) — loaded after the chrome markup, BEFORE the fit contract, verbatim, DO NOT EDIT
 ├── diagrams-fit.js                                upstream fit contract v3 (#77-#80, #169, #175) — loaded BEFORE the engine, verbatim, DO NOT EDIT
@@ -122,8 +122,8 @@ State; **color encodes state only**.
   the fit helper at its v3 contract (balanced vertical placement and compact clearance, building
   on the panel-aware fit of #77/#79 and the dynamic interaction floor of #78) and, like the
   interactive spine's engine, drives the shared pointer controller (v2). The static page exporter
-  runs through #169 (the exporter through #80 before it), and the interactive spine's engine and
-  stylesheet through #173. Both static pages adopt `diagrams-chrome.js`, the responsive chrome
+  runs through #169 (the exporter through #80 before it), and the interactive spine's engine,
+  stylesheet and exporter through #222. Both static pages adopt `diagrams-chrome.js`, the responsive chrome
   #169 adds.
   Exact owner pins and propagation state live in the operator consumer ledger.
 

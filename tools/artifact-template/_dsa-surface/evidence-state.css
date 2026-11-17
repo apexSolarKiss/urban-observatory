@@ -14,12 +14,27 @@
      - ADDS two evidence-specific roles (weakened, not-yet-testable).
 
    Load order (each layers on the previous):
-     colors_and_type.css  →  spectral-state.css  →  evidence-state.css
+     colors_and_type.css  →  surface-panel.css  →  surface-treatments.css  →
+     spectral-state.css  →  evidence-state.css
+   surface-panel.css and surface-treatments.css supply the inks Spectral State
+   binds; this file reads none of them. Its two values are the foundation's reserved
+   state values (colors_and_type.css).
 
-   Offline; no CDN. Theme-aware via the foundation's `[data-theme]` +
-   `prefers-color-scheme` model.
+   Offline; no CDN. One value per role in both themes: no theme block.
 
-   STATUS: v0.1 — first generalized profile. Authorized by ASK source-of-intent
+   STATUS: v0.3 — the two new values are defined once, in the foundation's reserved
+   state values (colors_and_type.css: --ask-state-value-brown and
+   --ask-state-value-lavender-gray), as Spectral State v1.3's are; the values are unchanged.
+   Re-sync this file with colors_and_type.css from the same owner commit.
+
+   v0.2 — one value per role in both themes, as Spectral State v1.2:
+   weakened is hsl(30, 45%, 48%) and not-yet-testable hsl(264, 8%, 53%) on either
+   field (ASK, 2026-11-15). The three reused roles move with Spectral State:
+   supported and partially-supported each take one value, and unresolved the
+   foundation cyan, a hue of about 195° where it was 180°. Role names and the
+   not-yet-testable presentation are unchanged.
+
+   v0.1 — first generalized profile. Authorized by ASK source-of-intent
    (2026-06-18) as a reusable profile; first consumer is urban-observatory
    (a domain-partner consumer, by reference). Provisional-but-reusable: the
    role list may firm up as the profile sees more use; the two new values are
@@ -53,30 +68,19 @@
        neutral lavender-gray  +  dashed rail  +  hollow marker  +  visible label
    ========================================================================= */
 
-/* ---------- Light (default) ---------- */
+/* ---------- The five roles, one value each, in both themes ---------- */
 :root {
-  /* reused Spectral State values (resolve + theme-flip via --state-*) */
+  /* reused Spectral State values, by reference */
   --evidence-supported:           var(--state-earned);   /* visual-role mapping */
   --evidence-partially-supported: var(--state-partial);  /* visual-role mapping */
   --evidence-unresolved:          var(--state-held);     /* exact mapping */
 
-  /* new Evidence State roles — theme-calibrated */
-  --evidence-weakened:            hsl( 30, 55%, 32%);    /* muted/darkened 30° — brown */
-  --evidence-not-yet-testable:    hsl(264,  8%, 53%);    /* neutral lavender-gray (see contract above) */
+  /* new Evidence State roles — one value each, in both themes */
+  --evidence-weakened:            var(--ask-state-value-brown);          /* muted 30° — brown */
+  --evidence-not-yet-testable:    var(--ask-state-value-lavender-gray);  /* neutral lavender-gray (see contract above) */
 }
 
-/* ---------- Dark — on the dark ink field ----------
-   The three reused values need no redefinition here: they reference --state-*,
-   which spectral-state.css already re-resolves per theme. Only the two new
-   roles carry explicit dark values (lifted for the dark field). */
-:root[data-theme="dark"] {
-  --evidence-weakened:            hsl( 30, 45%, 48%);
-  --evidence-not-yet-testable:    hsl(264, 12%, 64%);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) {
-    --evidence-weakened:          hsl( 30, 45%, 48%);
-    --evidence-not-yet-testable:  hsl(264, 12%, 64%);
-  }
-}
+/* No theme block. Through v0.1 the two new roles took a lighter brown and a
+   lighter gray on the dark field; v0.2 gives each one value in both themes: the
+   former dark-theme brown and the former light-theme gray. The three reused
+   values follow Spectral State, which also takes one value per role. */
