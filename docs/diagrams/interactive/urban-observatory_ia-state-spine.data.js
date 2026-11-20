@@ -1,7 +1,7 @@
 /* urban-observatory_ia-state-spine.data.js
    Source data for the urban-observatory INTERACTIVE IA STATE SPINE.
    Rendered by diagrams-interactive-spine-engine.js (Class A · diagram-interactive-spine,
-   by reference; authored @ pin 20fc5d6), consuming Spectral State v1.3.
+   by reference; authored @ pin 20fc5d6), consuming Spectral State v1.4.
 
    WHAT THIS DIAGRAM ASSERTS
      The operational STATE surface: each surface / seam / open question colored by
@@ -36,7 +36,7 @@ window.IA_STATE_SPINE = {
     stamp: { source: 'source-v1', render: 'render-v7', date: '2026-11-17' },
   },
 
-  // The eight Spectral State v1.3 roles (inherited vocabulary — do not rename).
+  // The eight Spectral State v1.4 roles (inherited vocabulary — do not rename).
   states: [
     { role: 'earned',     label: 'earned',     meaning: 'operationally grounded at full depth' },
     { role: 'structural', label: 'structural', meaning: 'structurally / schema proven; not full-flow pressured' },

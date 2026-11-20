@@ -365,7 +365,7 @@ opt-in Review Semantics composition (`review-semantics.md`), adopted for
 presentation. UO's review anatomy (its parts, banners, table roles and domain
 vocabulary) stays `urban-observatory`'s own; annotation presentation and the
 scopes it draws are `design-system-ASK`'s. The renderer follows the composition
-as of `design-system-ASK` `842f272` (#223), the commit both snapshot manifests
+as of `design-system-ASK` `aa7bfb0` (#230), the commit both snapshot manifests
 pin. The re-sync that adopted it moved this repo's pin from `53fa86e` (#169) to
 `705a195` (#185) and crosses the owner's events #170 to #185, which
 `_dsa-surface/MANIFEST.md` records file by file: #170 to #177 change no
@@ -387,7 +387,19 @@ changes the composition's vocabulary: #219 gives each Spectral State and
 Evidence State role one value in both themes, which accepted and declined
 take, and draws a bordered label's edge as the plain 1px border under a
 dark theme; #223 moves those values into the foundation unchanged; and
-`review-semantics.css` changes only in comment text. A
+`review-semantics.css` changes only in comment text. The next, to
+`aa7bfb0`, crosses #224 to #230; only #227, #229 and #230 change vendored
+files, and none changes the composition's vocabulary: #227 moves the
+foundation's brown, which Evidence State's weakened role reads, to `#895538`,
+and adds opt-in treatments this renderer does not emit (markers, keyed state
+and evidence labels, fill inks and the filled decision record), while the
+existing marks read their size, corners and hollow edge from marker tokens at
+the values they had; #229 draws the content-emphasis panel's edge, ring and
+bloom, which the banners use, through the new perimeter rule with the same
+paint, and makes a decision record shown on its own a panel, which this
+renderer does not draw; and #230 changes `review-semantics.css` only in
+comment text, which no longer matches the build's resource-function
+refusal. A
 review mark is the shared bordered label
 (#182); a judgment on whole blocks opens a labeled range with a scope rail
 (#183, #184); exact words take the scope underline, pending or decided, and a
