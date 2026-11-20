@@ -13,16 +13,39 @@
      - REUSES three Spectral State values by reference (see below), and
      - ADDS two evidence-specific roles (weakened, not-yet-testable).
 
-   Load order (each layers on the previous):
-     colors_and_type.css  →  surface-panel.css  →  surface-treatments.css  →
-     spectral-state.css  →  evidence-state.css
-   surface-panel.css and surface-treatments.css supply the inks Spectral State
-   binds; this file reads none of them. Its two values are the foundation's reserved
-   state values (colors_and_type.css).
+   Load order: colors_and_type.css first, then spectral-state.css and this
+   file, in that order, with surface-panel.css and surface-treatments.css,
+   which keep their own order. surface-treatments.css's FILL PAINT supplies the
+   inks the --state-*-ink and --evidence-*-ink bindings name, and its bordered
+   label and labeled range draw the keyed labels and ranges the two files bind;
+   surface-panel.css, which surface-treatments.css extends, supplies none.
+   spectral-state.css and this file declare custom properties only: role
+   values and inks on :root, and the keyed label's and range's color and
+   paint properties on their own selectors, which no other module sets on
+   those elements. So their place beside those two changes no resolved
+   value; the rendered key loads them directly after the foundation. Its two
+   own values are the foundation's reserved state values (colors_and_type.css).
 
    Offline; no CDN. One value per role in both themes: no theme block.
 
-   STATUS: v0.3 — the two new values are defined once, in the foundation's reserved
+   STATUS: v0.4 — each role's ink, and an evidence role in words. Each
+   chromatic role names its ink on a fill, --evidence-<role>-ink, bound by
+   reference to the ink FILL PAINT, in surface-treatments.css, keys by the fill
+   color: supported on green, partially-supported on orange, unresolved on
+   cyan and weakened on brown, whose ink is the lavender in both themes.
+   Not-yet-testable has no ink and is never filled (EACH ROLE'S INK, below).
+   Outside a multi-axis review annotation, a chromatic role may be named on a
+   keyed bordered label, .evidence-label with data-evidence, whose words are
+   exactly Evidence // <Role>, and a labeled range that label opens takes the
+   role's value on its scope rail, with green's rail paint for supported (AN
+   EVIDENCE ROLE IN WORDS, below). Not-yet-testable takes no keyed label and
+   keeps its note, and inside a Review Semantics annotation evidence keeps its
+   dot. Weakened's value, the foundation's brown, moves to a darker, redder
+   chocolate, hsl(21, 41.8%, 38%), #895538 (ASK, 2026-11-18); the other role
+   values are unchanged. Re-sync this file with surface-treatments.css and
+   colors_and_type.css from the same owner commit.
+
+   v0.3 — the two new values are defined once, in the foundation's reserved
    state values (colors_and_type.css: --ask-state-value-brown and
    --ask-state-value-lavender-gray), as Spectral State v1.3's are; the values are unchanged.
    Re-sync this file with colors_and_type.css from the same owner commit.
@@ -47,7 +70,7 @@
      supported             value of --state-earned            visual-role mapping
      partially-supported   value of --state-partial           visual-role mapping
      unresolved            value of --state-held              exact mapping
-     weakened              new — muted/darkened 30° brown     new Evidence role
+     weakened              new — muted/darkened 21° brown     new Evidence role
      not-yet-testable      new — neutral lavender-gray        new Evidence role
 
    The three reused values are VISUAL-ROLE mappings (and one exact mapping,
@@ -56,8 +79,9 @@
    and must never relabel them earned / partial / held just because the color
    value is shared.
 
-   `weakened` is a tonal derivative of `partial`: the same 30° hue family, lower
-   saturation and lightness — a muted, darkened orange ("brown"). It reads as a
+   `weakened` is a tonal derivative of `partial`: a muted, darkened brown on the
+   orange side of the wheel, at about 21° where `partial` is 30°, with lower
+   saturation and lightness. It reads as a
    degraded `partial` (viable but credibility lost), distinct from neon
    `partial` and from red `deflated`. It is NOT a new wheel position and is NOT
    added to the Spectral State health ramp.
@@ -66,6 +90,43 @@
    for "evidence cannot exist yet at this stage". Color alone is NOT sufficient
    to express it. Its presentation contract on a consuming surface is:
        neutral lavender-gray  +  dashed rail  +  hollow marker  +  visible label
+
+   ---------------------------------------------------------------------------
+   EACH ROLE'S INK
+   ---------------------------------------------------------------------------
+   A shape filled in a chromatic role takes the surface treatments' FILL
+   PAINT: .surface-fill on the shape, with the role's value as
+   --surface-fill-color and its ink, --evidence-<role>-ink, as
+   --surface-fill-ink, and .surface-fill-ink on any text set on it. Each ink
+   is FILL PAINT's for the role's color, keyed by that color: supported on
+   green, partially supported on orange, unresolved on cyan and weakened on
+   brown. This file binds each role to its color's ink and defines no ink
+   value. The evidence label stays visible, on the shape or beside it.
+   Not yet testable has no ink and is never filled: its contract above is
+   hollow, dashed and labeled.
+
+   ---------------------------------------------------------------------------
+   AN EVIDENCE ROLE IN WORDS
+   ---------------------------------------------------------------------------
+   Outside a multi-axis review annotation, for a statement in a report, a
+   figure or a table, what the evidence supports may be named in words on the
+   surface treatments' bordered label: .evidence-label on a
+   .surface-bordered-label (.doc-label in a document) with data-evidence, its
+   words exactly the axis and the role's word, "Evidence // Supported" or
+   "Evidence // Partially supported". Its edge takes the role's value. A
+   labeled range whose first child is that label takes the same value on its
+   scope rail, and supported takes green's rail paint; partially supported,
+   unresolved and weakened keep the plain stroke. The label is a word that is
+   read: inert and unfilled.
+
+   Not yet testable takes no keyed label and no scope rail, never a solid edge
+   or a solid rail: it keeps its whole contract above, lavender-gray, a dashed
+   rail, a hollow marker and its visible label. Inside Review Semantics'
+   annotation composition evidence keeps its dot: a keyed label never sits in
+   its rows, items, lists or notes. The class and the attribute opt in
+   together, and only with the words: a bare data-evidence keys nothing, and a
+   label whose words do not name its axis and role is not an evidence label
+   (tools/role-conformance.js, C13).
    ========================================================================= */
 
 /* ---------- The five roles, one value each, in both themes ---------- */
@@ -76,9 +137,35 @@
   --evidence-unresolved:          var(--state-held);     /* exact mapping */
 
   /* new Evidence State roles — one value each, in both themes */
-  --evidence-weakened:            var(--ask-state-value-brown);          /* muted 30° — brown */
+  --evidence-weakened:            var(--ask-state-value-brown);          /* muted 21° — brown */
   --evidence-not-yet-testable:    var(--ask-state-value-lavender-gray);  /* neutral lavender-gray (see contract above) */
+
+  /* Each chromatic role's ink: the color of text set on a shape filled in that
+     role's color, bound to the surface treatments' FILL PAINT, which keys each
+     ink by the fill color. Not yet testable takes none: it is never filled. */
+  --evidence-supported-ink:           var(--surface-fill-ink-on-green);
+  --evidence-partially-supported-ink: var(--surface-fill-ink-on-orange);
+  --evidence-unresolved-ink:          var(--surface-fill-ink-on-cyan);
+  --evidence-weakened-ink:            var(--surface-fill-ink-on-brown);
 }
+
+/* ---------- An evidence role in words: the keyed label and the range it opens ----------
+   Each chromatic role colors the bordered label's edge and, through the label at
+   a range's head, the labeled range's scope rail (surface-treatments.css), with
+   green's rail paint for supported. Not yet testable takes no keyed label and no
+   scope rail (AN EVIDENCE ROLE IN WORDS, above). */
+.evidence-label[data-evidence="supported"]           { --surface-bordered-label-color: var(--evidence-supported); }
+.evidence-label[data-evidence="partially-supported"] { --surface-bordered-label-color: var(--evidence-partially-supported); }
+.evidence-label[data-evidence="unresolved"]          { --surface-bordered-label-color: var(--evidence-unresolved); }
+.evidence-label[data-evidence="weakened"]            { --surface-bordered-label-color: var(--evidence-weakened); }
+
+.surface-labeled-range:has(> .evidence-label[data-evidence="supported"]:first-child) {
+  --surface-labeled-range-color: var(--evidence-supported);
+  --surface-labeled-range-paint: var(--surface-rail-paint-green);
+}
+.surface-labeled-range:has(> .evidence-label[data-evidence="partially-supported"]:first-child) { --surface-labeled-range-color: var(--evidence-partially-supported); }
+.surface-labeled-range:has(> .evidence-label[data-evidence="unresolved"]:first-child)          { --surface-labeled-range-color: var(--evidence-unresolved); }
+.surface-labeled-range:has(> .evidence-label[data-evidence="weakened"]:first-child)            { --surface-labeled-range-color: var(--evidence-weakened); }
 
 /* No theme block. Through v0.1 the two new roles took a lighter brown and a
    lighter gray on the dark field; v0.2 gives each one value in both themes: the

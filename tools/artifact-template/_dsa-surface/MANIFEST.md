@@ -6,26 +6,63 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `842f272280a3240ac51182d43d5d70efe7108f2c` |
-| short | `842f272` |
-| commit date | `2026-11-17 07:22:31 -0800` |
-| commit subject | `feat(color): define the six state values once in the foundation, reserved (#223)` |
-| synced at | `2026-11-17` |
+| commit | `aa7bfb00df9ac7f80b15ab118ff1c46403f265db` |
+| short | `aa7bfb0` |
+| commit date | `2026-11-19 15:22:10 -0800` |
+| commit subject | `fix(review): reword two comment passages that a consumer's style scan rejects (#230)` |
+| synced at | `2026-11-19` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `9a6acf457ffbe2a0bb31ae28507855b6446195ff9dcd3cc7112f04ec5bf0fce3` |
 | surface-document.css sha256 | `57140e0d5383f95d4d88001e535c682d0c47152e2165e92516ece2ba4cf999ed` |
-| surface-treatments.css sha256 | `272bb52c3f84e845a2c040bf90e0b04289bd3b121512de8e879c70665fec06da` |
-| spectral-state.css sha256 | `d93aa47ad8acb4c7b7873d8a0bcd5f55abec1f19035eecb4d239d2621cc354bc` |
-| evidence-state.css sha256 | `9d70966f33ca4c940e8b2e2b6c2c10350ce2a305e65d07c7e43f8507c223358a` |
-| review-semantics.css sha256 | `1647f1d54f7873db5b932dea117c1b12f56dc779881cf8e0587ca586dd648f34` |
+| surface-treatments.css sha256 | `ae03dda052475be5d6ea14e0fab8dd3f1608fdf5b9d09b4859a1f146a08fc0dc` |
+| spectral-state.css sha256 | `770324231461b629d18a0b41c4beecb9b5015e203f6a49b2e84ef56bc29020cf` |
+| evidence-state.css sha256 | `7467c69aa4da4220792132d338ef3fc937ecfcf44cfdbe5f167c4b4ddea4957d` |
+| review-semantics.css sha256 | `347ea6cf5886171a4e00c81144e935c6c824a7e76ffc63fd94d01c6288fe5bcc` |
 
 **Created 2026-09-25 at U6.** The design-system-ASK document register: the four modules the owner's sealed-use rule inlines after the
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-11-17 (`e88e92b` → `842f272`; two register modules and two semantic-state modules change, and one more in comment text only):**
+**Re-sync 2026-11-19 (`842f272` → `aa7bfb0`; one register module and three semantic-state modules change):**
+crosses the owner events **#224–#230**. **#224–#226** and **#228** change no file this renderer vendors; **#227**, **#229** and
+**#230** do. At **#227** (`ccb9cda`) `surface-treatments.css` adds the marker tokens and `.surface-marker` classes, the rail-paint
+color names `--surface-rail-paint-green`, `-yellow` and `-red`, still `none` in every theme, with the earlier names kept as
+aliases, and the ink on brown, `--surface-fill-ink-on-brown`; `spectral-state.css` (v1.4) adds the keyed state label,
+`.state-label`, and the range it opens; `evidence-state.css` (v0.4) adds each role's ink and the keyed evidence label,
+`.evidence-label`, with its range; and `review-semantics.css` adds the filled decision record, `.review-record`, and its inks,
+reads the existing marks' size, corners and hollow edge from the marker tokens at the values it wrote before (10px, 50%, 2px and
+2px), and binds an accepted or declined range to the new rail-paint names, which resolve to the same `none`. At **#229**
+(`a6f48fb`) `surface-treatments.css` adds PERIMETER PAINT, `.surface-perimeter`, whose color `--surface-perimeter-color` is
+registered with `@property` as non-inheriting, and the content-emphasis panel now draws its edge, ring and bloom through the same
+rule; `review-semantics.css` (v0.3) makes a decision record shown on its own a panel. At **#230** (`aa7bfb0`)
+`review-semantics.css` changes in comment text only: its rules are byte-identical to #229's with comments removed, and its comments
+no longer match this build's resource-function refusal, which #229's matched twice. This renderer adopts none of the additions: it
+emits no `.surface-marker`, `.surface-perimeter`, `.state-label`, `.evidence-label`, `.review-record` or fill class, and the
+final-HTML allowlist admits no class set that carries one. The composition's classes, attributes and `data-review`,
+`data-evidence` and `data-state` values are unchanged. The one resolved value that changes is the foundation's brown, at #227 in
+`../_dsa-tokens/colors_and_type.css`, which `evidence-state.css` reads for the weakened role.
+
+Measured on renders of synthetic sources at both pins in headless Chrome 157, light and dark, at 1280 and 390 wide: a document
+without annotations that carries both banners, and an annotated document that carries both banners and every state and evidence
+role. Every element's computed style is identical at both pins, except the Weakened mark's dot. The two banners' border, ring and
+bloom compute the same, cyan and violet, and their pixels do not change. The only differing pixels are the Weakened mark's dot,
+`rgb(177, 122, 67)` → `rgb(137, 85, 56)` (`#B17A43` → `#895538`) in both themes, and the seal line's design-system pin. Every
+render passes the final-HTML check, with no match for the resource-function refusal. The four files are copied verbatim from the
+commit above:
+
+- `surface-treatments.css` sha256 `272bb52c…` → `ae03dda0…`, 55,223 → 69,299 B;
+- `spectral-state.css` sha256 `d93aa47a…` → `77032423…`, 6,581 → 11,065 B;
+- `evidence-state.css` sha256 `9d70966f…` → `7467c69a…`, 5,060 → 11,225 B;
+- `review-semantics.css` sha256 `1647f1d5…` → `347ea6cf…`, 33,137 → 44,233 B.
+
+`surface-panel.css`, `surface-text-link.css` and `surface-document.css` are byte-identical at both commits (same hashes).
+`surface-document-overflow.js` is still not copied, and `criterion-assessment.css`, which #227 also changes, `three-functions.css`
+and the new `surface-cta.css` are not vendored. **No frozen/sealed artifact regenerated**; renders made after this re-sync use the
+new pin.
+
+**Prior re-sync 2026-11-17 (`e88e92b` → `842f272`; two register modules and two semantic-state modules change, and one more in comment text only):**
 crosses the owner events **#213–#223**. **#213**, **#215–#218**, **#220** and **#221** change no file this renderer vendors; **#214**,
 **#219**, **#222** and **#223** do. `surface-document.css` changes at **#214** (`1f5461f`): it adds the ordered sequence,
 `.doc-sequence` on a list and `.doc-sequence-step` on each step, with a print rule that keeps a step whole, and it declares the

@@ -19,21 +19,29 @@
         reference, keeps its own labels and meanings, and mints no value. Its
         scope is narrow: the review condition of an identified item or
         request. It owns no evidence judgment, no authority and no workflow.
-        Its module also carries the document marks for the other two state
-        axes (facet 2).
+        Outside a reviewed document's annotation, its decision record shows
+        one decision on its own: as a panel in a summary or board, or as a
+        decision node in a diagram. Its module also carries the document
+        marks for the other two state axes (facet 2).
      2  ANNOTATION // the inert marks, items, rows, lists, ranges, passage
         marks and notes that attach review, evidence, state and basis to the
         exact content they concern, without repainting that content's role.
 
    APPLICABILITY. Every rule here applies to elements carrying this module's
-   classes: .doc-mark, mark.doc-passage-mark, .doc-annotation-note,
-   .doc-annotation-item, .doc-annotations, .doc-annotation-list and
-   .doc-annotation-range. A
+   classes: the annotation composition's .doc-mark, mark.doc-passage-mark,
+   .doc-annotation-note, .doc-annotation-item, .doc-annotations,
+   .doc-annotation-list and .doc-annotation-range, and the decision record's
+   .review-record and .review-record-outcome, which are never elements of that
+   composition. A
    data-review, data-evidence or data-state attribute alone opts nothing in
    and paints nothing. Evidence State and Spectral State presentations
    authored outside this composition, such as a consumer's own evidence
-   assignment or a separately authored not-yet-testable note with its own
-   rail, stay governed by those owners, not by this module.
+   assignment, a separately authored not-yet-testable note with its own
+   rail, or a keyed state or evidence label and the range it opens
+   (.state-label, .evidence-label), stay governed by those owners, not by
+   this module. A keyed label is never an element of this composition and
+   never sits in its rows, items, lists or notes: there state keeps its
+   square and evidence its dot.
 
    Load order: after the four register modules, the state modules, then this
    file. The order is part of the contract.
@@ -45,10 +53,39 @@
    prefers-color-scheme model: every color resolves through a foundation or
    Spectral token. Since Spectral State v1.2 only none flips with the theme,
    through --fg-3: proposed and open take the fixed emphasis magenta and cyan,
-   and accepted and declined take Spectral's single values. This file sets no
-   value per theme.
+   and accepted and declined take Spectral's single values. A decision node's
+   inks are FILL PAINT's (surface-treatments.css), whose one theme exception
+   among them is magenta's; a decision panel's perimeter takes PERIMETER
+   PAINT's dose per theme. This file sets no value per theme.
 
-   STATUS: v0.1 // first version. Opt-in. A consumer takes it through its own
+   STATUS: v0.3 // the decision record as a panel. A decision record shown on
+   its own in a review summary or a decision or status board is a panel: the
+   shared neutral material, an outlined outcome label in its role's value, and
+   a perimeter with a soft bloom in that value, drawn with the surface
+   treatments' PERIMETER PAINT, alike for all four outcomes. Its words keep
+   the theme's text roles. A decision node in a diagram, declared with
+   data-record-presentation="node", keeps FILL PAINT's full fill and ink. The
+   bloom adds no pending, settled, urgency, interaction or authority meaning
+   (DECISION RECORD, below). The role values and inks are unchanged. Re-sync
+   this file with surface-treatments.css from the same owner commit.
+
+   v0.2 // the filled decision record. Outside a reviewed document's
+   own annotation, one decision may be shown on its own as a filled record,
+   .review-record with data-review proposed, open, accepted or declined, on a
+   shape the consumer fills with FILL PAINT, in surface-treatments.css; each of
+   those roles names its ink, --review-<role>-ink, and none draws no record.
+   The record states its outcome in words, names its object or version, its
+   actor, its scope and any material condition in fields of its own, and is
+   inert; its fill confers no authority (then FILLED DECISION RECORD, now
+   DECISION RECORD, below). The
+   evidence and state marks now read the surface treatments' shared marker
+   anatomy, and the accepted and declined ranges bind green's and red's rail
+   paint by color, with no change to what either draws; a keyed state or
+   evidence label is never an element of the composition. The role values are
+   unchanged. Re-sync this file with surface-treatments.css from the same owner
+   commit.
+
+   v0.1 // first version. Opt-in. A consumer takes it through its own
    gates; no existing document is recolored by its arrival. Contract:
    review-semantics.md; visual key: review-semantics.html.
 
@@ -101,6 +138,79 @@
    meaning, a matter not yet settled, and their value, and remains its own
    review role.
 
+   DECISION RECORD
+     meaning         one decision, pending or decided, shown on its own
+                     outside a reviewed document's annotation. It reports the
+                     decision; its color confers no authority and no evidence
+     population      .review-record with data-review proposed, open, accepted
+                     or declined. It states its outcome in words (Proposed or
+                     Correction requested, Open question, Accepted, Declined)
+                     and, each in a field of its own marked data-record-field,
+                     what it concerns ("object", the object or its version),
+                     who decided or decides ("actor", the actor or role), its
+                     scope ("scope") and any condition where it is material
+                     ("condition"). It takes one of two presentations, chosen
+                     by its purpose, never by its HTML or SVG host:
+                       panel  the default, for a record that is read: in a
+                              standalone review summary or a decision or
+                              status board. The record is a separate surface,
+                              .surface-separate .surface-material-page
+                              .surface-attach-free .surface-elevation-flush,
+                              drawn with .surface-perimeter. Its first child
+                              is its outcome label, span.review-record-outcome
+                              .doc-label .surface-bordered-label, holding the
+                              outcome word. Its words keep the theme's text
+                              roles
+                       node   a decision node in a diagram, declared with
+                              data-record-presentation="node": FILL PAINT's
+                              full fill, on the record itself in HTML or on
+                              the one .surface-fill shape inside an SVG
+                              g.review-record, its words in .surface-fill-ink
+     owner           this module for the record's color: the role's value as
+                     --review-record-color, bound on .review-record, which a
+                     panel draws as its perimeter, --surface-perimeter-color,
+                     and its outcome label's border, and a node as its fill,
+                     --surface-fill-color, with the role's ink,
+                     --review-<role>-ink, as --surface-fill-ink. Each ink is
+                     FILL PAINT's for the role's color, keyed by that color:
+                     proposed on magenta, open on cyan, accepted on green,
+                     declined on red; this module defines no ink value.
+                     surface-treatments.css for the paint: PERIMETER PAINT for
+                     the edge, ring and bloom; the bordered label's box; the
+                     separate surface's material and corners; and FILL PAINT for
+                     the fill, its boundary and the ink. The consumer for
+                     the layout, the fields' type and the record's values
+     exclusions      no decision recorded draws no record: none binds no
+                     color and has no ink, and a missing record is no
+                     decision. One record, one decision: its words name one
+                     outcome, and no record holds another. A panel's bloom is
+                     its perimeter, alike for every outcome: it adds no
+                     pending, settled, urgency, interaction or authority
+                     meaning. A panel takes no fill or wash, and its words
+                     never take the role's value or a fill's ink. A node is a
+                     shape in a diagram, never a filled reading card in a
+                     summary or board, whatever its host. It is inert: never a
+                     link or a control (an a, a button, the compact action,
+                     the larger call to action), holding none and set inside
+                     none, with no hover, press, focus or selection; a link to
+                     the reviewed object sits beside it. Never an element of
+                     the annotation composition and never inside its rows,
+                     items, lists, notes or ranges: in a reviewed document the
+                     mark, the range and the passage mark stay the channels.
+                     Never a content-emphasis panel, a bordered label, a chip,
+                     a marker or a text role; its outcome label is never a
+                     review mark or an emphasis chip. The DECISION RECORD
+                     obligation (facet 2) binds it as it binds every shown
+                     decision
+     example         an Accepted panel naming the storage plan v3, the owner
+                     and the write path; an Accepted node in a figure of the
+                     same decision
+     counterexample  a green box reading "approved" that names no object,
+                     actor or scope; a record that is the link to the
+                     document it accepts; a filled reading card on a status
+                     board; a perimeter that blooms only while a decision is
+                     pending
+
    ---------------------------------------------------------------------------
    FACET 2 // ANNOTATION
    ---------------------------------------------------------------------------
@@ -113,8 +223,12 @@
                      also carries .surface-bordered-label
      owner           surface-treatments.css for a review mark's box and edge:
                      the shared bordered label, the same box as the emphasis
-                     chip. This module for the review mark's color and for the
-                     evidence and state marks' geometry. surface-document.css
+                     chip; and for the evidence and state marks' marker
+                     anatomy (MARKER): its size, its corners and the hollow
+                     marker's dashed edge. This module for the review mark's
+                     color, each evidence and state role's color, which facet
+                     takes which shape, and the evidence and state marks' box
+                     beside their words. surface-document.css
                      for every mark's text, the operative label role ("for
                      labels and status"): a mark is status in the document's
                      reading flow, so its words take the register's status
@@ -126,10 +240,12 @@
                      Functions' channel allocation, so each axis reads in
                      monochrome:
        review        the bordered label's outline in the role value
-       evidence      a filled 10px dot (Three Functions: "evidence marker");
-                     not yet testable keeps its whole contract: a hollow
-                     dashed dot, a dashed rail and the visible label
-       state         a filled 10px square ("separate state marker")
+       evidence      the shared marker's filled 10px dot (Three Functions:
+                     "evidence marker"); not yet testable keeps its whole
+                     contract: the hollow dashed dot, a dashed rail and the
+                     visible label
+       state         the shared marker's filled 10px square ("separate state
+                     marker")
      corners         a review mark takes the bordered label's --radius-sm,
                      which keeps an inert mark from resembling the compact
                      action; an evidence or state mark draws no box
@@ -275,7 +391,9 @@
      A shown decision names what it concerns (object or version), who decided
      (actor or role) and its scope, and any condition where it is material.
      Consumers supply those values; the display reports an authority relation
-     and never creates one. A missing record is no decision.
+     and never creates one. A missing record is no decision. The obligation
+     binds every shown decision, a mark's record beside it and the decision
+     record shown on its own (facet 1), panel or node, alike.
 
    PASSAGE MARK
      meaning         the exact words inside a block that one review judgment
@@ -350,22 +468,30 @@
    REGISTERED LITERALS
      1px      the evidence and state marks' vertical padding and their
               transparent border
-     10px     the dot and square marker size
-     50%      the dot's corner (a circle)
-     2px      the square marker's corner; the not-yet-testable dashed rail and
-              hollow-dot border
+     2px      the not-yet-testable dashed rail
+   The marker's size, corners and hollow edge are surface-treatments.css's
+   registered literals (MARKER), which this module reads.
 
    CHECKING. tools/role-conformance.js rule C12 checks this composition where
    its classes appear: syntax (classes, attributes, vocabulary, a review
    mark's bordered label, a range's row, the one judgment that leads it and
-   its shared class, a passage mark's shared class) and computed
+   its shared class, a passage mark's shared class, and a keyed label kept
+   outside its rows, items, lists and notes) and computed
    presentation (the outline's, the scope rail's and the passage line's
    color, the marker, the rail and a note's attachment in a list item). Rule
    C13 checks a review mark's box and edge as it checks every bordered label,
    rule C14 a range's scope rail, lane, host, clearance and buffer as it
    checks every labeled range, an item host's included, and rule C15 a
    passage mark's line and unchanged words as it checks every scope
-   underline.
+   underline. Rule C18 checks a decision record: its role (never none), its
+   declared presentation, its outcome words, its object, actor and scope
+   fields, that it is inert and outside the annotation composition, and its
+   paint by presentation: a panel's composition, its perimeter and bloom in
+   the role's value, its outcome label and its words in the theme's text
+   roles; a node's place in a diagram, its one filled shape in the role's
+   value and its words in the role's ink. It proves that a record
+   names an object, an actor and a scope, not that they are the right ones
+   or that the decision was made.
    C12 never judges semantic assignment, whether an item's role is the right
    one, or scope: a pass does not show that a range was opened wherever a
    judgment needed one or that it holds the right blocks. A review row left
@@ -388,7 +514,30 @@
   --review-accepted: var(--state-earned);    /* a recorded decision to adopt */
   --review-declined: var(--state-deflated);  /* a recorded decision not to adopt */
   --review-none:     var(--fg-3);            /* no decision recorded */
+
+  /* Each pending or decided role's ink: the color of words set on a decision
+     node filled in that role's color, bound to the surface treatments' FILL
+     PAINT, which keys each ink by the fill color. A decision panel's words keep
+     the theme's text roles. None draws no record and has no ink. */
+  --review-proposed-ink: var(--surface-fill-ink-on-magenta);
+  --review-open-ink:     var(--surface-fill-ink-on-cyan);
+  --review-accepted-ink: var(--surface-fill-ink-on-green);
+  --review-declined-ink: var(--surface-fill-ink-on-red);
 }
+
+/* The decision record: one decision shown on its own, outside a reviewed
+   document's annotation. This module binds the role's value once, as
+   --review-record-color, and hands it to the paint the record's presentation
+   takes from surface-treatments.css: a panel's perimeter (PERIMETER PAINT) and
+   its outcome label's border (the bordered label), or a node's fill and ink
+   (FILL PAINT). None binds nothing, since no decision recorded draws no
+   record. */
+.review-record[data-review="proposed"] { --review-record-color: var(--review-proposed); --surface-fill-ink: var(--review-proposed-ink); }
+.review-record[data-review="open"]     { --review-record-color: var(--review-open);     --surface-fill-ink: var(--review-open-ink); }
+.review-record[data-review="accepted"] { --review-record-color: var(--review-accepted); --surface-fill-ink: var(--review-accepted-ink); }
+.review-record[data-review="declined"] { --review-record-color: var(--review-declined); --surface-fill-ink: var(--review-declined-ink); }
+.review-record { --surface-perimeter-color: var(--review-record-color); --surface-fill-color: var(--review-record-color); }
+.review-record-outcome { --surface-bordered-label-color: var(--review-record-color); }
 
 /* ---- Facet 2: Annotation --------------------------------------------- */
 
@@ -406,7 +555,10 @@
 
 /* Evidence and state: a marker beside the words, no outline. An inline flex
    box on the baseline, so the ::before marker is drawn as a box; its words
-   keep one line. */
+   keep one line. The marker is the shared marker's anatomy at its small size
+   (surface-treatments.css, MARKER): its size, corners and hollow edge are
+   that module's, read here; its color and which facet takes which shape are
+   this module's. */
 .doc-mark[data-evidence],
 .doc-mark[data-state] {
   display: inline-flex;
@@ -422,13 +574,13 @@
 .doc-mark[data-state]::before {
   content: "";
   flex: none;
-  width: 10px;
-  height: 10px;
+  width: var(--surface-marker-size-sm);
+  height: var(--surface-marker-size-sm);
   box-sizing: border-box;
   background: var(--review-mark-color, var(--fg-3));
 }
-.doc-mark[data-evidence]::before { border-radius: 50%; }
-.doc-mark[data-state]::before    { border-radius: 2px; }
+.doc-mark[data-evidence]::before { border-radius: var(--surface-marker-corner-dot); }
+.doc-mark[data-state]::before    { border-radius: var(--surface-marker-corner-square); }
 
 .doc-mark[data-evidence="supported"]           { --review-mark-color: var(--evidence-supported); }
 .doc-mark[data-evidence="partially-supported"] { --review-mark-color: var(--evidence-partially-supported); }
@@ -443,7 +595,7 @@
 }
 .doc-mark[data-evidence="not-yet-testable"]::before {
   background: transparent;
-  border: 2px dashed var(--evidence-not-yet-testable);
+  border: var(--surface-marker-hollow-edge) dashed var(--evidence-not-yet-testable);
 }
 
 .doc-mark[data-state="earned"]     { --review-mark-color: var(--state-earned); }
@@ -486,11 +638,11 @@
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="open"])     { --surface-labeled-range-color: var(--review-open); }
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="accepted"]) {
   --surface-labeled-range-color: var(--review-accepted);
-  --surface-labeled-range-paint: var(--surface-rail-paint-earned);
+  --surface-labeled-range-paint: var(--surface-rail-paint-green);
 }
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="declined"]) {
   --surface-labeled-range-color: var(--review-declined);
-  --surface-labeled-range-paint: var(--surface-rail-paint-deflated);
+  --surface-labeled-range-paint: var(--surface-rail-paint-red);
 }
 .doc-annotation-range:has(> .doc-annotations:first-child .doc-mark[data-review="none"])     { --surface-labeled-range-color: var(--review-none); }
 

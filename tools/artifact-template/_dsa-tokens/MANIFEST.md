@@ -6,21 +6,23 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `842f272280a3240ac51182d43d5d70efe7108f2c` |
-| short | `842f272` |
-| commit date | `2026-11-17 07:22:31 -0800` |
-| commit subject | `feat(color): define the six state values once in the foundation, reserved (#223)` |
-| synced at | `2026-11-17` |
+| commit | `aa7bfb00df9ac7f80b15ab118ff1c46403f265db` |
+| short | `aa7bfb0` |
+| commit date | `2026-11-19 15:22:10 -0800` |
+| commit subject | `fix(review): reword two comment passages that a consumer's style scan rejects (#230)` |
+| synced at | `2026-11-19` |
 | consuming project | `urban-observatory` |
 | files copied | `colors_and_type.css`, `fonts/InterVariable.woff2`, `fonts/InterVariable-Italic.woff2`, `fonts/JetBrainsMono.woff2`, `fonts/JetBrainsMono-Italic.woff2`, `assets/logo-ASK.svg` |
-| colors_and_type.css sha256 | `14631bbcca9f18f2b59ec1483daac91dd3a51ada0f38f451ba06d73ebb838bf4` |
+| colors_and_type.css sha256 | `4913d77072b44e9b5217bb2a64526ae3ee5248913a9eade08a63d8f520d11385` |
 | fonts/InterVariable.woff2 sha256 | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | fonts/InterVariable-Italic.woff2 sha256 | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | fonts/JetBrainsMono.woff2 sha256 | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | fonts/JetBrainsMono-Italic.woff2 sha256 | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 | assets/logo-ASK.svg sha256 | `76babfb09522a9236f8ec43e7d72ce4c3f32be41982962cd14505493b7664e69` |
 
-**Re-sync 2026-11-17 (`e88e92b` → `842f272`, `colors_and_type.css` only):** crosses one carrier-changing owner event for this snapshot, **#223** (`842f272`): it adds the reserved state values, six custom properties on the root (`--ask-state-value-green`, `-yellow`, `-orange`, `-red`, `-brown` and `-lavender-gray`), one value each in both themes, with their comment. `spectral-state.css` and `evidence-state.css`, in `../_dsa-surface/`, now read their values from them, and the owner requires the three files to be re-synced from one commit. No existing token value, selector, `@font-face` block or theme behavior changes, so the token CSS alone changes no render. The four fonts and the wordmark are **byte-identical** at both commits (same hashes). `colors_and_type.css` sha256 `d00f1f4f…` → `14631bbc…`, 15,945 → 17,164 B. `../_dsa-surface/` moves to the same commit, with five of its files changed. **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+**Re-sync 2026-11-19 (`842f272` → `aa7bfb0`, `colors_and_type.css` only):** crosses the owner events **#224–#230**, of which one changes a file in this snapshot, **#227** (`ccb9cda`): the reserved `--ask-state-value-brown` moves from `hsl( 30, 45%, 48%)` (`#B17A43`) to `hsl( 21, 41.8%, 38%)` (`#895538`), with its comment. No other token value, selector, `@font-face` block or theme behavior changes. `evidence-state.css`, in `../_dsa-surface/`, reads that value for the weakened role, so an annotated document's Weakened marks take the new brown; that snapshot's entry records the measurement. The owner requires its coupled stylesheets to be re-synced from one commit. The four fonts and the wordmark are **byte-identical** at both commits (same hashes). `colors_and_type.css` sha256 `14631bbc…` → `4913d770…`, 17,164 B at both. `../_dsa-surface/` moves to the same commit, with four of its files changed. **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
+
+**Prior re-sync 2026-11-17 (`e88e92b` → `842f272`, `colors_and_type.css` only):** crosses one carrier-changing owner event for this snapshot, **#223** (`842f272`): it adds the reserved state values, six custom properties on the root (`--ask-state-value-green`, `-yellow`, `-orange`, `-red`, `-brown` and `-lavender-gray`), one value each in both themes, with their comment. `spectral-state.css` and `evidence-state.css`, in `../_dsa-surface/`, now read their values from them, and the owner requires the three files to be re-synced from one commit. No existing token value, selector, `@font-face` block or theme behavior changes, so the token CSS alone changes no render. The four fonts and the wordmark are **byte-identical** at both commits (same hashes). `colors_and_type.css` sha256 `d00f1f4f…` → `14631bbc…`, 15,945 → 17,164 B. `../_dsa-surface/` moves to the same commit, with five of its files changed. **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
 **Prior re-sync 2026-11-12 (`e84394b` → `e88e92b`, `colors_and_type.css` only):** crosses one carrier-changing owner event, **#212** (`e88e92b`): a print-only rule, `@media print { body { background-attachment: scroll; } }`, with its comment; no token value, selector outside print, `@font-face` block or theme behavior changes. This template prints its ground (`print-color-adjust: exact` on the root), so the rule reaches every render made after this re-sync. Measured on renders of synthetic sources at both pins, printed to PDF in headless Chrome 157 at 375 and 1440 wide, light: at `e84394b` the body's field was fixed to the printing window, repeated on every sheet and, from the 375px window, drawn only in a strip that wide with the root's field beside it; at `e88e92b` it is one gradient the length of the document, drawn across the printed column, the same from both widths. Screen output does not change. The four fonts and the wordmark are **byte-identical** at both commits (same hashes). `colors_and_type.css` sha256 `4fed9d79…` → `d00f1f4f…`, 15,496 → 15,945 B. `../_dsa-surface/` moves to the same commit with no byte change. **No frozen/sealed artifact regenerated**; renders made after this re-sync use the new pin.
 
