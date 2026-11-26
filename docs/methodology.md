@@ -67,11 +67,13 @@ Row-level assessment uses a working vocabulary: `confirmed / weakened / contradi
 | UO assessment label | design-system-ASK Evidence State role | Note |
 | --- | --- | --- |
 | `confirmed` | `supported` | mapped, not a verbatim label match |
-| `weakened` | `weakened` | reused role — kept under its evidence label, not relabeled by any Spectral name |
+| `weakened` | `weakened` | **conditional** — the orange annotation only where the row's recorded basis shows material adverse evidence that undermines the claim without sufficient grounds to reject it; kept under its evidence label, not relabeled by any Spectral name |
 | `unresolved` | `unresolved` | reused role |
 | `not yet testable` | `not-yet-testable` | same role; formatting differs |
-| `contradicted` | *(none)* | **consumer-local — outside the current DS Evidence State profile**; UO-local until/unless DS adds it |
+| `contradicted` | `contradicted` | **conditional** — the red annotation only where the row's recorded scope and basis meet the profile's rejection threshold: sufficient grounds to reject the claim as stated, within its declared scope and conditions |
 | *(no single UO label)* | `partially-supported` | UO expresses partial readings through evidence-depth qualifiers / composite prose, not a dedicated row label |
+
+The two conditional rows map a row only when its recorded basis meets the condition. UO's working labels are broader than the profile's thresholds, so a `weakened` or `contradicted` row that does not meet its condition keeps its UO label and takes no Evidence State annotation until UO assigns one; the mapping reassesses no existing reading.
 
 See also [`object-model.md`](object-model.md) §Three-layer assessment treatment.
 

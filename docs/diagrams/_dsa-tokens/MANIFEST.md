@@ -11,11 +11,11 @@ This mirror is a **build input, not a fork** and not a second source of truth.
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `aa7bfb00df9ac7f80b15ab118ff1c46403f265db` |
-| short | `aa7bfb0` |
-| commit date | `2026-11-19 15:22:10 -0800` |
-| commit subject | `fix(review): reword two comment passages that a consumer's style scan rejects (#230)` |
-| synced at | `2026-11-19` |
+| commit | `89397df24550bd5c7f1d64d1c8a8b46143c0219f` |
+| short | `89397df` |
+| commit date | `2026-11-25 19:25:16 -0800` |
+| commit subject | `feat: approved fill inks + traffic-light semantic coherence (Spectral v2.0, Evidence v0.5, Criterion v0.3, Review v0.4) (#237)` |
+| synced at | `2026-11-25` |
 | consuming surface | `urban-observatory/docs/diagrams/` |
 | scope | Tier 1 + Tier 2 only (no Tier 3) |
 
@@ -26,7 +26,7 @@ _dsa-tokens/
 ├── MANIFEST.md                     this file
 ├── colors_and_type.css             Tier 1 + Tier 2 tokens + @font-face
 │                                   (light default · [data-theme="dark"] · prefers-color-scheme auto-bridge)
-├── spectral-state.css              Spectral State v1.4 — 8 --state-* roles (interactive spine only)
+├── spectral-state.css              Spectral State v2.0 — 7 --state-* roles (interactive spine only)
 └── fonts/
     ├── InterVariable.woff2         Inter (interface + display), OFL
     ├── InterVariable-Italic.woff2
@@ -38,14 +38,20 @@ _dsa-tokens/
 
 | file | sha256 |
 | --- | --- |
-| `colors_and_type.css` | `4913d77072b44e9b5217bb2a64526ae3ee5248913a9eade08a63d8f520d11385` |
-| `spectral-state.css` | `770324231461b629d18a0b41c4beecb9b5015e203f6a49b2e84ef56bc29020cf` |
+| `colors_and_type.css` | `5aceed44caea4a7643de432deb4370ce43a848a16e5e75ddcfb5a6bb93f62481` |
+| `spectral-state.css` | `e9801af2e9ed44e9890f907dac76f6cf41b50a81860241aae99f67a35c250fe4` |
 | `fonts/InterVariable.woff2` | `693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3` |
 | `fonts/InterVariable-Italic.woff2` | `e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a` |
 | `fonts/JetBrainsMono.woff2` | `31ec365b93e4bad6f202ce23352a56d01ca4462b2afc782ed2cf6fa42ca9ac0e` |
 | `fonts/JetBrainsMono-Italic.woff2` | `76a805b6ea613ce2e3973f1bac6fa29db23116b2881390b59247d22890844ecc` |
 
-**Re-sync 2026-11-19 (`colors_and_type.css` + `spectral-state.css` `842f272` → `aa7bfb0`):** crosses the owner events **#224–#230**, of which one changes the files in this mirror, **#227** (`ccb9cda`). In `colors_and_type.css` the reserved `--ask-state-value-brown` moves from `hsl( 30, 45%, 48%)` (`#B17A43`) to `hsl( 21, 41.8%, 38%)` (`#895538`), with its comment; no other token value, selector, `@font-face` block or theme behavior changes. `spectral-state.css` becomes Spectral State v1.4: it adds the keyed state label, `.state-label` with a `data-state` role, and the labeled range it opens, both opt-in; no role value or existing rule changes. The owner requires its coupled stylesheets to be re-synced from one commit, so the two move together. Two files re-vendored **in this mirror**: `colors_and_type.css` (sha256 `14631bbc…` → `4913d770…`, 17,164 B at both) and `spectral-state.css` (sha256 `d93aa47a…` → `77032423…`, 6,581 → 11,065 B); new values in the file table. The four fonts are **byte-identical** at `aa7bfb0` and remain pinned at `1231d03`; this mirror stays at **mixed pins**.
+**Re-sync 2026-11-25 (`colors_and_type.css` + `spectral-state.css` `aa7bfb0` → `89397df`):** crosses the owner events **#231–#237**, of which two change the files in this mirror. **#233** (`00d8264`) changes `colors_and_type.css` in comment text only: the reserved state values are reserved in the interface, and an ASK-approved artwork palette may name one. **#237** (`89397df`) changes both files. In `colors_and_type.css` only comments change: each reserved value names its family across the semantic systems (affirmative, qualified, materially undermined, negative), and brown keeps its value with no semantic assignment; no token value, selector, `@font-face` block or theme behavior changes. `spectral-state.css` becomes Spectral State v2.0: partial takes the yellow and structural the violet, each role binding its value directly from the foundation, and external leaves the vocabulary, with `--state-external`, `--state-external-ink` and its keyed label and range rules; seven roles remain. A source that still names external must be migrated by what it meant, and the spine's engine now refuses one (below). The owner requires its coupled stylesheets, the spine engine and the spine source to move from one commit, so they move together. Two files re-vendored **in this mirror**: `colors_and_type.css` (sha256 `4913d770…` → `5aceed44…`, 17,164 → 17,649 B) and `spectral-state.css` (sha256 `77032423…` → `e9801af2…`, 11,065 → 12,463 B); new values in the file table. The four fonts are **byte-identical** at `89397df` and remain pinned at `1231d03`; this mirror stays at **mixed pins**.
+
+**Render impact: the interactive spine changes; the static pages and the reading pages do not; the front door changes one card's words. Measured.** Headless Chrome 158, base `aa8b198` against this tree, light and dark, at 1440 × 900 and 390 × 844. **Interactive IA spine:** with its engine re-vendored and its source migrated in the same commit (below), measured on all 24 nodes (computed fill, stroke and text fill) in both themes: the six structural nodes take the violet, `#AA40FF`, where they took the yellow; the four partial nodes take the yellow, `#FAFA38`, where they took the orange; each takes its color's ink. The earned and proposed nodes keep their colors and take their new inks; magenta's ink is now one value in both themes. The seven held nodes and the root are unchanged. `x-owned-elsewhere`, which named the retired external state and took the violet, takes the neutral filled shape the root takes: its group tag still reads external, and its inspector shows neutral, with the qualifier Source // External. The legend lists seven roles. Hover, click to lock, tap to lock and the compact Legend trigger work in both themes with no console error; `PNG page` and `PNG diagram` export in both themes with the new paint. The page subtitle drops external and adds no clause, so the header is no longer than before; the owned-elsewhere clause is in the data file's `meta.subtitle` only, which the page does not render. The spine was measured on the staging tree before that last subtitle edit, which changes only the subtitle's words. The stamp moves `source-v1 // render-v7` → `source-v2 // render-v8`, dated 2026-11-25, in the page and in the data file's `meta.stamp`. **Architecture tree and ontology:** every element's computed style is identical at both pins, wide and compact and with the compact About trigger open, and both pages' `PNG page` and `PNG diagram` exports are byte-identical in both themes. Their screenshots are identical except, at 390 px, 10 pixels of the architecture tree's dark capture and 1 pixel of the ontology's light capture, by 1 level, which two captures of the base reproduce exactly. Stamps held at `render-v12`; their generator pins move to `89397df`. **Front door (`../index.html`):** every element's computed style is identical apart from the spine card's words, which no longer list external and say that what is owned elsewhere shows neutral with a Source // External label, and the layout that follows from their length. **Reading pages** that `tools/read/` composes from this mirror, at 1280 × 900 and 390 × 844: thirteen pages have identical computed styles and screenshots in both themes; the six whose words change differ in those words and the layout that follows: the composed front door and the rendered copies of this manifest, `../README.md`, `docs/methodology.md`, `docs/object-model.md` and the spine data's source view. **No raster regenerated:** the repository commits none exported from these pages.
+
+**Outside this mirror, in the same commit.** `../_dsa-surface/surface-treatments.css` (`71ac72e` → `d0972f1`) re-syncs from the same owner commit: at #237 the FILL PAINT inks on yellow, green, orange, red, violet, magenta and white take the lightness ASK selected for each fill, written as HSL; cyan, brown and lavender keep theirs; magenta's dark-theme ink is retired; and the alias `--surface-rail-paint-structural` is retired. `../interactive/diagrams-interactive-spine-engine.js` (`facd94b` → `c1f13e2`) adds `refuseRetired()`: `render()` throws, before drawing, on a legend row or a node that names external. With the old data file it throws "Spectral State retired the external state. Remove its legend row: owned elsewhere is provenance, not a state." and draws nothing (control). `../interactive/urban-observatory_ia-state-spine.data.js` migrates by meaning: the external legend row is removed; `x-owned-elsewhere` takes `state: 'neutral'` and the qualifier `Source // External`, and keeps its id, group, label, evidence and pointer; the structural legend row takes the owner's v2.0 meaning; and the subtitle, in the data file and the page, no longer lists external. No node's assigned state or basis changes. Every other vendored carrier in `docs/diagrams/` was verified byte-identical to the owner at `89397df` and is not re-vendored.
+
+**Prior re-sync 2026-11-19 (`colors_and_type.css` + `spectral-state.css` `842f272` → `aa7bfb0`):** crosses the owner events **#224–#230**, of which one changes the files in this mirror, **#227** (`ccb9cda`). In `colors_and_type.css` the reserved `--ask-state-value-brown` moves from `hsl( 30, 45%, 48%)` (`#B17A43`) to `hsl( 21, 41.8%, 38%)` (`#895538`), with its comment; no other token value, selector, `@font-face` block or theme behavior changes. `spectral-state.css` becomes Spectral State v1.4: it adds the keyed state label, `.state-label` with a `data-state` role, and the labeled range it opens, both opt-in; no role value or existing rule changes. The owner requires its coupled stylesheets to be re-synced from one commit, so the two move together. Two files re-vendored **in this mirror**: `colors_and_type.css` (sha256 `14631bbc…` → `4913d770…`, 17,164 B at both) and `spectral-state.css` (sha256 `d93aa47a…` → `77032423…`, 6,581 → 11,065 B); new values in the file table. The four fonts are **byte-identical** at `aa7bfb0` and remain pinned at `1231d03`; this mirror stays at **mixed pins**.
 
 **Render impact: none, measured.** Headless Chrome 157, base `a558f61` against this tree, light and dark, at 1440 × 900 and 390 × 844. On the interactive IA spine, the architecture tree, the ontology and the front door, every element's computed style is identical at both pins, apart from custom properties (the new tokens and the brown's value): at rest, wide and compact, with a spine node hovered or locked, the spine's compact Legend open, and the static pages' compact triggers open. Nothing on these pages reads the brown or carries `.state-label`. Their screenshots are identical with two exceptions that repeat captures of the base reproduce: the ontology's light capture at 1440 differs by 1,436 pixels, by 3 levels or less, and two captures of the base differ by the same; and the spine's hover captures vary from capture to capture on either tree while their opacity transitions run, two captures of the base differing by as many as 70,835 pixels. With transitions disabled on both trees, the spine's hover and lock captures are byte-identical in both themes. The `PNG page` and `PNG diagram` exports of all three diagrams are byte-identical in both themes. The source data `window.IA_STATE_SPINE` is deep-equal at both pins: `../interactive/urban-observatory_ia-state-spine.data.js` changes in two comments only, which now name v1.4, and its "authored @ pin 20fc5d6" is kept. Stamps held: the spine at `source-v1 // render-v7`, the architecture tree and ontology at `render-v12`. **Reading pages** that `tools/read/` composes from this mirror, at 1280 × 900 and 390 × 844: every generated page, the home page, the documents index and the composed front door have identical computed styles and screenshots in both themes, except the rendered copies of this manifest, of `../README.md` and of the spine's data file, whose words change. **No raster regenerated:** the repository commits none exported from these pages.
 
@@ -85,8 +91,8 @@ _dsa-tokens/
 
 This mirror carries `colors_and_type.css` + fonts (everything the **static**
 Class A diagrams need, `diagram-static-H`) **and** `spectral-state.css` (Spectral
-State v1.4), required by the **interactive** IA spine (`diagram-interactive-spine`,
-in `../interactive/`). Now at **mixed pins**: `colors_and_type.css` + `spectral-state.css` @ `aa7bfb0` (DS #230);
+State v2.0), required by the **interactive** IA spine (`diagram-interactive-spine`,
+in `../interactive/`). Now at **mixed pins**: `colors_and_type.css` + `spectral-state.css` @ `89397df` (DS #237);
 the four fonts @ `1231d03` (prior `b5d158e`) — see the
 field table and the re-sync notes.
 
@@ -99,8 +105,8 @@ diagrams-interactive-spine.css`. Color on the interactive surface encodes
 
 This manifest records the vendored owner-carrier pins: the upstream
 `design-system-ASK` state each file listed above was copied from (current
-pins: `colors_and_type.css` + `spectral-state.css` @ `aa7bfb0`, fonts @
-`1231d03`; prior `colors_and_type.css` + `spectral-state.css` @ `842f272`). Each diagram's `<head>` records a separate
+pins: `colors_and_type.css` + `spectral-state.css` @ `89397df`, fonts @
+`1231d03`; prior `colors_and_type.css` + `spectral-state.css` @ `aa7bfb0`). Each diagram's `<head>` records a separate
 identity, its `source-vN` // `render-vN` tuple: the authored source and the
 rendered output. The two planes advance independently, and a pin advance alone
 changes neither tuple. Drift means the vendored bytes differ from this manifest,

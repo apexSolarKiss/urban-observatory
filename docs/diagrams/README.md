@@ -21,7 +21,7 @@ axis) and *structure or state*.
 |---|---|---|---|---|
 | **Architecture tree** | whole repo (the atlas) | structure | [`diagram-static-H`](https://github.com/apexSolarKiss/design-system-ASK/blob/main/patterns/diagram-static-H/README.md) | built |
 | **Ontology** | one axis — *kinds* of concepts (Axis A) | structure | `diagram-static-H` | built |
-| **Interactive IA spine** | the operational whole | **state** (Spectral State v1.4) | [`diagram-interactive-spine`](https://github.com/apexSolarKiss/design-system-ASK/blob/main/patterns/diagram-interactive-spine/README.md) | built |
+| **Interactive IA spine** | the operational whole | **state** (Spectral State v2.0) | [`diagram-interactive-spine`](https://github.com/apexSolarKiss/design-system-ASK/blob/main/patterns/diagram-interactive-spine/README.md) | built |
 
 - The **structure** diagrams keep **one axis each** (axis purity) and assert no
   maturity. The **state** diagram is the one place the mixed operational whole is
@@ -44,7 +44,7 @@ docs/diagrams/
 ├── _dsa-tokens/                                   VENDORED, PINNED design-system-ASK mirror
 │   ├── MANIFEST.md                                upstream commit + per-file sha256
 │   ├── colors_and_type.css                        Tier 1 + Tier 2 tokens (verbatim)
-│   ├── spectral-state.css                         Spectral State v1.4 (verbatim) — interactive spine only
+│   ├── spectral-state.css                         Spectral State v2.0 (verbatim) — interactive spine only
 │   └── fonts/                                      Inter + JetBrains Mono (+ OFL licenses)
 ├── diagrams-chrome.js                             upstream responsive chrome (#169, #175) — loaded after the chrome markup, BEFORE the fit contract, verbatim, DO NOT EDIT
 ├── diagrams-fit.js                                upstream fit contract v3 (#77-#80, #169, #175) — loaded BEFORE the engine, verbatim, DO NOT EDIT
@@ -81,7 +81,8 @@ panels keep their own taps and scrolling. The **interactive** IA spine sits in
 then `surface-panel.css → surface-treatments.css`). It needs
 `surface-treatments.css` for two things: its fill paint (FILL PAINT) paints
 every node (a state node filled at 100% of its state's color, its group tag and
-label in that color's ink; the root as the neutral filled shape), and its
+label in that color's ink; the root, and the node owned elsewhere, which assert
+no state, as the neutral filled shape), and its
 disclosure grammar styles the About, Legend and Inspector triggers the engine
 adds on a narrow or short canvas. The spine references the shared
 mirrors one level up at `../_dsa-tokens/` and `../_dsa-surface/`, and loads
@@ -126,8 +127,9 @@ State; **color encodes state only**.
   the fit helper at its v3 contract (balanced vertical placement and compact clearance, building
   on the panel-aware fit of #77/#79 and the dynamic interaction floor of #78) and, like the
   interactive spine's engine, drives the shared pointer controller (v2). The static page exporter
-  runs through #169 (the exporter through #80 before it), and the interactive spine's engine,
-  stylesheet and exporter through #222. Both static pages adopt `diagrams-chrome.js`, the responsive chrome
+  runs through #169 (the exporter through #80 before it), and the interactive spine's stylesheet
+  and exporter through #222 and its engine through #237, which refuses the retired external
+  state. Both static pages adopt `diagrams-chrome.js`, the responsive chrome
   #169 adds.
   Exact owner pins and propagation state live in the operator consumer ledger.
 
