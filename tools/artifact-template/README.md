@@ -365,7 +365,7 @@ opt-in Review Semantics composition (`review-semantics.md`), adopted for
 presentation. UO's review anatomy (its parts, banners, table roles and domain
 vocabulary) stays `urban-observatory`'s own; annotation presentation and the
 scopes it draws are `design-system-ASK`'s. The renderer follows the composition
-as of `design-system-ASK` `aa7bfb0` (#230), the commit both snapshot manifests
+as of `design-system-ASK` `89397df` (#237), the commit both snapshot manifests
 pin. The re-sync that adopted it moved this repo's pin from `53fa86e` (#169) to
 `705a195` (#185) and crosses the owner's events #170 to #185, which
 `_dsa-surface/MANIFEST.md` records file by file: #170 to #177 change no
@@ -399,7 +399,16 @@ bloom, which the banners use, through the new perimeter rule with the same
 paint, and makes a decision record shown on its own a panel, which this
 renderer does not draw; and #230 changes `review-semantics.css` only in
 comment text, which no longer matches the build's resource-function
-refusal. A
+refusal. The next, to `89397df`, crosses #231 to #237; only #233 and #237
+change vendored files. #233 changes `colors_and_type.css` only in comment
+text. #237 changes the composition's vocabulary: Spectral State v2.0 retires
+`external`, so no state mark names it, and Evidence State v0.5 adds
+`contradicted`, in red. Structural marks take the violet, partial and
+partially supported the yellow and weakened the orange; accepted and declined
+bind the foundation's green and red directly, at the values they had; and the
+fill inks change, which this renderer does not emit. The build's words follow:
+`state external` fails the build as an unknown word, and `evidence
+contradicted` is admitted. A
 review mark is the shared bordered label
 (#182); a judgment on whole blocks opens a labeled range with a scope rail
 (#183, #184); exact words take the scope underline, pending or decided, and a
@@ -429,9 +438,9 @@ review     proposed (Proposed) · correction-requested (Correction requested,
            shown as proposed) · open (Open question) · accepted (Accepted) ·
            declined (Declined) · none (No decision recorded)
 evidence   supported · partially-supported · unresolved · weakened ·
-           not-yet-testable
-state      earned · structural · partial · deflated · held · external ·
-           proposed · neutral
+           contradicted · not-yet-testable
+state      earned · structural · partial · deflated · held · proposed ·
+           neutral
 ```
 
 - Items read in one fixed order: state, basis, evidence, review, then check;

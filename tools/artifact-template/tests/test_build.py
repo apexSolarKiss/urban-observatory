@@ -3036,9 +3036,9 @@ class ReviewAnnotations(RenderCase):
         # the owner's checker vocabulary (role-conformance.js C12) is the renderer's
         self.assertEqual(build.FACET_VALUES, {"data-review": ("accepted", "declined", "none", "open", "proposed"),
                                               "data-evidence": ("supported", "partially-supported", "unresolved",
-                                                                "weakened", "not-yet-testable"),
+                                                                "weakened", "contradicted", "not-yet-testable"),
                                               "data-state": ("earned", "structural", "partial", "deflated", "held",
-                                                             "external", "proposed", "neutral")})
+                                                             "proposed", "neutral")})
         self.assertEqual(build.PASSAGE_ROLES, ("proposed", "open", "accepted", "declined"))
 
     def test_RS_meta_is_plain_text_and_escaped(self):
@@ -3073,7 +3073,7 @@ class ReviewAnnotations(RenderCase):
                      + CELL % "{{review accepted: v2 · owner · this listing}}")
         src = mutate(src, "The non-central question's detail.\n",
                      "The non-central question's detail, {{mark proposed qd: as worded}}.\n\n:::annotate list\n"
-                     "state external: the archive\nevidence unresolved: two readings\n:::\n\n"
+                     "state neutral: the archive\nevidence unresolved: two readings\n:::\n\n"
                      ":::note qd\n:::annotate\nreview correction-requested: owner, round 2\n:::\n:::\n")
         r = self.render(src)
         h = r["html"]
@@ -3718,10 +3718,10 @@ class ReviewAnnotationRecordsAndEscapes(RenderCase):
         rich = self.render(annotated(), name="rich")["html"].split("</head>")[0]
         for rel in build.MODULES:
             for head in (plain, rich):
-                self.assertIn("SEALED design-system-ASK %s (upstream aa7bfb0, verbatim; bytes verified against the register "
+                self.assertIn("SEALED design-system-ASK %s (upstream 89397df, verbatim; bytes verified against the register "
                               "manifest) === */" % rel, head)
         for rel in build.STATE_MODULES:
-            self.assertIn("SEALED design-system-ASK %s (upstream aa7bfb0, verbatim; bytes verified against the _dsa-surface "
+            self.assertIn("SEALED design-system-ASK %s (upstream 89397df, verbatim; bytes verified against the _dsa-surface "
                           "manifest) === */" % rel, rich)
             self.assertNotIn(rel, plain)
 

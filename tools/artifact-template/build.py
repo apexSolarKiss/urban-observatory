@@ -281,9 +281,9 @@ REVIEW_WORDS = {"proposed": ("proposed", "Proposed"), "correction-requested": ("
 # record after ':'; the build can only require that something is written.
 REVIEW_NEEDS_META = ("accepted", "declined", "correction-requested")
 EVIDENCE_WORDS = {"supported": "Supported", "partially-supported": "Partially supported", "unresolved": "Unresolved",
-                  "weakened": "Weakened", "not-yet-testable": "Not yet testable"}
+                  "weakened": "Weakened", "contradicted": "Contradicted", "not-yet-testable": "Not yet testable"}
 STATE_WORDS = {"earned": "Earned", "structural": "Structural", "partial": "Partial", "deflated": "Deflated",
-               "held": "Held", "external": "External", "proposed": "Proposed", "neutral": "Neutral"}
+               "held": "Held", "proposed": "Proposed", "neutral": "Neutral"}
 # The axes of an annotation, in the owner's fixed order (state, basis, evidence, review), then a neutral check. A row
 # that opens a range or stands as a prompt leads with its review item, then the others in the same order (LEAD_ORDER).
 ANNOTATION_AXES = ("state", "basis", "evidence", "review", "check")

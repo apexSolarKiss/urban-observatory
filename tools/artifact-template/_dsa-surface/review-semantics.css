@@ -51,14 +51,31 @@
 
    Offline; no CDN. Theme-aware through the foundation's [data-theme] +
    prefers-color-scheme model: every color resolves through a foundation or
-   Spectral token. Since Spectral State v1.2 only none flips with the theme,
-   through --fg-3: proposed and open take the fixed emphasis magenta and cyan,
-   and accepted and declined take Spectral's single values. A decision node's
-   inks are FILL PAINT's (surface-treatments.css), whose one theme exception
-   among them is magenta's; a decision panel's perimeter takes PERIMETER
-   PAINT's dose per theme. This file sets no value per theme.
+   Spectral token. Only none flips with the theme, through --fg-3: proposed
+   and open take the fixed emphasis magenta and cyan, and accepted and
+   declined the foundation's green and red, bound directly (2026-11-25). A
+   decision node's inks are FILL PAINT's (surface-treatments.css), the same
+   in both themes; a decision panel's perimeter takes PERIMETER PAINT's dose
+   per theme. This file sets no value per theme.
 
-   STATUS: v0.3 // the decision record as a panel. A decision record shown on
+   PROVENANCE IS NOT A STATE. Spectral State v2.0 retires external from the
+   state vocabulary: that an item is owned elsewhere is its source, not its
+   condition. Inside this composition say it in the basis or a neutral
+   metadata item, never with a state square; outside it a neutral
+   Source // External label may sit beside whatever state the item asserts.
+
+   STATUS: v0.4 // direct physical bindings and the contradicted mark
+   (2026-11-25). Accepted and declined bind the foundation's green and red
+   directly, not through Spectral State's earned and deflated; their values
+   are unchanged. The evidence dot admits Evidence State v0.5's contradicted,
+   in red, and its weakened is now orange and partially supported yellow,
+   through Evidence State's own tokens. The state square follows Spectral
+   State v2.0: structural violet, partial yellow, and no external square
+   (PROVENANCE IS NOT A STATE, above). Review meanings and the composition
+   are unchanged. Re-sync this file with spectral-state.css,
+   evidence-state.css and surface-treatments.css from the same owner commit.
+
+   v0.3 // the decision record as a panel. A decision record shown on
    its own in a review summary or a decision or status board is a panel: the
    shared neutral material, an outlined outcome label in its role's value, and
    a perimeter with a soft bloom in that value, drawn with the surface
@@ -101,17 +118,17 @@
                                                    Evidence unresolved also
                                                    name, in the same
                                                    foundation cyan
-     accepted           value of --state-earned    a recorded decision to adopt
-                                                   or permit, at its scope
-     declined           value of --state-deflated  a recorded decision not to
-                                                   adopt or permit, at its scope
+     accepted           value of                   a recorded decision to adopt
+                        --ask-state-value-green    or permit, at its scope
+     declined           value of                   a recorded decision not to
+                        --ask-state-value-red      adopt or permit, at its scope
      none               value of --fg-3            no decision recorded
 
    DECIDED OUTCOMES: accepted is green and declined red, and no decision
    recorded stays the faintest neutral, so affirmative, negative and absent
    records differ at a glance; the words still name each. A review outcome is
-   never an evidence role: a shared value is not a shared meaning, as Evidence
-   State's own reuse of Spectral values shows. A green outline says accepted
+   never an evidence role: a shared value is not a shared meaning, as the
+   profiles' shared physical values show. A green outline says accepted
    at this scope; a green evidence dot says supported by this evidence. An
    accepted narrow scope is still a whole decision, a decline does not
    disprove a statement, and green never authorizes production.
@@ -511,8 +528,8 @@
 :root {
   --review-proposed: var(--ask-emphasis-magenta);  /* a candidate: the emphasis magenta */
   --review-open:     var(--ask-emphasis-cyan); /* a named open question: the emphasis cyan */
-  --review-accepted: var(--state-earned);    /* a recorded decision to adopt */
-  --review-declined: var(--state-deflated);  /* a recorded decision not to adopt */
+  --review-accepted: var(--ask-state-value-green); /* a recorded decision to adopt */
+  --review-declined: var(--ask-state-value-red);   /* a recorded decision not to adopt */
   --review-none:     var(--fg-3);            /* no decision recorded */
 
   /* Each pending or decided role's ink: the color of words set on a decision
@@ -586,6 +603,7 @@
 .doc-mark[data-evidence="partially-supported"] { --review-mark-color: var(--evidence-partially-supported); }
 .doc-mark[data-evidence="unresolved"]          { --review-mark-color: var(--evidence-unresolved); }
 .doc-mark[data-evidence="weakened"]            { --review-mark-color: var(--evidence-weakened); }
+.doc-mark[data-evidence="contradicted"]        { --review-mark-color: var(--evidence-contradicted); }
 .doc-mark[data-evidence="not-yet-testable"]    { --review-mark-color: var(--evidence-not-yet-testable); }
 /* Not yet testable keeps its whole contract: lavender-gray, a dashed rail,
    a hollow marker and the visible label. */
@@ -603,7 +621,6 @@
 .doc-mark[data-state="partial"]    { --review-mark-color: var(--state-partial); }
 .doc-mark[data-state="deflated"]   { --review-mark-color: var(--state-deflated); }
 .doc-mark[data-state="held"]       { --review-mark-color: var(--state-held); }
-.doc-mark[data-state="external"]   { --review-mark-color: var(--state-external); }
 .doc-mark[data-state="proposed"]   { --review-mark-color: var(--state-proposed); }
 .doc-mark[data-state="neutral"]    { --review-mark-color: var(--state-neutral); }
 

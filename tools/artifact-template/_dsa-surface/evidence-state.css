@@ -4,14 +4,14 @@
    A semantic state-color PROFILE under the Spectral State family. Where
    Spectral State (`spectral-state.css`) encodes the state of architectural
    elements, Evidence State encodes epistemic EVIDENCE state — what current
-   evidence shows about an assumption (supported / partially supported /
-   unresolved / weakened / not yet testable).
+   available evidence supports about a scoped claim (supported / partially
+   supported / weakened / contradicted / unresolved / not yet testable).
 
    It is a SANCTIONED PROFILE, not a separate palette and not a change to
-   Spectral State. Spectral State's eight-role architectural-element vocabulary
-   is unchanged. This profile:
-     - REUSES three Spectral State values by reference (see below), and
-     - ADDS two evidence-specific roles (weakened, not-yet-testable).
+   Spectral State. Spectral State's architectural-element vocabulary is its
+   own. This profile binds its roles directly to the foundation's physical
+   values, the same physical colors Spectral State and the other profiles
+   bind: a shared value is a shared family, never a shared meaning.
 
    Load order: colors_and_type.css first, then spectral-state.css and this
    file, in that order, with surface-panel.css and surface-treatments.css,
@@ -23,12 +23,30 @@
    values and inks on :root, and the keyed label's and range's color and
    paint properties on their own selectors, which no other module sets on
    those elements. So their place beside those two changes no resolved
-   value; the rendered key loads them directly after the foundation. Its two
-   own values are the foundation's reserved state values (colors_and_type.css).
+   value; the rendered key loads them directly after the foundation. Every
+   role value is a foundation physical value (colors_and_type.css): the
+   reserved state values and the emphasis cyan.
 
    Offline; no CDN. One value per role in both themes: no theme block.
 
-   STATUS: v0.4 — each role's ink, and an evidence role in words. Each
+   STATUS: v0.5 — traffic-light coherence (ASK, 2026-11-25). Partially
+   supported takes the yellow and weakened the orange, and a new role,
+   contradicted, takes the red. Each role binds its physical value directly
+   from the foundation, not through a Spectral State role. Weakened is
+   narrowed: material adverse evidence undermines the scoped claim without
+   sufficient grounds to reject it; it is no longer a tonal derivative of
+   partial. Brown leaves the profile: the foundation keeps its value, with no
+   semantic assignment. On a scope rail supported takes green's rail paint,
+   partially supported yellow's and contradicted red's; unresolved and
+   weakened keep the plain stroke. Each chromatic role's ink is its fill
+   color's: supported on green, partially supported on yellow, weakened on
+   orange, contradicted on red and unresolved on cyan. Re-sync this file with
+   spectral-state.css, surface-treatments.css and colors_and_type.css from the
+   same owner commit. A consumer's existing weakened records keep their role:
+   where one was assigned under the earlier, broader reading, its owner
+   reviews it; nothing here reassigns it.
+
+   v0.4 — each role's ink, and an evidence role in words. Each
    chromatic role names its ink on a fill, --evidence-<role>-ink, bound by
    reference to the ink FILL PAINT, in surface-treatments.css, keys by the fill
    color: supported on green, partially-supported on orange, unresolved on
@@ -66,25 +84,40 @@
    ---------------------------------------------------------------------------
    ROLE MAP
    ---------------------------------------------------------------------------
-   Evidence meaning        Visual implementation              Relationship
-     supported             value of --state-earned            visual-role mapping
-     partially-supported   value of --state-partial           visual-role mapping
-     unresolved            value of --state-held              exact mapping
-     weakened              new — muted/darkened 21° brown     new Evidence role
-     not-yet-testable      new — neutral lavender-gray        new Evidence role
+   Evidence meaning      Physical value                          Shared family
+     supported           green          --ask-state-value-green  affirmative
+     partially-supported yellow         --ask-state-value-yellow qualified
+     weakened            orange         --ask-state-value-orange materially undermined
+     contradicted        red            --ask-state-value-red    negative
+     unresolved          cyan           --ask-emphasis-cyan      open
+     not-yet-testable    lavender-gray  --ask-state-value-lavender-gray  off the arc
 
-   The three reused values are VISUAL-ROLE mappings (and one exact mapping,
-   `unresolved → held`); they are NOT semantic aliases. A consuming surface
-   keeps the evidence LABELS — Supported / Partially supported / Unresolved —
-   and must never relabel them earned / partial / held just because the color
-   value is shared.
+   Each role means, for one scoped claim under its stated conditions:
+     supported           available evidence supports the claim
+     partially-supported available evidence supports only a bounded part or a
+                         qualified extent of the claim
+     weakened            material adverse evidence undermines the claim,
+                         without sufficient grounds to reject it
+     contradicted        current evidence provides sufficient grounds to reject
+                         the claim as stated, within its declared scope and
+                         conditions; the assignment may change with new
+                         evidence
+     unresolved          no sufficiently grounded positive or adverse
+                         disposition is warranted
+     not-yet-testable    a meaningful test is unavailable at the current stage;
+                         ordinary missing or uncollected evidence is not enough
 
-   `weakened` is a tonal derivative of `partial`: a muted, darkened brown on the
-   orange side of the wheel, at about 21° where `partial` is 30°, with lower
-   saturation and lightness. It reads as a
-   degraded `partial` (viable but credibility lost), distinct from neon
-   `partial` and from red `deflated`. It is NOT a new wheel position and is NOT
-   added to the Spectral State health ramp.
+   A declining confidence number alone does not establish weakened, and a
+   contrary observation alone does not establish contradicted without the
+   claim's scope. Evidence State records what the available evidence
+   supports; it is not a verdict on what is true, and supported evidence
+   need not describe a desirable outcome.
+
+   The shared physical values are a shared family, never a shared meaning. A
+   consuming surface keeps the evidence LABELS — Supported / Partially
+   supported / Weakened / Contradicted / Unresolved — and never relabels them
+   earned / partial / deflated / held, or by a review or assessment word,
+   because a color value is shared.
 
    `not-yet-testable` is OFF the chromatic arc entirely — a neutral lavender-gray
    for "evidence cannot exist yet at this stage". Color alone is NOT sufficient
@@ -99,9 +132,9 @@
    --surface-fill-color and its ink, --evidence-<role>-ink, as
    --surface-fill-ink, and .surface-fill-ink on any text set on it. Each ink
    is FILL PAINT's for the role's color, keyed by that color: supported on
-   green, partially supported on orange, unresolved on cyan and weakened on
-   brown. This file binds each role to its color's ink and defines no ink
-   value. The evidence label stays visible, on the shape or beside it.
+   green, partially supported on yellow, weakened on orange, contradicted on
+   red and unresolved on cyan. This file binds each role to its color's ink
+   and defines no ink value. The evidence label stays visible, on the shape or beside it.
    Not yet testable has no ink and is never filled: its contract above is
    hollow, dashed and labeled.
 
@@ -115,8 +148,9 @@
    words exactly the axis and the role's word, "Evidence // Supported" or
    "Evidence // Partially supported". Its edge takes the role's value. A
    labeled range whose first child is that label takes the same value on its
-   scope rail, and supported takes green's rail paint; partially supported,
-   unresolved and weakened keep the plain stroke. The label is a word that is
+   scope rail, with green's rail paint for supported, yellow's for partially
+   supported and red's for contradicted; weakened and unresolved keep the
+   plain stroke. The label is a word that is
    read: inert and unfilled.
 
    Not yet testable takes no keyed label and no scope rail, never a solid edge
@@ -129,45 +163,52 @@
    (tools/role-conformance.js, C13).
    ========================================================================= */
 
-/* ---------- The five roles, one value each, in both themes ---------- */
+/* ---------- The six roles, one value each, in both themes ----------
+   Each binds the foundation's physical value directly (colors_and_type.css). */
 :root {
-  /* reused Spectral State values, by reference */
-  --evidence-supported:           var(--state-earned);   /* visual-role mapping */
-  --evidence-partially-supported: var(--state-partial);  /* visual-role mapping */
-  --evidence-unresolved:          var(--state-held);     /* exact mapping */
-
-  /* new Evidence State roles — one value each, in both themes */
-  --evidence-weakened:            var(--ask-state-value-brown);          /* muted 21° — brown */
+  --evidence-supported:           var(--ask-state-value-green);          /* affirmative */
+  --evidence-partially-supported: var(--ask-state-value-yellow);         /* qualified */
+  --evidence-weakened:            var(--ask-state-value-orange);         /* materially undermined */
+  --evidence-contradicted:        var(--ask-state-value-red);            /* negative */
+  --evidence-unresolved:          var(--ask-emphasis-cyan);              /* open */
   --evidence-not-yet-testable:    var(--ask-state-value-lavender-gray);  /* neutral lavender-gray (see contract above) */
 
   /* Each chromatic role's ink: the color of text set on a shape filled in that
      role's color, bound to the surface treatments' FILL PAINT, which keys each
      ink by the fill color. Not yet testable takes none: it is never filled. */
   --evidence-supported-ink:           var(--surface-fill-ink-on-green);
-  --evidence-partially-supported-ink: var(--surface-fill-ink-on-orange);
+  --evidence-partially-supported-ink: var(--surface-fill-ink-on-yellow);
+  --evidence-weakened-ink:            var(--surface-fill-ink-on-orange);
+  --evidence-contradicted-ink:        var(--surface-fill-ink-on-red);
   --evidence-unresolved-ink:          var(--surface-fill-ink-on-cyan);
-  --evidence-weakened-ink:            var(--surface-fill-ink-on-brown);
 }
 
 /* ---------- An evidence role in words: the keyed label and the range it opens ----------
    Each chromatic role colors the bordered label's edge and, through the label at
    a range's head, the labeled range's scope rail (surface-treatments.css), with
-   green's rail paint for supported. Not yet testable takes no keyed label and no
-   scope rail (AN EVIDENCE ROLE IN WORDS, above). */
+   green's, yellow's and red's rail paint for supported, partially supported and
+   contradicted. Not yet testable takes no keyed label and no scope rail (AN
+   EVIDENCE ROLE IN WORDS, above). */
 .evidence-label[data-evidence="supported"]           { --surface-bordered-label-color: var(--evidence-supported); }
 .evidence-label[data-evidence="partially-supported"] { --surface-bordered-label-color: var(--evidence-partially-supported); }
-.evidence-label[data-evidence="unresolved"]          { --surface-bordered-label-color: var(--evidence-unresolved); }
 .evidence-label[data-evidence="weakened"]            { --surface-bordered-label-color: var(--evidence-weakened); }
+.evidence-label[data-evidence="contradicted"]        { --surface-bordered-label-color: var(--evidence-contradicted); }
+.evidence-label[data-evidence="unresolved"]          { --surface-bordered-label-color: var(--evidence-unresolved); }
 
 .surface-labeled-range:has(> .evidence-label[data-evidence="supported"]:first-child) {
   --surface-labeled-range-color: var(--evidence-supported);
   --surface-labeled-range-paint: var(--surface-rail-paint-green);
 }
-.surface-labeled-range:has(> .evidence-label[data-evidence="partially-supported"]:first-child) { --surface-labeled-range-color: var(--evidence-partially-supported); }
-.surface-labeled-range:has(> .evidence-label[data-evidence="unresolved"]:first-child)          { --surface-labeled-range-color: var(--evidence-unresolved); }
-.surface-labeled-range:has(> .evidence-label[data-evidence="weakened"]:first-child)            { --surface-labeled-range-color: var(--evidence-weakened); }
+.surface-labeled-range:has(> .evidence-label[data-evidence="partially-supported"]:first-child) {
+  --surface-labeled-range-color: var(--evidence-partially-supported);
+  --surface-labeled-range-paint: var(--surface-rail-paint-yellow);
+}
+.surface-labeled-range:has(> .evidence-label[data-evidence="contradicted"]:first-child) {
+  --surface-labeled-range-color: var(--evidence-contradicted);
+  --surface-labeled-range-paint: var(--surface-rail-paint-red);
+}
+.surface-labeled-range:has(> .evidence-label[data-evidence="weakened"]:first-child)   { --surface-labeled-range-color: var(--evidence-weakened); }
+.surface-labeled-range:has(> .evidence-label[data-evidence="unresolved"]:first-child) { --surface-labeled-range-color: var(--evidence-unresolved); }
 
-/* No theme block. Through v0.1 the two new roles took a lighter brown and a
-   lighter gray on the dark field; v0.2 gives each one value in both themes: the
-   former dark-theme brown and the former light-theme gray. The three reused
-   values follow Spectral State, which also takes one value per role. */
+/* No theme block. Every role takes one value in both themes, as the
+   foundation's physical values do. */

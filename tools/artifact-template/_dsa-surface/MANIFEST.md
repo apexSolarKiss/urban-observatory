@@ -6,26 +6,57 @@ Generated snapshot. Do not hand-edit. Refreshed only by the procedure in
 | Field | Value |
 | --- | --- |
 | upstream | https://github.com/apexSolarKiss/design-system-ASK.git |
-| commit | `aa7bfb00df9ac7f80b15ab118ff1c46403f265db` |
-| short | `aa7bfb0` |
-| commit date | `2026-11-19 15:22:10 -0800` |
-| commit subject | `fix(review): reword two comment passages that a consumer's style scan rejects (#230)` |
-| synced at | `2026-11-19` |
+| commit | `89397df24550bd5c7f1d64d1c8a8b46143c0219f` |
+| short | `89397df` |
+| commit date | `2026-11-25 19:25:16 -0800` |
+| commit subject | `feat: approved fill inks + traffic-light semantic coherence (Spectral v2.0, Evidence v0.5, Criterion v0.3, Review v0.4) (#237)` |
+| synced at | `2026-11-25` |
 | consuming project | `urban-observatory` |
 | files copied | `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`, `spectral-state.css`, `evidence-state.css`, `review-semantics.css` |
 | surface-panel.css sha256 | `883e24ac5407a4fe24f9149b0d8964a06995cc88b6b6150b1a1bdfd9aee2976e` |
 | surface-text-link.css sha256 | `9a6acf457ffbe2a0bb31ae28507855b6446195ff9dcd3cc7112f04ec5bf0fce3` |
 | surface-document.css sha256 | `57140e0d5383f95d4d88001e535c682d0c47152e2165e92516ece2ba4cf999ed` |
-| surface-treatments.css sha256 | `ae03dda052475be5d6ea14e0fab8dd3f1608fdf5b9d09b4859a1f146a08fc0dc` |
-| spectral-state.css sha256 | `770324231461b629d18a0b41c4beecb9b5015e203f6a49b2e84ef56bc29020cf` |
-| evidence-state.css sha256 | `7467c69aa4da4220792132d338ef3fc937ecfcf44cfdbe5f167c4b4ddea4957d` |
-| review-semantics.css sha256 | `347ea6cf5886171a4e00c81144e935c6c824a7e76ffc63fd94d01c6288fe5bcc` |
+| surface-treatments.css sha256 | `03bb8b36c5f058d8783442cc1ea499b0076892ca27047d80f2a1ccd99a56f6ba` |
+| spectral-state.css sha256 | `e9801af2e9ed44e9890f907dac76f6cf41b50a81860241aae99f67a35c250fe4` |
+| evidence-state.css sha256 | `512256b76184c0cce974f514d50e6e392ea2721fb7843819c6422c5c71f2e2cb` |
+| review-semantics.css sha256 | `1d190b8e824037009660273edee35ee332fbc97af76811f2e119cf0dcfde2a24` |
 
 **Created 2026-09-25 at U6.** The design-system-ASK document register: the four modules the owner's sealed-use rule inlines after the
 foundation, in this order: `surface-panel.css`, `surface-text-link.css`, `surface-document.css`, `surface-treatments.css`. They are
 copied verbatim from the commit above. `surface-document-overflow.js` is not copied: a sealed review document carries no script.
 
-**Re-sync 2026-11-19 (`842f272` → `aa7bfb0`; one register module and three semantic-state modules change):**
+**Re-sync 2026-11-25 (`aa7bfb0` → `89397df`; one register module and three semantic-state modules change):**
+crosses the owner events **#231–#237**. **#231** changes the owner's rendered checker, which package review runs by reference at
+the commit a package MANIFEST records, and its tests; **#232** and **#234–#236** change no file this renderer vendors; **#233**
+changes only `../_dsa-tokens/colors_and_type.css`, in comment text; and **#237** (`89397df`) changes this snapshot. At #237
+`surface-treatments.css` gives the FILL PAINT inks on yellow, green, orange, red, violet, magenta and white the lightness ASK
+selected for each fill, retires magenta's dark-theme ink and retires the alias `--surface-rail-paint-structural`;
+`spectral-state.css` (v2.0) paints structural violet and partial yellow, and retires external, with `--state-external`, its ink and
+its keyed label and range rules; `evidence-state.css` (v0.5) paints partially supported yellow and weakened orange, where weakened
+read the foundation's brown, adds `contradicted`, in red, with its ink, keyed label and range, and binds unresolved to the cyan
+directly; and `review-semantics.css` (v0.4) adds `.doc-mark[data-evidence="contradicted"]`, removes
+`.doc-mark[data-state="external"]` and binds accepted and declined to the foundation's green and red directly, at the values they
+had. The composition's vocabulary changes, so `../build.py` follows in the same commit: `state external` fails the build as an
+unknown word, and `evidence contradicted` is admitted. This renderer still emits no fill, keyed label or decision record.
+
+Measured on renders of a synthetic source at both pins in headless Chrome 158, light and dark, at 1440 and at 375 with mobile
+emulation: the tests' annotated document with a proof banner and a row naming every state and evidence word the build admits.
+Structural marks take the violet, `rgb(170, 64, 255)`, where they took the yellow; Partial and Partially supported marks take the
+yellow, `rgb(250, 250, 56)`, where they took the orange; Weakened marks take the orange, `rgb(255, 128, 0)`, where they took
+`#895538`; and Contradicted marks take the red, `rgb(250, 56, 56)`. Every other mark computes the same, and the proof banner's
+pixels are identical. design-system-ASK `tools/check-role-conformance.mjs` at `89397df` passes the head render at 1440 and at 375
+with mobile emulation, in both themes, with no finding and nothing unmapped. As a control, the same checker fails the render made
+at `aa7bfb0` with C12.vocab on its External state mark and C0.token on the retired tokens. The four files are copied verbatim from
+the commit above:
+
+- `surface-treatments.css` sha256 `ae03dda0…` → `03bb8b36…`, 69,299 → 71,897 B;
+- `spectral-state.css` sha256 `77032423…` → `e9801af2…`, 11,065 → 12,463 B;
+- `evidence-state.css` sha256 `7467c69a…` → `512256b7…`, 11,225 → 13,892 B;
+- `review-semantics.css` sha256 `347ea6cf…` → `1d190b8e…`, 44,233 → 45,324 B.
+
+`surface-panel.css`, `surface-text-link.css` and `surface-document.css` are byte-identical at both commits (same hashes).
+
+**Prior re-sync 2026-11-19 (`842f272` → `aa7bfb0`; one register module and three semantic-state modules change):**
 crosses the owner events **#224–#230**. **#224–#226** and **#228** change no file this renderer vendors; **#227**, **#229** and
 **#230** do. At **#227** (`ccb9cda`) `surface-treatments.css` adds the marker tokens and `.surface-marker` classes, the rail-paint
 color names `--surface-rail-paint-green`, `-yellow` and `-red`, still `none` in every theme, with the earlier names kept as

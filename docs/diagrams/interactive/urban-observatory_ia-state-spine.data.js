@@ -1,7 +1,7 @@
 /* urban-observatory_ia-state-spine.data.js
    Source data for the urban-observatory INTERACTIVE IA STATE SPINE.
    Rendered by diagrams-interactive-spine-engine.js (Class A · diagram-interactive-spine,
-   by reference; authored @ pin 20fc5d6), consuming Spectral State v1.4.
+   by reference; authored @ pin 20fc5d6), consuming Spectral State v2.0.
 
    WHAT THIS DIAGRAM ASSERTS
      The operational STATE surface: each surface / seam / open question colored by
@@ -26,25 +26,24 @@
 
    Node: { id, group, label, state, evidence, qualifier?, pointer }
      group: 'root' | 'spine' | 'question' | 'external'   (no 'mode' in v1)
-     state: one of the eight Spectral State roles in `states` below.
+     state: one of the seven Spectral State roles in `states` below.
 */
 
 window.IA_STATE_SPINE = {
   meta: {
     title: 'Information architecture — state',
-    subtitle: 'operational state surface · earned / structural / partial / held / proposed / external, and where · color encodes state only',
-    stamp: { source: 'source-v1', render: 'render-v7', date: '2026-11-17' },
+    subtitle: 'operational state surface · earned / structural / partial / held / proposed, and where · owned elsewhere: neutral, Source // External · color encodes state only',
+    stamp: { source: 'source-v2', render: 'render-v8', date: '2026-11-25' },
   },
 
-  // The eight Spectral State v1.4 roles (inherited vocabulary — do not rename).
+  // The seven Spectral State v2.0 roles (inherited vocabulary — do not rename).
   states: [
     { role: 'earned',     label: 'earned',     meaning: 'operationally grounded at full depth' },
-    { role: 'structural', label: 'structural', meaning: 'structurally / schema proven; not full-flow pressured' },
+    { role: 'structural', label: 'structural', meaning: 'structural or schema assurance established; not yet operated at this scope' },
     { role: 'partial',    label: 'partial',    meaning: 'operational at bounded depth' },
     { role: 'proposed',   label: 'proposed',   meaning: 'articulated as a candidate; not yet pressured' },
     { role: 'deflated',   label: 'deflated',   meaning: 'pressure showed it unnecessary / dead' },
     { role: 'held',       label: 'held',       meaning: 'a named open question, not yet resolved' },
-    { role: 'external',   label: 'external',   meaning: 'owned elsewhere (inherited / upstream)' },
     { role: 'neutral',    label: 'neutral',    meaning: 'no asserted state (the lavender field)' },
   ],
 
@@ -120,8 +119,8 @@ window.IA_STATE_SPINE = {
       evidence: 'Not authorized; a v0 anti-goal as current execution.', pointer: 'docs/project-scope.md (anti-goals)' },
 
     // ---- external: owned elsewhere (ONE anchor; engine places one external node) ----
-    { id: 'x-owned-elsewhere', group: 'external', label: 'owned elsewhere · operator-side + upstream', state: 'external',
+    { id: 'x-owned-elsewhere', group: 'external', label: 'owned elsewhere · operator-side + upstream', state: 'neutral',
       evidence: 'Four owned-elsewhere surfaces, consolidated into the engine’s single external anchor: grounding note (source-of-intent) · sources-of-intent + handoff/absorption records · TMK interim domain reviews · design-system-ASK (upstream Class A/B patterns + Spectral State). UO points to / consumes them; they are not repo truth.',
-      pointer: 'docs/diagrams/_dsa-tokens/MANIFEST.md (upstream pin) + operator-side sources-of-intent' },
+      qualifier: 'Source // External', pointer: 'docs/diagrams/_dsa-tokens/MANIFEST.md (upstream pin) + operator-side sources-of-intent' },
   ],
 };
