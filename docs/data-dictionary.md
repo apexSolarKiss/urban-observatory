@@ -112,7 +112,7 @@ The ontology should not force per-site framing on aggregate strategies. A reside
 - the retrieval / access date;
 - the relevant location within the source;
 - the signal subtype (one of the candidate subtypes; see §Candidate signal subtypes);
-- the direction of the signal relative to the assumption: `supports`, `weakens`, `contradicted`, or `uncertain`;
+- the direction of the signal relative to the assumption: `supports`, `weakens`, `contradicts`, or `uncertain`;
 - confidence (see §Confidence and provenance);
 - known / inferred / missing status of the underlying fields.
 
@@ -141,7 +141,7 @@ Assumption being tested:
 Relevant object(s):
 Observed signals:
 Interpretation:
-Direction: supports / weakens / contradicted / uncertain
+Direction: supports / weakens / contradicts / uncertain
 Confidence: low / medium / high (with basis)
 Possible intervention candidates:
 Sources:
